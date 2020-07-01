@@ -1,0 +1,4 @@
+include README.md
+recursive-include octoprint_rgb_led_status/templates *
+recursive-include octoprint_rgb_led_status/translations *
+recursive-include octoprint_rgb_led_status/static *
