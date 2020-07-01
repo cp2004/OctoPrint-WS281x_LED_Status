@@ -33,7 +33,7 @@ plugin_url = "https://github.com/cp2004/OctoPrint-RGB_LED_Status"
 plugin_license = "AGPLv3"
 
 # Any additional requirements besides OctoPrint should be listed here
-plugin_requires = []
+plugin_requires = ['rpi_ws281x==4.2.4']
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point
