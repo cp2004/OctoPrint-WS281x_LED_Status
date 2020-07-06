@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 import time
 
+
 def solid_color(strip, queue, color, delay=None):
     # Set pixels to a solid color
     for p in range(strip.numPixels()):

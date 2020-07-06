@@ -6,6 +6,7 @@ import time
 
 import rpi_ws281x
 from rpi_ws281x import PixelStrip
+
 from octoprint_rgb_led_status.effects import basic, progress
 from octoprint_rgb_led_status.util import hex_to_rgb
 

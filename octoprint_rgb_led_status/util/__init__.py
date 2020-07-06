@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import absolute_import, division
 
 
 def hex_to_rgb(h):

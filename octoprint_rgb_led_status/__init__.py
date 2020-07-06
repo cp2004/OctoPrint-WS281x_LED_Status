@@ -19,6 +19,7 @@ MODES = ['startup', 'idle', 'progress_print']  # Possible modes that can happen
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 
+
 class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
                          octoprint.plugin.ShutdownPlugin,
                          octoprint.plugin.SettingsPlugin,
@@ -44,7 +45,10 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
     # Shutdown plugin
     def on_shutdown(self):
         self.update_effect("shutdown")
-        self.stop_effect_thread()
+        self._logger.info("RGB LED Status runner stopped")
+        if self.current_effect_thread is not None:
+            self.effect_queue.put("KILL")
+            self.current_effect_thread.join()
 
     # Settings plugin
     def on_settings_save(self, data):
