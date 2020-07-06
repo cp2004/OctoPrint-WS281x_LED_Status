@@ -1,0 +1,94 @@
+<h3>RGB LED Status</h3>
+<form class="form-horizontal">
+    <button class="btn btn-primary" data-toggle="modal" data-target="#LEDStripEditor">Edit strip settings</button>
+    <div class="control-group">
+        <label class="control-label">{{ _('Startup effect enabled') }}</label>
+        <div class="controls">
+            <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.startup_enabled">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">{{ _('Startup effect') }}</label>
+        <div class="controls">
+            <select class="input-medium" id="stripType" data-bind="value: settings.plugins.rgb_led_status.startup_effect">
+                {% for type in plugin_rgb_led_status_effects %}
+                    <option value="{{ type }}">{{ type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="control-group">
+
+        <label class="control-label">{{ _('Startup speed') }}</label>
+        <div class="controls">
+            <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.startup_delay">
+        </div>
+    </div>
+</form>
+<div id="LEDStripEditor" class="modal hide fade">
+	<div class="modal-header">
+		<a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
+		<h3>{{ _('LED Strip editor') }}</h3>
+	</div>
+	<div class="modal-body">
+        <span href="https://github.com/cp2004/OctoPrint-RGB_LED_Status">More information about these options *Point link</span>
+        <form class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label">{{ _('Strip Type') }}</label>
+                <div class="controls">
+                <select class="input-block-level" id="stripType" data-bind="value: settings.plugins.rgb_led_status.strip_type">
+                    {% for type in plugin_rgb_led_status_strip_types %}
+                        <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Brightness:') }}</label>
+                <div class="controls">
+                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_brightness">
+                    <input type="range" min="1" max="100" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_brightness">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Count:') }}</label>
+                <div class="controls">
+                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_count">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Pin:') }}</label>
+                <div class="controls">
+                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_pin">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Frequency:') }}</label>
+                <div class="controls">
+                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_freq_hz">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('DMA:') }}</label>
+                <div class="controls">
+                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_dma">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Invert:') }}</label>
+                <div class="controls">
+                    <input type="checkbox" class="input-block-level" data-bind="checked: settings.plugins.rgb_led_status.led_invert">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('LED channel: ') }}</label>
+                <div class="controls">
+                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_channel">
+                </div>
+            </div>
+        </form>
+    </div>
+	<div class="modal-footer">
+		<small>Make sure to click save in the main settings after making changes here.</small> <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">{{ _('Close') }}</a>
+	</div>
+</div>
