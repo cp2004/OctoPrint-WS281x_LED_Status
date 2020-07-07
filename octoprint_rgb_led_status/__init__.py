@@ -1,6 +1,8 @@
 # coding=utf-8
 from __future__ import absolute_import, unicode_literals
 from threading import Thread
+import multiprocessing
+from multiprocessing import Process
 import re
 import io
 import os
@@ -14,10 +16,18 @@ import octoprint.plugin
 from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, effect_runner
 from octoprint_rgb_led_status.effects import basic, progress
 
+import faulthandler
+faulthandler.enable()
+MP_CONTEXT = multiprocessing.get_context('fork')
 
 MODES = ['startup', 'idle', 'progress_print']  # Possible modes that can happen
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
+
+STANDARD_EFFECT_NICE_NAMES = {
+    'Color Wipe': 'wipe',
+    'Solid Color': 'solid'
+}
 
 
 class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
@@ -31,20 +41,19 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     current_effect_thread = None  # thread object
     current_state = None  # Idle, startup, progress etc.
-    effect_queue = Queue()  # pass name of effects here
+    effect_queue = MP_CONTEXT.Queue()  # pass name of effects here
 
     SETTINGS = {}  # Filled in on startup
     PI_MODEL = None
 
     # Startup plugin
     def on_after_startup(self):
-        self.PI_MODEL = self.determine_pi_version()
+        self.PI_MODEL = self.determine_pi_version()  # Needed for the wizard...
         self.refresh_settings()
-        self.start_effect_thread()
+        self.start_effect_process()
 
     # Shutdown plugin
     def on_shutdown(self):
-        self.update_effect("shutdown")
         self._logger.info("RGB LED Status runner stopped")
         if self.current_effect_thread is not None:
             self.effect_queue.put("KILL")
@@ -68,18 +77,18 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             strip_type='WS2811_STRIP_GRB',
 
             startup_enabled=True,
-            startup_effect='wipe',
+            startup_effect='Color Wipe',
             startup_color='#00ff00',
             startup_delay='10',
 
             idle_enabled=True,
-            idle_effect='solid',
+            idle_effect='Solid Color',
             idle_color='#0000ff',
             idle_delay='10',
 
             progress_enabled=True,
-            progress_colour_base='#000000',
-            progress_colour_bar='#00ff00'
+            progress_color_base='#000000',
+            progress_color='#00ff00'
         )
 
     # Template plugin
@@ -89,7 +98,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         ]
 
     def get_template_vars(self):
-        return {'effects': EFFECTS, 'strip_types': STRIP_TYPES}
+        return {'standard_names': STANDARD_EFFECT_NICE_NAMES, 'effects': EFFECTS, 'strip_types': STRIP_TYPES}
 
     # Wizard plugin bits
 
@@ -122,29 +131,31 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
         for mode in MODES:
             mode_settings = {'enabled': self._settings.get_boolean(['{}_enabled'.format(mode)]),
-                             'effect': self._settings.get(['{}_effect'.format(mode)]),
                              'color': self._settings.get(['{}_color'.format(mode)])}
             if 'progress' in mode:  # Unsure
                 mode_settings['base'] = self._settings.get(['{}_base'.format(mode)])
             else:
+                effect_nice_name = self._settings.get(['{}_effect'.format(mode)])
+                effect_name = STANDARD_EFFECT_NICE_NAMES[effect_nice_name]
+                mode_settings['effect'] = effect_name
                 mode_settings['delay'] = self._settings.get_int(['{}_delay'.format(mode)])
             self.SETTINGS[mode] = mode_settings
 
         self._logger.info("Settings refreshed")
 
     def restart_strip(self):
-        self.stop_effect_thread()
-        self.start_effect_thread()
+        self.stop_effect_process()
+        self.start_effect_process()
 
-    def start_effect_thread(self):
+    def start_effect_process(self):
         # Start effect runner here
-        self.current_effect_thread = Thread(target=effect_runner, args=(self._logger, self.effect_queue, self.SETTINGS,), name="RGB LED Status runner")
+        self.current_effect_thread = MP_CONTEXT.Process(target=effect_runner, name="RGB LED Status Effect Process", args=(self._logger, self.effect_queue, self.SETTINGS), daemon=True)
         self.current_effect_thread.start()
         self._logger.info("RGB LED Status runner started")
 
-    def stop_effect_thread(self):
+    def stop_effect_process(self):
         """
-        Stop the runnner
+        Stop the runner
         As this can potentially hang the server for a fraction of a second while the final frame of the effect runs,
         it is not called often - only on update of settings & shutdown.
         """
@@ -153,11 +164,22 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.effect_queue.put("KILL")
             self.current_effect_thread.join()
 
-    def update_effect(self, mode_name):
-        if progress not in mode_name:
-            self.effect_queue.put(mode_name)
+    def update_effect(self, mode_name, value=None):
+        """
+        Change the effect displayed, using effect.EFFECTS for the correct names!
+        If progress effect, value must be specified
+        :param mode_name: string of mode name
+        :param value: percentage of how far through it is. None
+        """
+        if 'progress' in mode_name:
+            if not value:
+                self._logger.warning("No value supplied with progress style effect, ignoring")
+                return
+            self._logger.debug("Updating progress effect {}, value {}".format(mode_name, value))
+            # Do the thing
         else:
-            pass
+            self._logger.debug("Updating standard effect {}".format(mode_name))
+            # Do the thing
 
     # Softwareupdate hook
     def get_update_information(self):

@@ -11,7 +11,7 @@
         <label class="control-label">{{ _('Startup effect') }}</label>
         <div class="controls">
             <select class="input-medium" id="stripType" data-bind="value: settings.plugins.rgb_led_status.startup_effect">
-                {% for type in plugin_rgb_led_status_effects %}
+                {% for type in plugin_rgb_led_status_standard_names %}
                     <option value="{{ type }}">{{ type }}</option>
                 {% endfor %}
             </select>

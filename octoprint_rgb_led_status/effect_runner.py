@@ -37,6 +37,7 @@ MODES = [  # Add more here once we get going.... (Duplicate of MODES in __init__
 
 
 def effect_runner(logger, queue, all_settings):
+    logger.debug("[RUNNER] Hello!")
     # start strip, run startup effect until we get something else
     strip = start_strip(logger, all_settings['strip'])
     if not strip:
@@ -52,8 +53,11 @@ def effect_runner(logger, queue, all_settings):
             # Run messaged effect
             if msg == KILL_MSG:
                 logger.debug("[RUNNER] Received KILL message")
+                # Cleanup ws281x so we don't get segfault
+                strip._cleanup()
                 return
             elif msg == 'shutdown':
+                logger.debug("[RUNNER] Moving to blank LEDs to shutdown")
                 EFFECTS['solid'](strip, queue, [0, 0, 0])
             elif msg.split()[0] in MODES:
                 effect_settings = all_settings[msg.split()[0]]  # dict containing 'enabled', 'effect', 'color', 'delay'/'base'
@@ -86,9 +90,37 @@ def start_strip(logger, strip_settings):
             strip_type=STRIP_TYPES[strip_settings['strip_type']]
         )
         strip.begin()
-        logger.debug("Strip object initialised")
+        # logger.debug("Strip object initialised")
         return strip
     except Exception as e:  # Probably wrong settings...
-        logger.warning("[RUNNER] Strip failed to initialize, no effects will be run.")
-        logger.warning("[RUNNER] Exception: {}".format(e))
+        print("[RUNNER] Strip failed to initialize, no effects will be run.")
+        print("[RUNNER] Exception: {}".format(e))
         return None
+
+
+class FakeStrip:
+    def __init__(self, num, pin, freq_hz, dma, invert, brightness, channel, strip_type):
+        self.pixels = num
+        self.pin = pin
+        self.freq_hz = freq_hz
+        self.dma = dma
+        self.invert = invert
+        self.brightness = brightness
+        self.channel = channel
+        self.strip_type = strip_type
+
+    def numPixels(self):
+        return self.pixels
+
+    def begin(self):
+        pass
+
+    def show(self):
+        pass
+
+    def setPixelColorRGB(self, num, red, green, blue, white=0):
+        pass
+
+    def _cleanup(self):
+        print("Cleaning up FakeStrip")
+        pass
