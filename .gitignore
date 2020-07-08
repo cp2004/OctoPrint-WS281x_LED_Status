@@ -9,3 +9,5 @@ dist
 *.zip
 .vscode
 *.workspace
+
+TODO.txt
