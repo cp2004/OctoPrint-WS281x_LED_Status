@@ -1,0 +1,99 @@
+<h5>Printing Effects</h5>
+<form class="form-horizontal">
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.idle_enabled">Enable idle effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.idle_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.idle_effect">
+            {% for effect in plugin_rgb_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.idle_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.idle_delay">
+    </div>
+    <br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.disconnected_enabled">Enable disconnected effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.disconnected_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.disconnected_effect">
+            {% for effect in plugin_rgb_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.disconnected_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.disconnected_delay">
+    </div>
+<br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.success_enabled">Enable print success effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.success_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.success_effect">
+            {% for effect in plugin_rgb_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.success_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.success_delay">
+    </div>
+<br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.failed_enabled">Enable failed effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.failed_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.failed_effect">
+            {% for effect in plugin_rgb_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.failed_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.failed_delay">
+    </div>
+<br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.cancelled_enabled">Enable cancelled effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.cancelled_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.cancelled_effect">
+            {% for effect in plugin_rgb_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.cancelled_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.cancelled_delay">
+    </div>
+<br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.paused_enabled">Enable paused effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.paused_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.paused_effect">
+            {% for effect in plugin_rgb_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.paused_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.paused_delay">
+    </div>
+</form>
+
