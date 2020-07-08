@@ -29,14 +29,20 @@ EFFECTS = {  # Add more here once we get going....
     'wipe': basic.color_wipe,
     'print_progress': progress.print_progress
 }
-MODES = [  # Add more here once we get going.... (Duplicate of MODES in __init__.py?)
+MODES = [  # Add more here once we get going....
     'startup',
     'idle',
-    'progress_print'
+    'disconnected',
+    'progress_print',
+    'failed',
+    'success',
+    'cancelled',
+    'paused'
 ]
 
 
-def effect_runner(logger, queue, all_settings):
+
+def effect_runner(logger, queue, all_settings, previous_state):
     logger.debug("[RUNNER] Hello!")
     # start strip, run startup effect until we get something else
     strip = start_strip(logger, all_settings['strip'])
@@ -44,8 +50,7 @@ def effect_runner(logger, queue, all_settings):
         logger.debug("[RUNNER] Exiting effect runner")
         return
 
-    msg = None
-    state = None
+    msg = previous_state
     while True:
         if not queue.empty():
             msg = queue.get()  # The ONLY place the queue should be 'got'
@@ -68,6 +73,8 @@ def effect_runner(logger, queue, all_settings):
                 else:
                     EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
                                                        effect_settings['delay'])
+            else:
+                time.sleep(0.1)
         else:
             effect_settings = all_settings['startup']
             # Run startup effect (We haven't got a message yet)
