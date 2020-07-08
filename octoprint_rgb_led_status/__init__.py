@@ -1,26 +1,15 @@
 # coding=utf-8
 from __future__ import absolute_import, unicode_literals
-from threading import Thread
-import multiprocessing
-from multiprocessing import Process
+from multiprocessing import get_context
 import re
 import io
-import os
-try:
-    from queue import Queue  # In Python 3 the module has been renamed to queue
-except ImportError:
-    from Queue import Queue  # Python 2 queue
 
 import octoprint.plugin
 
-from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, effect_runner
+from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
 from octoprint_rgb_led_status.effects import basic, progress
 
-import faulthandler
-faulthandler.enable()
-MP_CONTEXT = multiprocessing.get_context('fork')
-
-MODES = ['startup', 'idle', 'progress_print']  # Possible modes that can happen
+MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 
@@ -28,6 +17,28 @@ STANDARD_EFFECT_NICE_NAMES = {
     'Color Wipe': 'wipe',
     'Solid Color': 'solid'
 }
+
+
+class EventReactor:
+    def __init__(self, parent_plugin):
+        self.parent = parent_plugin
+        self.events = {
+            'Connected': 'idle',
+            'Disconnected': 'disconnected',
+            'PrintFailed': 'failed',
+            'PrintDone': 'success',
+            'PrintCancelled': 'cancelled',
+            'PrintPaused': 'paused'
+        }
+
+    def on_standard_event_handler(self, event):
+        try:
+            self.parent.update_effect(self.events[event])
+        except KeyError:
+            pass
+
+    def on_progress_event_handler(self, event, value):
+        self.parent.update_effect('{} {}'.format(self.events[event], value))
 
 
 class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
@@ -38,9 +49,11 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
                          octoprint.plugin.ProgressPlugin,
                          octoprint.plugin.EventHandlerPlugin,
                          octoprint.plugin.RestartNeedingPlugin):
+    def __init__(self):
+        self.event_reactor = EventReactor(self)
 
     current_effect_thread = None  # thread object
-    current_state = None  # Idle, startup, progress etc.
+    current_state = None  # Idle, startup, progress etc. Used to put the old effect back on settings change
     effect_queue = MP_CONTEXT.Queue()  # pass name of effects here
 
     SETTINGS = {}  # Filled in on startup
@@ -85,6 +98,31 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             idle_effect='Solid Color',
             idle_color='#0000ff',
             idle_delay='10',
+
+            disconnected_enabled=True,
+            disconnected_effect='Solid Color',
+            disconnected_color='#ff0000',
+            disconnected_delay='10',
+
+            failed_enabled=True,
+            failed_effect='Solid Color',
+            failed_color='#0f0f00',
+            failed_delay='10',
+
+            success_enabled=True,
+            success_effect='Solid Color',
+            success_color='#00f0f0',
+            success_delay='10',
+
+            cancelled_enabled=True,
+            cancelled_effect='Solid Color',
+            cancelled_color='#0f0f00',
+            cancelled_delay='10',
+
+            paused_enabled=True,
+            paused_effect='Solid Color',
+            paused_color='#0f0f0a',
+            paused_delay='10',
 
             progress_enabled=True,
             progress_color_base='#000000',
@@ -149,7 +187,11 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def start_effect_process(self):
         # Start effect runner here
-        self.current_effect_thread = MP_CONTEXT.Process(target=effect_runner, name="RGB LED Status Effect Process", args=(self._logger, self.effect_queue, self.SETTINGS), daemon=True)
+        self.current_effect_thread = MP_CONTEXT.Process(
+            target=effect_runner,
+            name="RGB LED Status Effect Process",
+            args=(self._logger, self.effect_queue, self.SETTINGS, self.current_state),
+            daemon=True)
         self.current_effect_thread.start()
         self._logger.info("RGB LED Status runner started")
 
@@ -180,6 +222,11 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         else:
             self._logger.debug("Updating standard effect {}".format(mode_name))
             # Do the thing
+            self.effect_queue.put(mode_name)
+            self.current_state = mode_name
+
+    def on_event(self, event, payload):
+        self.event_reactor.on_standard_event_handler(event)
 
     # Softwareupdate hook
     def get_update_information(self):
