@@ -12,7 +12,7 @@ from octoprint_rgb_led_status.effects import basic, progress
 MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
-BLOCKING_TEMP_GCODE = "M109"
+BLOCKING_TEMP_GCODES = ["M109","M190"]
 
 STANDARD_EFFECT_NICE_NAMES = {
     'Color Wipe': 'wipe',
@@ -44,6 +44,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     heating = False
     temp_target = 0
+    tool_heating = None
 
     # Startup plugin
     def on_after_startup(self):
@@ -233,8 +234,13 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return round((current / target) * 100)
 
     def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
-        if gcode == BLOCKING_TEMP_GCODE:
+        bed_or_tool = {
+            'M109': 'T0',  # TODO Make a setting for which tool and whether to watch bed heating
+            'M190': 'B'
+        }
+        if gcode in BLOCKING_TEMP_GCODES:
             self.heating = True
+            self.tool_heating = bed_or_tool[gcode]
         else:
             self.heating = False
 
@@ -243,7 +249,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
         if self.heating:
             try:
-                current_temp, target_temp = parsed_temperatures['T0']  # TODO Make setting so is configurable which tool to watch
+                current_temp, target_temp = parsed_temperatures[self.tool_heating]  # TODO Make setting so is configurable which tool to watch
             except KeyError:
                 self._logger.error("Could not find tool temperature, not showing progress")
                 return
@@ -251,7 +257,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 self.temp_target = target_temp
             if self.temp_target > 0:  # So we don't get ZeroDivisionError
                 self.on_progress_event_handler('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
-        return
+        return parsed_temperatures
 
     # Softwareupdate hook
     def get_update_information(self):
