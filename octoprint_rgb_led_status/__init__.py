@@ -233,7 +233,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return round((current / target) * 100)
 
     def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
-        if cmd.startswith(BLOCKING_TEMP_GCODE):
+        if gcode == BLOCKING_TEMP_GCODE:
             self.heating = True
         else:
             self.heating = False
@@ -249,7 +249,8 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 return
             if target_temp:  # Sometimes we don't get everything, so to update more frequently we'll store the target
                 self.temp_target = target_temp
-            self.on_progress_event_handler('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
+            if self.temp_target > 0:  # So we don't get ZeroDivisionError
+                self.on_progress_event_handler('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
         return
 
     # Softwareupdate hook
