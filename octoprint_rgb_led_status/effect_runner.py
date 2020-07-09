@@ -79,9 +79,10 @@ def effect_runner(logger, queue, all_settings, previous_state):
                     time.sleep(0.1)
             else:
                 effect_settings = all_settings['startup']
-                # Run startup effect (We haven't got a message yet)
-                EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
-                                                   effect_settings['delay'])
+                if effect_settings['enabled']:
+                    # Run startup effect (We haven't got a message yet)
+                    EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
+                                                       effect_settings['delay'])
                 if not queue.empty():
                     time.sleep(0.1)
     except KeyboardInterrupt:

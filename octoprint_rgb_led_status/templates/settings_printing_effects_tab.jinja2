@@ -1,5 +1,21 @@
 <h5>Printing Effects</h5>
 <form class="form-horizontal">
+<label class="checkbox inline">
+    <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.startup_enabled">Enable startup effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.startup_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.startup_effect">
+            {% for effect in plugin_rgb_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.startup_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.startup_delay">
+    </div>
+    <br>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.idle_enabled">Enable idle effect
     </label>
