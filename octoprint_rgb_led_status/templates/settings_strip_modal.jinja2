@@ -2,9 +2,9 @@
 	<div class="modal-header">
 		<a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
 		<h3>{{ _('LED Strip editor') }}</h3>
-	</div>
+	</div>  <!-- TODO Cleanup the fields with different lengths -->
 	<div class="modal-body">
-        <span href="https://github.com/cp2004/OctoPrint-RGB_LED_Status">More information about these options *Point link</span>
+        <span href="https://github.com/cp2004/OctoPrint-RGB_LED_Status">More information about these options *Point link to docs*</span> <!-- TODO Write docs about the settings -->
         <form class="form-horizontal">
             <div class="control-group">
                 <label class="control-label">{{ _('Strip Type') }}</label>
@@ -43,7 +43,7 @@
                 <label class="control-label">{{ _('Frequency') }}</label>
                 <div class="controls">
                     <div class="input-append">
-                        <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_freq_hz">
+                        <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_freq_hz">
                         <span class="add-on">hz</span>
                     </div>
                 </div>
@@ -51,19 +51,19 @@
             <div class="control-group">
                 <label class="control-label">{{ _('DMA channel') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_dma">
+                    <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_dma">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('Invert pin output') }}</label>
                 <div class="controls">
-                    <input type="checkbox" class="input-block-level" data-bind="checked: settings.plugins.rgb_led_status.led_invert">
+                    <input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.rgb_led_status.led_invert">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('PWM channel ') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.rgb_led_status.led_channel">
+                    <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_channel">
                 </div>
             </div>
         </form>
