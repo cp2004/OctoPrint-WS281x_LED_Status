@@ -65,22 +65,6 @@
     </div>
 <br>
     <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.cancelled_enabled">Enable cancelled effect
-    </label>
-    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.cancelled_enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settings.plugins.rgb_led_status.cancelled_effect">
-            {% for effect in plugin_rgb_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.cancelled_color">
-        <label class="inline"> Delay </label>
-        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.cancelled_delay">
-    </div>
-<br>
-    <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.paused_enabled">Enable paused effect
     </label>
     <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.paused_enabled">
