@@ -63,7 +63,6 @@ def effect_runner(logger, queue, all_settings, previous_state):
                 msg_split = msg.split()
                 # Run messaged effect
                 if msg == KILL_MSG:
-                    # TODO Catch KeyBoardInterrupt here, and set to blank. Maybe SIGTERM as well?
                     print("[RUNNER] Received KILL message")
                     on_exit(strip)
                     return

@@ -8,7 +8,6 @@ import octoprint.plugin
 
 from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
 from octoprint_rgb_led_status.effects import basic, progress
-# TODO Make enable/disable do something
 # TODO Add setup wizard
 MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
@@ -247,7 +246,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
         bed_or_tool = {
-            'M109': 'T{}'.format(self.tool_to_target),  # TODO Make a setting for which tool and whether to watch bed heating
+            'M109': 'T{}'.format(self.tool_to_target),  # TODO Make enabling/disabling bed/tool heating tracking work
             'M190': 'B'
         }
         if gcode in BLOCKING_TEMP_GCODES:
