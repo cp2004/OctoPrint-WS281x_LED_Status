@@ -12,33 +12,12 @@ from octoprint_rgb_led_status.effects import basic, progress
 MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
+BLOCKING_TEMP_GCODE = "M109"
 
 STANDARD_EFFECT_NICE_NAMES = {
     'Color Wipe': 'wipe',
     'Solid Color': 'solid'
 }
-
-
-class EventReactor:
-    def __init__(self, parent_plugin):
-        self.parent = parent_plugin
-        self.events = {
-            'Connected': 'idle',
-            'Disconnected': 'disconnected',
-            'PrintFailed': 'failed',
-            'PrintDone': 'success',
-            'PrintCancelled': 'cancelled',
-            'PrintPaused': 'paused'
-        }
-
-    def on_standard_event_handler(self, event):
-        try:
-            self.parent.update_effect(self.events[event])
-        except KeyError:
-            pass
-
-    def on_progress_event_handler(self, event, value):
-        self.parent.update_effect('{} {}'.format(self.events[event], value))
 
 
 class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
@@ -49,15 +28,22 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
                          octoprint.plugin.ProgressPlugin,
                          octoprint.plugin.EventHandlerPlugin,
                          octoprint.plugin.RestartNeedingPlugin):
-    def __init__(self):
-        self.event_reactor = EventReactor(self)
-
+    supported_events = {
+        'Connected': 'idle',
+        'Disconnected': 'disconnected',
+        'PrintFailed': 'failed',
+        'PrintDone': 'success',
+        'PrintPaused': 'paused'
+    }
     current_effect_thread = None  # thread object
     current_state = None  # Idle, startup, progress etc. Used to put the old effect back on settings change
     effect_queue = MP_CONTEXT.Queue()  # pass name of effects here
 
     SETTINGS = {}  # Filled in on startup
     PI_MODEL = None
+
+    heating = False
+    temp_target = 0
 
     # Startup plugin
     def on_after_startup(self):
@@ -114,19 +100,18 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             success_color='#00f0f0',
             success_delay='10',
 
-            cancelled_enabled=True,
-            cancelled_effect='Solid Color',
-            cancelled_color='#0f0f00',
-            cancelled_delay='10',
-
             paused_enabled=True,
             paused_effect='Solid Color',
             paused_color='#0f0f0a',
             paused_delay='10',
 
-            progress_enabled=True,
-            progress_color_base='#000000',
-            progress_color='#00ff00'
+            progress_print_enabled=True,
+            progress_print_color_base='#000000',
+            progress_print_color='#00ff00',
+
+            progress_heatup_enabled=True,
+            progress_heatup_color_base='#0000ff',
+            progress_heatup_color='#ff0000'
         )
 
     # Template plugin
@@ -170,8 +155,8 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         for mode in MODES:
             mode_settings = {'enabled': self._settings.get_boolean(['{}_enabled'.format(mode)]),
                              'color': self._settings.get(['{}_color'.format(mode)])}
-            if 'progress' in mode:  # Unsure
-                mode_settings['base'] = self._settings.get(['{}_base'.format(mode)])
+            if 'progress' in mode:  # Unsure if this works?
+                mode_settings['base'] = self._settings.get(['{}_color_base'.format(mode)])
             else:
                 effect_nice_name = self._settings.get(['{}_effect'.format(mode)])
                 effect_name = STANDARD_EFFECT_NICE_NAMES[effect_nice_name]
@@ -219,6 +204,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 return
             self._logger.debug("Updating progress effect {}, value {}".format(mode_name, value))
             # Do the thing
+            self.effect_queue.put('{} {}'.format(mode_name, value))
         else:
             self._logger.debug("Updating standard effect {}".format(mode_name))
             # Do the thing
@@ -226,7 +212,45 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.current_state = mode_name
 
     def on_event(self, event, payload):
-        self.event_reactor.on_standard_event_handler(event)
+        self.on_standard_event_handler(event)
+
+    def on_print_progress(self, storage, path, progress):
+        if (progress == 100 and self.current_state == 'success') or self.heating:
+            return
+        self.on_progress_event_handler('progress_print', progress)
+        self._logger.info("Updating print progress to {}".format(progress))
+
+    def on_standard_event_handler(self, event):  # TODO 'event handler' functions are unnecessary!
+        try:
+            self.update_effect(self.supported_events[event])
+        except KeyError:
+            pass
+
+    def on_progress_event_handler(self, event, value):
+        self.update_effect(event, value)
+
+    def calculate_heatup_progress(self, current, target):
+        return round((current / target) * 100)
+
+    def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
+        if cmd.startswith(BLOCKING_TEMP_GCODE):
+            self.heating = True
+        else:
+            self.heating = False
+
+        return
+
+    def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
+        if self.heating:
+            try:
+                current_temp, target_temp = parsed_temperatures['T0']  # TODO Make setting so is configurable which tool to watch
+            except KeyError:
+                self._logger.error("Could not find tool temperature, not showing progress")
+                return
+            if target_temp:  # Sometimes we don't get everything, so to update more frequently we'll store the target
+                self.temp_target = target_temp
+            self.on_progress_event_handler('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
+        return
 
     # Softwareupdate hook
     def get_update_information(self):
@@ -269,6 +293,8 @@ def __plugin_load__():
 
     global __plugin_hooks__
     __plugin_hooks__ = {
-        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
+        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
+        "octoprint.comm.protocol.gcode.queued": __plugin_implementation__.look_for_temperature,
+        "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received
     }
 

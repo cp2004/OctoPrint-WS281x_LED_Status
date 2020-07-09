@@ -27,61 +27,67 @@ STRIP_TYPES = {  # Add more here once we get going....
 EFFECTS = {  # Add more here once we get going....
     'solid': basic.solid_color,
     'wipe': basic.color_wipe,
-    'print_progress': progress.print_progress
-}
+    'progress_print': progress.progress,
+    'progress_heatup': progress.progress
+}  # TODO Add more effects!
 MODES = [  # Add more here once we get going....
     'startup',
     'idle',
     'disconnected',
     'progress_print',
+    'progress_heatup',
     'failed',
     'success',
-    'cancelled',
     'paused'
 ]
 
 
-
 def effect_runner(logger, queue, all_settings, previous_state):
-    logger.debug("[RUNNER] Hello!")
+    def on_exit(led_strip):
+        EFFECTS['solid'](strip, queue, [0, 0, 0])
+        return
+
+    print("[RUNNER] Hello!")
     # start strip, run startup effect until we get something else
     strip = start_strip(logger, all_settings['strip'])
     if not strip:
-        logger.debug("[RUNNER] Exiting effect runner")
+        print("[RUNNER] Exiting effect runner")
         return
 
     msg = previous_state
-    while True:
-        if not queue.empty():
-            msg = queue.get()  # The ONLY place the queue should be 'got'
-        if msg:
-            # Run messaged effect
-            if msg == KILL_MSG:
-                logger.debug("[RUNNER] Received KILL message")
-                # Cleanup ws281x so we don't get segfault
-                strip._cleanup()
-                return
-            elif msg == 'shutdown':
-                logger.debug("[RUNNER] Moving to blank LEDs to shutdown")
-                EFFECTS['solid'](strip, queue, [0, 0, 0])
-            elif msg.split()[0] in MODES:
-                effect_settings = all_settings[msg.split()[0]]  # dict containing 'enabled', 'effect', 'color', 'delay'/'base'
-                if 'progress' in msg:
-                    value = msg.split()[1]
-                    EFFECTS[msg.split()[0]](strip, queue, value, hex_to_rgb(effect_settings['color']),
-                                            hex_to_rgb(effect_settings['base']))
-                else:
-                    EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
-                                                       effect_settings['delay'])
-            else:
-                time.sleep(0.1)
-        else:
-            effect_settings = all_settings['startup']
-            # Run startup effect (We haven't got a message yet)
-            EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
-                                               effect_settings['delay'])
+    try:
+        while True:
             if not queue.empty():
-                time.sleep(0.1)
+                msg = queue.get()  # The ONLY place the queue should be 'got'
+            if msg:
+                msg_split = msg.split()
+                # Run messaged effect
+                if msg == KILL_MSG:
+                    # TODO Catch KeyBoardInterrupt here, and set to blank. Maybe SIGTERM as well?
+                    print("[RUNNER] Received KILL message")
+                    on_exit(strip)
+                    return
+                elif msg_split[0] in MODES:
+                    effect_settings = all_settings[msg_split[0]]  # dict containing 'enabled', 'effect', 'color', 'delay'/'base'
+                    if 'progress' in msg:
+                        value = msg_split[1]
+                        EFFECTS[msg_split[0]](strip, queue, int(value), hex_to_rgb(effect_settings['color']),
+                                              hex_to_rgb(effect_settings['base']))
+                    else:
+                        EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
+                                                           effect_settings['delay'])
+                else:
+                    time.sleep(0.1)
+            else:
+                effect_settings = all_settings['startup']
+                # Run startup effect (We haven't got a message yet)
+                EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
+                                                   effect_settings['delay'])
+                if not queue.empty():
+                    time.sleep(0.1)
+    except KeyboardInterrupt:
+        on_exit(strip)
+        return
 
 
 def start_strip(logger, strip_settings):
@@ -97,7 +103,7 @@ def start_strip(logger, strip_settings):
             strip_type=STRIP_TYPES[strip_settings['strip_type']]
         )
         strip.begin()
-        # logger.debug("Strip object initialised")
+        print("Strip object initialised")
         return strip
     except Exception as e:  # Probably wrong settings...
         print("[RUNNER] Strip failed to initialize, no effects will be run.")
