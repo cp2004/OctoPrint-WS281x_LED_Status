@@ -148,7 +148,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             elif setting == 'strip_type':  # String settings
                 self.SETTINGS['strip']['strip_type'] = self._settings.get([setting])
             elif setting == 'led_brightness':  # Percentage
-                self.SETTINGS['strip']['led_brightness'] = int(round((self._settings.get_int([setting]) / 100) * 255))
+                self.SETTINGS['strip']['led_brightness'] = min(int(round((self._settings.get_int([setting]) / 100) * 255)), 255)
             else:  # Integer settings
                 self.SETTINGS['strip'][setting] = self._settings.get_int([setting])
 
