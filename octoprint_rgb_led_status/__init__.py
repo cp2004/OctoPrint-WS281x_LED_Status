@@ -8,7 +8,8 @@ import octoprint.plugin
 
 from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
 from octoprint_rgb_led_status.effects import basic, progress
-
+# TODO Make enable/disable do something
+# TODO Add setup wizard
 MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
@@ -44,7 +45,8 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     heating = False
     temp_target = 0
-    tool_heating = None
+    current_heater_heating = None
+    tool_to_target = 0
 
     # Startup plugin
     def on_after_startup(self):
@@ -112,7 +114,10 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
             progress_heatup_enabled=True,
             progress_heatup_color_base='#0000ff',
-            progress_heatup_color='#ff0000'
+            progress_heatup_color='#ff0000',
+            progress_heatup_tool_enabled=True,
+            progress_heatup_bed_enabled=True,
+            progress_heatup_tool_key=0
         )
 
     # Template plugin
@@ -142,6 +147,10 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         """
         Update self.SETTINGS dict to custom data structure
         """
+        self.tool_to_target = self._settings.get_int(['progress_heatup_tool_key'])
+        if not self.tool_to_target:
+            self.tool_to_target = 0
+
         self.SETTINGS['strip'] = {}
         for setting in STRIP_SETTINGS:
             if setting == 'led_invert':  # Boolean settings
@@ -235,12 +244,12 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
         bed_or_tool = {
-            'M109': 'T0',  # TODO Make a setting for which tool and whether to watch bed heating
+            'M109': 'T{}'.format(self.tool_to_target),  # TODO Make a setting for which tool and whether to watch bed heating
             'M190': 'B'
         }
         if gcode in BLOCKING_TEMP_GCODES:
             self.heating = True
-            self.tool_heating = bed_or_tool[gcode]
+            self.current_heater_heating = bed_or_tool[gcode]
         else:
             self.heating = False
 
@@ -249,13 +258,14 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
         if self.heating:
             try:
-                current_temp, target_temp = parsed_temperatures[self.tool_heating]  # TODO Make setting so is configurable which tool to watch
+                current_temp, target_temp = parsed_temperatures[self.current_heater_heating]
             except KeyError:
-                self._logger.error("Could not find tool temperature, not showing progress")
+                self._logger.error("Could not find temperature of tool T{}, not able to show heatup progress.".format(self.current_heater_heating))
+                self.heating = False
                 return
             if target_temp:  # Sometimes we don't get everything, so to update more frequently we'll store the target
                 self.temp_target = target_temp
-            if self.temp_target > 0:  # So we don't get ZeroDivisionError
+            if self.temp_target > 0:  # Prevent ZeroDivisionError, or showing progress when target is zero
                 self.on_progress_event_handler('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
         return parsed_temperatures
 
