@@ -208,6 +208,9 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         :param mode_name: string of mode name
         :param value: percentage of how far through it is. None
         """
+        if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple
+            return
+
         if 'progress' in mode_name:
             if not value:
                 self._logger.warning("No value supplied with progress style effect, ignoring")
