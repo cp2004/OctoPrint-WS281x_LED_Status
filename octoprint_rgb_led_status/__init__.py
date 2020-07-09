@@ -66,7 +66,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.refresh_settings()
         self.restart_strip()
 
-    def get_settings_defaults(self):
+    def get_settings_defaults(self):  # TODO Make default settings better chosen
         return dict(
             led_count=24,
             led_pin=10,
@@ -224,22 +224,16 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.current_state = mode_name
 
     def on_event(self, event, payload):
-        self.on_standard_event_handler(event)
+        try:
+            self.update_effect(self.supported_events[event])
+        except KeyError:  # The event isn't supported
+            pass
 
     def on_print_progress(self, storage, path, progress):
         if (progress == 100 and self.current_state == 'success') or self.heating:
             return
-        self.on_progress_event_handler('progress_print', progress)
+        self.update_effect('progress_print', progress)
         self._logger.info("Updating print progress to {}".format(progress))
-
-    def on_standard_event_handler(self, event):  # TODO 'event handler' functions are unnecessary!
-        try:
-            self.update_effect(self.supported_events[event])
-        except KeyError:
-            pass
-
-    def on_progress_event_handler(self, event, value):
-        self.update_effect(event, value)
 
     def calculate_heatup_progress(self, current, target):
         return round((current / target) * 100)
@@ -268,7 +262,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if target_temp:  # Sometimes we don't get everything, so to update more frequently we'll store the target
                 self.temp_target = target_temp
             if self.temp_target > 0:  # Prevent ZeroDivisionError, or showing progress when target is zero
-                self.on_progress_event_handler('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
+                self.update_effect('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
         return parsed_temperatures
 
     # Softwareupdate hook
