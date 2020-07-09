@@ -1,0 +1,30 @@
+<form class="form-horizontal">
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.progress_print_enabled">Enable printing progress effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.progress_print_enabled">
+        <label class="inline"> Progress bar color </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.progress_print_color">
+        <label class="inline"> Base color </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.progress_print_color_base">
+    </div>
+    <br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.progress_heatup_enabled">Enable heating progress effect
+    </label>
+    <br>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.progress_heatup_enabled">
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.progress_heatup_bed_enabled">
+        <label class="inline" style="padding-right: 10px"> Track bed heating </label>
+        <input type="checkbox" data-bind="checked: settings.plugins.rgb_led_status.progress_heatup_tool_enabled">
+        <label class="inline" style="padding-right: 10px"> Track tool heating </label>
+        <label class="inline" data-bind="visible: settings.plugins.rgb_led_status.progress_heatup_tool_enabled"> Tool to track: </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.rgb_led_status.progress_heatup_tool_key, visible: settings.plugins.rgb_led_status.progress_heatup_tool_enabled">
+    </div>
+    <div class="form-inline" data-bind="visible: settings.plugins.rgb_led_status.progress_heatup_enabled">
+        <label class="inline"> Progress bar color </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.progress_heatup_color">
+        <label class="inline"> Base color </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.rgb_led_status.progress_heatup_color_base">
+    </div>
+</form>
