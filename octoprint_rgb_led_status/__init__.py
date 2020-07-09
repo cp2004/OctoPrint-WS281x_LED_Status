@@ -246,10 +246,10 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
         bed_or_tool = {
-            'M109': 'T{}'.format(self.tool_to_target),  # TODO Make enabling/disabling bed/tool heating tracking work
-            'M190': 'B'
+            'M109': 'T{}'.format(self.tool_to_target) if self._settings.get_boolean(['progress_heatup_tool_enabled']) else None,
+            'M190': 'B' if self._settings.get_boolean(['progress_heatup_bed_enabled']) else None
         }
-        if gcode in BLOCKING_TEMP_GCODES:
+        if (gcode in BLOCKING_TEMP_GCODES) and bed_or_tool[gcode]:
             self.heating = True
             self.current_heater_heating = bed_or_tool[gcode]
         else:
@@ -258,7 +258,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return
 
     def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
-        if self.heating:
+        if self.heating and self.current_heater_heating:
             try:
                 current_temp, target_temp = parsed_temperatures[self.current_heater_heating]
             except KeyError:
