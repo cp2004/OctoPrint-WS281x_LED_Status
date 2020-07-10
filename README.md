@@ -1,4 +1,4 @@
-# OctoPrint-RGB LED Status
+# OctoPrint-RGB LED Status (WIP: May not work perfectly!)
 
 Add an WS2811 or similar LED strip to your printer for a quick status update.
 
@@ -21,7 +21,7 @@ or manually using this URL:
 
     https://github.com/cp2004/OctoPrint-RGB_LED_Status/archive/master.zip
 
-####Setting up SPI:
+###Setting up SPI:
 
 _Coming soon via configuration wizard!_
 
@@ -30,6 +30,7 @@ Run the following commands to enable SPI, increase buffer size and make sure the
 1. `sudo nano /boot/config.txt`
 
     Add `core_freq=250` **or** `core_freq=500` & `core_freq_min=500` (Pi4)
+    
     Also add `dtparam=spi=on` if it isn't already
 
 2. `sudo nano /boot/cmdline.txt`
