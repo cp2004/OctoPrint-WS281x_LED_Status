@@ -3,7 +3,8 @@ from __future__ import absolute_import, unicode_literals
 from octoprint_rgb_led_status.util import blend_two_colors
 
 
-def progress(strip, queue, value, progress_color, base_color):
+def progress(strip, queue, value, progress_color, base_color, max_brightness=255):
+    strip.setBrightness(max_brightness)
     num_pixels = strip.numPixels()
     upper_bar = round((value / 100) * num_pixels)
     lower_base = round(((100 - value) / 100) * num_pixels)

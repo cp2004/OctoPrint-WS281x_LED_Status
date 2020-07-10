@@ -15,8 +15,13 @@ _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 BLOCKING_TEMP_GCODES = ["M109","M190"]
 
 STANDARD_EFFECT_NICE_NAMES = {
+    'Solid Color': 'solid',
     'Color Wipe': 'wipe',
-    'Solid Color': 'solid'
+    'Color Wipe 2': 'wipe2',
+    'Pulse': 'pulse',
+    'Bounce': 'bounce',
+    'Rainbow': 'rainbow',
+    'Rainbow Cycle': 'cycle'
 }
 
 

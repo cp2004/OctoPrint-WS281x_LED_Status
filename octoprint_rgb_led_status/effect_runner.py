@@ -27,9 +27,14 @@ STRIP_TYPES = {  # Add more here once we get going....
 EFFECTS = {  # Add more here once we get going....
     'solid': basic.solid_color,
     'wipe': basic.color_wipe,
+    'wipe2': basic.color_wipe_2,
+    'pulse': basic.simple_pulse,
+    'rainbow': basic.rainbow,
+    'cycle': basic.rainbow_cycle,
+    'bounce': basic.bounce,
     'progress_print': progress.progress,
     'progress_heatup': progress.progress
-}  # TODO Add more effects!
+}
 MODES = [  # Add more here once we get going....
     'startup',
     'idle',
@@ -45,7 +50,6 @@ MODES = [  # Add more here once we get going....
 def effect_runner(logger, queue, all_settings, previous_state):
     def on_exit(led_strip):
         EFFECTS['solid'](strip, queue, [0, 0, 0])
-        return
 
     print("[RUNNER] Hello!")
     # start strip, run startup effect until we get something else
@@ -71,10 +75,10 @@ def effect_runner(logger, queue, all_settings, previous_state):
                     if 'progress' in msg:
                         value = msg_split[1]
                         EFFECTS[msg_split[0]](strip, queue, int(value), hex_to_rgb(effect_settings['color']),
-                                              hex_to_rgb(effect_settings['base']))
+                                              hex_to_rgb(effect_settings['base']), all_settings['strip']['led_brightness'])
                     else:
                         EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
-                                                           effect_settings['delay'])
+                                                           effect_settings['delay'], all_settings['strip']['led_brightness'])
                 else:
                     time.sleep(0.1)
             else:
@@ -82,7 +86,7 @@ def effect_runner(logger, queue, all_settings, previous_state):
                 if effect_settings['enabled']:
                     # Run startup effect (We haven't got a message yet)
                     EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
-                                                       effect_settings['delay'])
+                                                       effect_settings['delay'], all_settings['strip']['led_brightness'])
                 if not queue.empty():
                     time.sleep(0.1)
     except KeyboardInterrupt:

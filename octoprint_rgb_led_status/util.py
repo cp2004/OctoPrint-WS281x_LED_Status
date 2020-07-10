@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division
+from time import sleep
 
 
 def hex_to_rgb(h):
@@ -19,3 +20,22 @@ def blend_two_colors(colour1, colour2):
 
 def average(a, b):
     return round((a + b) / 2)
+
+
+def milli_sleep(m_secs):
+    sleep(m_secs / 1000)
+
+
+def wheel(pos):
+    """Get a 3 tuple r, g, b value for a position 0-255
+    From Adafruit's strandtest.py
+    :param pos: int 0-255
+    :return tuple r, g, b from 0-255"""
+    if pos < 85:
+        return int(pos * 3), int(255 - pos * 3), 0
+    elif pos < 170:
+        pos -= 85
+        return int(255 - pos * 3), 0, int(pos * 3)
+    else:
+        pos -= 170
+        return 0, int(pos * 3), int(255 - pos * 3)
