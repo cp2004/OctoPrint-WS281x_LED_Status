@@ -21,7 +21,7 @@ or manually using this URL:
 
     https://github.com/cp2004/OctoPrint-RGB_LED_Status/archive/master.zip
 
-##Setting up SPI:
+### Setting up SPI:
 
 _Coming soon via configuration wizard!_
 
