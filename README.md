@@ -25,7 +25,7 @@ or manually using this URL:
 
 _Coming soon via configuration wizard!_
 
-Run the following commands to enable SPI, increase buffer size and make sure the clock is set right.
+Run the following commands from the terminal to enable SPI, increase buffer size and make sure the clock is set right.
 
 2. Check your user (pi) is in the `gpio` group
    
