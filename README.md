@@ -21,17 +21,22 @@ or manually using this URL:
 
     https://github.com/cp2004/OctoPrint-RGB_LED_Status/archive/master.zip
 
-###Setting up SPI:
+##Setting up SPI:
 
 _Coming soon via configuration wizard!_
 
 Run the following commands to enable SPI, increase buffer size and make sure the clock is set right.
 
+2. Check your user (pi) is in the `gpio` group
+   
+   Run `groups pi`, look for `gpio
+   If not, run `sudo adduser pi gpio`
+
 1. `sudo nano /boot/config.txt`
 
     Add `core_freq=250` **or** `core_freq=500` & `core_freq_min=500` (Pi4)
     
-    Also add `dtparam=spi=on` if it isn't already
+    Add `dtparam=spi=on`
 
 2. `sudo nano /boot/cmdline.txt`
 
