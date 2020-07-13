@@ -9,7 +9,6 @@ import octoprint.plugin
 
 from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
 from octoprint_rgb_led_status.effects import basic, progress
-# TODO Add setup wizard
 MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
@@ -82,7 +81,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.refresh_settings()
         self.restart_strip()
 
-    def get_settings_defaults(self):  # TODO Make default settings better chosen
+    def get_settings_defaults(self):
         return dict(
             led_count=24,
             led_pin=10,
