@@ -390,7 +390,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         # for details.
         return dict(
             rgb_led_status=dict(
-                displayName="Rgb_led_status Plugin",
+                displayName="RGB LED Status",
                 displayVersion=self._plugin_version,
 
                 # version check: github repository
