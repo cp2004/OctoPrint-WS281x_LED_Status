@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from multiprocessing import get_context
 import re
 import io
+import subprocess
 
 import octoprint.plugin
 
@@ -28,7 +29,9 @@ STANDARD_EFFECT_NICE_NAMES = {
 class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
                          octoprint.plugin.ShutdownPlugin,
                          octoprint.plugin.SettingsPlugin,
+                         octoprint.plugin.AssetPlugin,
                          octoprint.plugin.TemplatePlugin,
+                         octoprint.plugin.SimpleApiPlugin,
                          octoprint.plugin.WizardPlugin,
                          octoprint.plugin.ProgressPlugin,
                          octoprint.plugin.EventHandlerPlugin,
@@ -52,9 +55,17 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
     current_heater_heating = None
     tool_to_target = 0
 
+    # Asset plugin
+    def get_assets(self):
+        return dict(
+            js=['js/rgb_led_status.js']
+        )
+
     # Startup plugin
+    def on_startup(self, host, port):
+        self.PI_MODEL = self.determine_pi_version()
+
     def on_after_startup(self):
-        self.PI_MODEL = self.determine_pi_version()  # Needed for the wizard...
         self.refresh_settings()
         self.start_effect_process()
 
@@ -131,9 +142,112 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         ]
 
     def get_template_vars(self):
-        return {'standard_names': STANDARD_EFFECT_NICE_NAMES, 'effects': EFFECTS, 'strip_types': STRIP_TYPES}
+        return {'standard_names': STANDARD_EFFECT_NICE_NAMES, 'pi_model': self.PI_MODEL, 'strip_types': STRIP_TYPES}
 
     # Wizard plugin bits
+    def is_wizard_required(self):
+        return True
+
+    def get_wizard_details(self):
+        return dict(
+            adduser_done=self.is_adduser_done(),
+            spi_enabled=self.is_spi_enabled(),
+            spi_buffer_increase=self.is_spi_buffer_increased(),
+            core_freq_set=self.is_core_freq_set(),
+            core_freq_min_set=self.is_core_freq_min_set()
+        )
+
+    def get_wizard_version(self):
+        return 1
+
+    def on_wizard_finish(self, handled):
+        self._logger.info("You will need to restart your Pi for the changes to take effect")  # TODO make this a popup? not very useful here
+
+    # Simple API plugin
+    def get_api_commands(self):
+        return dict(
+            adduser=['password'],
+            enable_spi=['password'],
+            spi_buffer_increase=['password'],
+            set_core_freq=['password'],
+            set_core_freq_min=['password']
+        )
+
+    def on_api_command(self, command, data):
+        api_to_command = {  # -S for sudo commands means accept password from stdin instead of terminal, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
+            'adduser': ['sudo', '-S', 'adduser', 'pi', 'gpio'],
+            'enable_spi': ['sudo', '-S', 'bash', '-c', 'echo \'dtparam=spi=on\' >> /home/pi/mock_config.txt'],
+            'set_core_freq': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq=500\' >> /home/pi/mock_config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq=250\' >> /home/pi/mock_config.txt'],
+            'set_core_freq_min': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq_min=500\' >> /home/pi/mock_config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq_min=500\' >> /home/pi/mock_config.txt'],
+            'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/home/pi/mock_cmdline.txt']
+        }
+        stdout, error = self.run_system_command(api_to_command[command], data.get('password'))
+        return self.build_response(error)
+
+    def build_response(self, errors=None):
+        from flask import jsonify
+        details = self.get_wizard_details()
+        details.update(errors=errors)
+        return jsonify(details)
+
+    def run_system_command(self, command, password=None):
+        if password and password != 'raspberry':
+            self._logger.error("Incorrect password")
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
+        if password:
+            stdout, stderr = process.communicate('{}\n'.format(password).encode())
+        else:
+            stdout, stderr = process.communicate()
+
+        if stderr and 'Sorry' in stderr.decode('utf-8') or 'no password' in stderr.decode('utf-8'):  # .decode for Python 2/3 compatibility, make sure utf-8
+            self._logger.error("Running command for {}, but password incorrect".format(command))
+            return stdout.decode('utf-8'), 'password'
+        else:
+            return stdout.decode('utf-8'), None
+
+    def is_adduser_done(self):
+        groups, error = self.run_system_command(['groups', 'pi'])
+        return 'gpio' in groups
+
+    def is_spi_enabled(self):
+        with io.open('/home/pi/mock_config.txt') as file:
+            for line in file:
+                if 'dtparam=spi=on' in line:
+                    return True
+        return False
+
+    def is_spi_buffer_increased(self):
+        with io.open('/home/pi/mock_cmdline.txt') as file:
+            for line in file:
+                if 'spidev.bufsiz=32768' in line:
+                    return True
+        return False
+
+    def is_core_freq_set(self):
+        if self.PI_MODEL == '4':
+            core_freq_line = 'core_freq=500'
+        else:
+            core_freq_line = 'core_freq=250'
+        with io.open('/home/pi/mock_config.txt') as file:
+            for line in file:
+                if core_freq_line in line:
+                    return True
+        return False
+
+    def is_core_freq_min_set(self):
+        if int(self.PI_MODEL) == 4:
+            with io.open('/home/pi/mock_config.txt') as file:
+                for line in file:
+                    if 'core_freq_min=500' in line:
+                        return True
+            return False
+        else:
+            return True
 
     # My methods
     def determine_pi_version(self):
