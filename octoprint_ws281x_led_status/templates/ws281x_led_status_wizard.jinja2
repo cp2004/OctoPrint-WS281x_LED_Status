@@ -1,7 +1,7 @@
 <div class="alert alert-info">
     Mandatory wizard! You will have to complete all steps to finish the wizard.
 </div>
-<h3>RGB LED Status SPI Setup</h3>
+<h3>WS281x LED Status SPI Setup</h3>
 <span class="text-info lead">As OctoPrint should not be run as root, we need to change a few system settings to let our LEDs run without root access.</span>
 <br>
 <div id="errorContainer"></div>
@@ -29,15 +29,21 @@
         <h4><i class="fa fa-large fa-arrow-right"></i> Increase SPI buffer<button style="margin-left: 10px" id="spiBufferIncreaseBtn" class="btn btn-success"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button></h4>
     <p class="help-block">Sets <code>spidev.bufsiz=32768</code> in <code>/boot/cmdline.txt</code></p>
     <li id="coreFreqSet">
-        <h4><i class="fa fa-large fa-arrow-right"></i> Set core_freq={% if plugin_rgb_led_status_pi_model == '4' %}500{% else %}250{% endif %}<button style="margin-left: 10px" id="coreFreqBtn" class="btn btn-success"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button></h4>
-        <p class="help-block">Sets <code>core_freq={% if plugin_rgb_led_status_pi_model == '4' %}500{% else %}250{% endif %}</code> in <code>/boot/config.txt</code></p>
+        <h4><i class="fa fa-large fa-arrow-right"></i> Set core_freq={% if plugin_ws281x_led_status_pi_model == '4' %}500{% else %}250{% endif %}<button style="margin-left: 10px" id="coreFreqBtn" class="btn btn-success"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button></h4>
+        <p class="help-block">
+            {% if plugin_ws281x_led_status_pi_model != '4' %}
+            Set the core_freq to 250 to <br>
+            Sets <code>core_freq_min={% if plugin_ws281x_led_status_pi_model == '4' %}500{% else %}250{% endif %}</code> in <code>/boot/config.txt</code>
+            {% else %}
+            This step is not required on your Raspberry Pi model, so it is marked as completed.
+            {% endif %}Sets <code>core_freq={% if plugin_ws281x_led_status_pi_model == '4' %}500{% else %}250{% endif %}</code> in <code>/boot/config.txt</code></p>
     </li>
     <li id="coreFreqMinSet">
-        <h4><i class="fa fa-large fa-arrow-right"></i> Set core_freq_min={% if plugin_rgb_led_status_pi_model == '4' %}500{% else %}250{% endif %}<button style="margin-left: 10px" id="coreFreqMinBtn" class="btn btn-success"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button></h4>
+        <h4><i class="fa fa-large fa-arrow-right"></i> Set core_freq_min={% if plugin_ws281x_led_status_pi_model == '4' %}500{% else %}250{% endif %}<button style="margin-left: 10px" id="coreFreqMinBtn" class="btn btn-success"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button></h4>
         <p class="help-block">
-            {% if plugin_rgb_led_status_pi_model == '4' %}
+            {% if plugin_ws281x_led_status_pi_model == '4' %}
             This is required to stop the SPI clock frequency changing, which messes up the timing for LEDs<br>
-            Sets <code>core_freq_min={% if plugin_rgb_led_status_pi_model == '4' %}500{% else %}250{% endif %}</code> in <code>/boot/config.txt</code>
+            Sets <code>core_freq_min={% if plugin_ws281x_led_status_pi_model == '4' %}500{% else %}250{% endif %}</code> in <code>/boot/config.txt</code>
             {% else %}
             This step is not required on your Raspberry Pi model, so it is marked as completed.
             {% endif %}

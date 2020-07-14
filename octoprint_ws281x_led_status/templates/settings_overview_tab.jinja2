@@ -1,42 +1,42 @@
 <div class=""> <!-- TODO Some Custom CSS? Looks good as is but maybe could be better -->
     <h4>Enabled effects</h4>
-    <div data-bind="visible: settings.plugins.rgb_led_status.idle_enabled()">
+    <div data-bind="visible: settings.plugins.ws281x_led_status.idle_enabled()">
         <span class="fa-lg" title="Idle effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Idle (connected)</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.rgb_led_status.disconnected_enabled()">
+    <div data-bind="visible: settings.plugins.ws281x_led_status.disconnected_enabled()">
         <span class="fa-lg" title="Disconnected effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Disconnected</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.rgb_led_status.success_enabled()">
+    <div data-bind="visible: settings.plugins.ws281x_led_status.success_enabled()">
         <span class="fa-lg" title="success effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Successful print</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.rgb_led_status.failed_enabled()">
+    <div data-bind="visible: settings.plugins.ws281x_led_status.failed_enabled()">
         <span class="fa-lg" title="failed effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Failed print</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.rgb_led_status.paused_enabled()">
+    <div data-bind="visible: settings.plugins.ws281x_led_status.paused_enabled()">
         <span class="fa-lg" title="paused effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Paused</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.rgb_led_status.progress_print_enabled()">
+    <div data-bind="visible: settings.plugins.ws281x_led_status.progress_print_enabled()">
         <span class="fa-lg" title="progress_print effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Print progress</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.rgb_led_status.progress_heatup_enabled()">
+    <div data-bind="visible: settings.plugins.ws281x_led_status.progress_heatup_enabled()">
         <span class="fa-lg" title="progress_heatup effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Heating progress</span>
@@ -46,43 +46,43 @@
 <br>
 <div class="">
     <h4>Disabled effects</h4>
-        <div data-bind="visible: !settings.plugins.rgb_led_status.idle_enabled()">
+        <div data-bind="visible: !settings.plugins.ws281x_led_status.idle_enabled()">
         <span class="fa-lg" title="Idle effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Idle (connected)</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.rgb_led_status.disconnected_enabled()">
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.disconnected_enabled()">
         <span class="fa-lg" title="Disconnected effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Disconnected</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.rgb_led_status.success_enabled()">
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.success_enabled()">
         <span class="fa-lg" title="success effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Successful print</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.rgb_led_status.failed_enabled()">
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.failed_enabled()">
         <span class="fa-lg" title="failed effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Failed print</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.rgb_led_status.paused_enabled()">
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.paused_enabled()">
         <span class="fa-lg" title="paused effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Paused</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.rgb_led_status.progress_print_enabled()">
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.progress_print_enabled()">
         <span class="fa-lg" title="progress_print effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Print progress</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.rgb_led_status.progress_heatup_enabled()">
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.progress_heatup_enabled()">
         <span class="fa-lg" title="progress_heatup effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Heating progress</span>

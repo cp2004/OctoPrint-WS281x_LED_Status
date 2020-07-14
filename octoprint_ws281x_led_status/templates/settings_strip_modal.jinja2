@@ -4,13 +4,13 @@
 		<h3>{{ _('LED Strip editor') }}</h3>
 	</div>
 	<div class="modal-body">
-        <span>More information about these options <a href="https://github.com/cp2004/OctoPrint-RGB_LED_Status/wiki/Configuration-options" class="btn btn-info">Click here</a></span> <!-- TODO Write docs about the settings -->
+        <span>More information about these options <a href="https://github.com/cp2004/OctoPrint-ws281x_led_status/wiki/Configuration-options" class="btn btn-info">Click here</a></span> <!-- TODO Write docs about the settings -->
         <form class="form-horizontal">
             <div class="control-group">
                 <label class="control-label">{{ _('Strip Type') }}</label>
                 <div class="controls">
-                    <select class="input-block-level" id="stripType" data-bind="value: settings.plugins.rgb_led_status.strip_type">
-                        {% for type in plugin_rgb_led_status_strip_types %}
+                    <select class="input-block-level" id="stripType" data-bind="value: settings.plugins.ws281x_led_status.strip_type">
+                        {% for type in plugin_ws281x_led_status_strip_types %}
                             <option value="{{ type }}">{{ type }}</option>
                         {% endfor %}
                     </select>
@@ -20,30 +20,30 @@
                 <label class="control-label">{{ _('Max brightness') }}</label>
                 <div class="controls">
                     <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_brightness">
+                        <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_brightness">
                         <span class="add-on">%</span>
                     </div>
-                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_brightness">
+                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_brightness">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('Number of LEDs') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_count">
+                    <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_count">
                 </div>
 
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('GPIO pin') }}</label>
                 <div class="controls">
-                    <input type="number" min="10" max="10" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_pin">
+                    <input type="number" min="10" max="10" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_pin">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('Frequency') }}</label>
                 <div class="controls">
                     <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_freq_hz">
+                        <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_freq_hz">
                         <span class="add-on">hz</span>
                     </div>
                 </div>
@@ -51,19 +51,19 @@
             <div class="control-group">
                 <label class="control-label">{{ _('DMA channel') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_dma">
+                    <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_dma">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('Invert pin output') }}</label>
                 <div class="controls">
-                    <input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.rgb_led_status.led_invert">
+                    <input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.ws281x_led_status.led_invert">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('PWM channel ') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_channel">
+                    <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_channel">
                 </div>
             </div>
         </form>

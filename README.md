@@ -1,11 +1,11 @@
-# OctoPrint-RGB LED Status (WIP: May not work perfectly!)
+# OctoPrint-WS281x LED Status (WIP: May not work perfectly!)
 
 Add an WS2811 or similar LED strip to your printer for a quick status update.
 
 _Based on the concepts of work [Eric Higdon](https://github.com/EricHigdon/OctoPrint-RGB_status), completely re-written for higher customizablility and new effects._
 
 ## Features
-Supports WS281x strips, for specific supported types see \*\*LINK\*\*
+Supports WS281x strips, for specific supported types see \*\*WIKI LINK\*\*
 
 Reacts to printing states; including connected, success, paused and cancelled
 

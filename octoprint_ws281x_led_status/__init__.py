@@ -7,8 +7,8 @@ import subprocess
 
 import octoprint.plugin
 
-from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
-from octoprint_rgb_led_status.effects import basic, progress
+from octoprint_ws281x_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
+from octoprint_ws281x_led_status.effects import basic, progress
 MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
@@ -25,16 +25,16 @@ STANDARD_EFFECT_NICE_NAMES = {
 }
 
 
-class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
-                         octoprint.plugin.ShutdownPlugin,
-                         octoprint.plugin.SettingsPlugin,
-                         octoprint.plugin.AssetPlugin,
-                         octoprint.plugin.TemplatePlugin,
-                         octoprint.plugin.SimpleApiPlugin,
-                         octoprint.plugin.WizardPlugin,
-                         octoprint.plugin.ProgressPlugin,
-                         octoprint.plugin.EventHandlerPlugin,
-                         octoprint.plugin.RestartNeedingPlugin):
+class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
+                            octoprint.plugin.ShutdownPlugin,
+                            octoprint.plugin.SettingsPlugin,
+                            octoprint.plugin.AssetPlugin,
+                            octoprint.plugin.TemplatePlugin,
+                            octoprint.plugin.SimpleApiPlugin,
+                            octoprint.plugin.WizardPlugin,
+                            octoprint.plugin.ProgressPlugin,
+                            octoprint.plugin.EventHandlerPlugin,
+                            octoprint.plugin.RestartNeedingPlugin):
     supported_events = {
         'Connected': 'idle',
         'Disconnected': 'disconnected',
@@ -57,7 +57,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
     # Asset plugin
     def get_assets(self):
         return dict(
-            js=['js/rgb_led_status.js']
+            js=['js/ws281x_led_status.js']
         )
 
     # Startup plugin
@@ -145,7 +145,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Wizard plugin bits
     def is_wizard_required(self):
-        return any(self.get_wizard_details())
+        return not any(self.get_wizard_details())
 
     def get_wizard_details(self):
         return dict(
@@ -229,12 +229,10 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def is_core_freq_set(self):
         if self.PI_MODEL == '4':
-            core_freq_line = 'core_freq=500'
-        else:
-            core_freq_line = 'core_freq=250'
+            return True
         with io.open('/boot/config.txt') as file:
             for line in file:
-                if core_freq_line in line:
+                if 'core_freq=250' in line:
                     return True
         return False
 
@@ -420,7 +418,7 @@ __plugin_pythoncompat__ = ">=3,<4" # only python 3
 
 def __plugin_load__():
     global __plugin_implementation__
-    __plugin_implementation__ = RgbLedStatusPlugin()
+    __plugin_implementation__ = WS281xLedStatusPlugin()
 
     global __plugin_hooks__
     __plugin_hooks__ = {

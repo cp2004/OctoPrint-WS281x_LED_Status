@@ -7,8 +7,8 @@ import time
 import rpi_ws281x
 from rpi_ws281x import PixelStrip
 
-from octoprint_rgb_led_status.effects import basic, progress
-from octoprint_rgb_led_status.util import hex_to_rgb
+from octoprint_ws281x_led_status.effects import basic, progress
+from octoprint_ws281x_led_status.util import hex_to_rgb
 
 KILL_MSG = 'KILL'
 STRIP_SETTINGS = [  # ALL LED SETTINGS, for rpi_ws281x.PixelStrip
@@ -22,7 +22,13 @@ STRIP_SETTINGS = [  # ALL LED SETTINGS, for rpi_ws281x.PixelStrip
     'strip_type'
 ]
 STRIP_TYPES = {  # Add more here once we get going....
-    'WS2811_STRIP_GRB': rpi_ws281x.WS2811_STRIP_GRB
+    'WS2811_STRIP_GRB': rpi_ws281x.WS2811_STRIP_GRB,
+    'WS2812_STRIP': rpi_ws281x.WS2812_STRIP,
+    'WS2811_STRIP_RGB': rpi_ws281x.WS2811_STRIP_RGB,
+    'WS2811_STRIP_RBG': rpi_ws281x.WS2811_STRIP_RBG,
+    'WS2811_STRIP_GBR': rpi_ws281x.WS2811_STRIP_GBR,
+    'WS2811_STRIP_BGR': rpi_ws281x.WS2811_STRIP_BGR,
+    'WS2811_STRIP_BRG': rpi_ws281x.WS2811_STRIP_BRG,
 }
 EFFECTS = {  # Add more here once we get going....
     'solid': basic.solid_color,

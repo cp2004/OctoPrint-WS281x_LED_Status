@@ -1,6 +1,6 @@
 # Basic effects; such as color wipe, pulse etc.
 from __future__ import absolute_import, unicode_literals
-from octoprint_rgb_led_status.util import milli_sleep, wheel
+from octoprint_ws281x_led_status.util import milli_sleep, wheel
 
 
 DIRECTIONS = ['forward', 'backward']  # Used for effects that go 'out and back' kind of thing
