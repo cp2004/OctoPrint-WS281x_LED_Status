@@ -9,7 +9,7 @@ import octoprint.plugin
 
 from octoprint_rgb_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
 from octoprint_rgb_led_status.effects import basic, progress
-MP_CONTEXT = get_context('fork')
+MP_CONTEXT = get_context('spawn')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 BLOCKING_TEMP_GCODES = ["M109","M190"]
@@ -145,7 +145,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Wizard plugin bits
     def is_wizard_required(self):
-        return any(self.get_wizard_details())
+        return not any(self.get_wizard_details())
 
     def get_wizard_details(self):
         return dict(
