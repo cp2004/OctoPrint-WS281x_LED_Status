@@ -4,7 +4,7 @@
 		<h3>{{ _('LED Strip editor') }}</h3>
 	</div>
 	<div class="modal-body">
-        <span href="https://github.com/cp2004/OctoPrint-RGB_LED_Status">More information about these options *Point link to docs*</span> <!-- TODO Write docs about the settings -->
+        <span>More information about these options <a href="https://github.com/cp2004/OctoPrint-RGB_LED_Status/wiki/Configuration-options" class="btn btn-info">Click here</a></span> <!-- TODO Write docs about the settings -->
         <form class="form-horizontal">
             <div class="control-group">
                 <label class="control-label">{{ _('Strip Type') }}</label>
@@ -36,7 +36,7 @@
             <div class="control-group">
                 <label class="control-label">{{ _('GPIO pin') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_pin">
+                    <input type="number" min="10" max="10" class="input-medium" data-bind="value: settings.plugins.rgb_led_status.led_pin">
                 </div>
             </div>
             <div class="control-group">
