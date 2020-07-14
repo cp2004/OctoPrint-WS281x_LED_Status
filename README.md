@@ -2,6 +2,8 @@
 
 Add an WS2811 or similar LED strip to your printer for a quick status update.
 
+_Based on the concepts of work [Eric Higdon](https://github.com/EricHigdon/OctoPrint-RGB_status), completely re-written for higher customizablility and new effects._
+
 ## Features
 Supports WS281x strips, for specific supported types see \*\*LINK\*\*
 
@@ -9,10 +11,10 @@ Reacts to printing states; including connected, success, paused and cancelled
 
 Show your heating or print progress on the strip
 
-Easy to use settings interface
+Easy to use but highly customizeable settings interface
 
 ## Effects
-Currently only supporting solid colour or colour wipe, more soon!
+Supporting effects inculding a color wipe, rainbow, bounce, pulse and more!
 
 ## Setup
 
@@ -23,25 +25,4 @@ or manually using this URL:
 
 ### Setting up SPI:
 
-_Coming soon via configuration wizard!_
-
-Run the following commands from the terminal to enable SPI, increase buffer size and make sure the clock is set right.
-
-2. Check your user (pi) is in the `gpio` group
-   
-   Run `groups pi`, look for `gpio
-   If not, run `sudo adduser pi gpio`
-
-1. `sudo nano /boot/config.txt`
-
-    Add `core_freq=250` **or** `core_freq=500` & `core_freq_min=500` (Pi4)
-    
-    Add `dtparam=spi=on`
-
-2. `sudo nano /boot/cmdline.txt`
-
-    Add `spidev.bufsiz=32768` to the end of the file
-
-## Configuration
-
-**TODO:** Describe your plugin's configuration options (if any).
+Please see the Wiki for details of how to do this. There is also a configuration wizard that will sort this out for you.
