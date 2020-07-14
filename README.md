@@ -21,7 +21,7 @@ Supporting effects inculding a color wipe, rainbow, bounce, pulse and more!
 Install via the bundled [Plugin Manager](https://docs.octoprint.org/en/master/bundledplugins/pluginmanager.html)
 or manually using this URL:
 
-    https://github.com/cp2004/OctoPrint-RGB_LED_Status/archive/master.zip
+    https://github.com/cp2004/OctoPrint-WS281x_LED_Status/archive/master.zip
 
 ### Setting up SPI:
 
