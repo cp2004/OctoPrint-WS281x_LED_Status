@@ -398,7 +398,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 current=self._plugin_version,
 
                 # update method: pip
-                pip="https://github.com/cp2004/OctoPrint-RGB_LED_Status/archive/{target_version}.zip"
+                pip="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/archive/{target_version}.zip"
             )
         )
 
@@ -406,7 +406,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
-__plugin_name__ = "RGB LED Status"
+__plugin_name__ = "WS281x LED Status"
 
 # Starting with OctoPrint 1.4.0 OctoPrint will also support to run under Python 3 in addition to the deprecated
 # Python 2. New plugins should make sure to run under both versions for now. Uncomment one of the following
