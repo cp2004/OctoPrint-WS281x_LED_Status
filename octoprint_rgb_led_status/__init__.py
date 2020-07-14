@@ -145,7 +145,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Wizard plugin bits
     def is_wizard_required(self):
-        return True
+        return any(self.get_wizard_details())
 
     def get_wizard_details(self):
         return dict(
@@ -175,10 +175,10 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def on_api_command(self, command, data):
         api_to_command = {  # -S for sudo commands means accept password from stdin instead of terminal, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
             'adduser': ['sudo', '-S', 'adduser', 'pi', 'gpio'],
-            'enable_spi': ['sudo', '-S', 'bash', '-c', 'echo \'dtparam=spi=on\' >> /home/pi/mock_config.txt'],
-            'set_core_freq': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq=500\' >> /home/pi/mock_config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq=250\' >> /home/pi/mock_config.txt'],
-            'set_core_freq_min': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq_min=500\' >> /home/pi/mock_config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq_min=500\' >> /home/pi/mock_config.txt'],
-            'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/home/pi/mock_cmdline.txt']
+            'enable_spi': ['sudo', '-S', 'bash', '-c', 'echo \'dtparam=spi=on\' >> /boot/config.txt'],
+            'set_core_freq': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq=250\' >> /boot/config.txt'],
+            'set_core_freq_min': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq_min=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq_min=250\' >> /boot/config.txt'],
+            'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
         }
         stdout, error = self.run_system_command(api_to_command[command], data.get('password'))
         return self.build_response(error)
@@ -214,14 +214,14 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return 'gpio' in groups
 
     def is_spi_enabled(self):
-        with io.open('/home/pi/mock_config.txt') as file:
+        with io.open('/boot/config.txt') as file:
             for line in file:
                 if 'dtparam=spi=on' in line:
                     return True
         return False
 
     def is_spi_buffer_increased(self):
-        with io.open('/home/pi/mock_cmdline.txt') as file:
+        with io.open('/boot/cmdline.txt') as file:
             for line in file:
                 if 'spidev.bufsiz=32768' in line:
                     return True
@@ -232,7 +232,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
             core_freq_line = 'core_freq=500'
         else:
             core_freq_line = 'core_freq=250'
-        with io.open('/home/pi/mock_config.txt') as file:
+        with io.open('/boot/config.txt') as file:
             for line in file:
                 if core_freq_line in line:
                     return True
@@ -240,7 +240,7 @@ class RgbLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def is_core_freq_min_set(self):
         if int(self.PI_MODEL) == 4:
-            with io.open('/home/pi/mock_config.txt') as file:
+            with io.open('/boot/config.txt') as file:
                 for line in file:
                     if 'core_freq_min=500' in line:
                         return True
