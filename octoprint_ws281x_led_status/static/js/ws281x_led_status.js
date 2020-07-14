@@ -12,7 +12,7 @@ $(function() {
             console.log("command run")
             console.log(command)
             var password = $('#PasswordField').val();
-            OctoPrint.simpleApiCommand('rgb_led_status', command, {'password': password}).done(process_steps);
+            OctoPrint.simpleApiCommand('ws281x_led_status', command, {'password': password}).done(process_steps);
         }
         function process_steps(data) {
             if (data.errors === 'password') {
@@ -65,10 +65,10 @@ $(function() {
         }
         self.name = "RGBLEDStatusWiz"
         self.onWizardDetails = function (response) {
-            process_steps(response.rgb_led_status.details)
+            process_steps(response.ws281x_led_status.details)
         };
         self.onBeforeWizardFinish = function () {
-            return !$('#wizard_plugin_rgb_led_status').find('ol li').not('.text-success').length;
+            return !$('#wizard_plugin_ws281x_led_status').find('ol li').not('.text-success').length;
         }
     }
     OCTOPRINT_VIEWMODELS.push({

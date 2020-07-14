@@ -7,8 +7,8 @@ import time
 import rpi_ws281x
 from rpi_ws281x import PixelStrip
 
-from octoprint_rgb_led_status.effects import basic, progress
-from octoprint_rgb_led_status.util import hex_to_rgb
+from octoprint_ws281x_led_status.effects import basic, progress
+from octoprint_ws281x_led_status.util import hex_to_rgb
 
 KILL_MSG = 'KILL'
 STRIP_SETTINGS = [  # ALL LED SETTINGS, for rpi_ws281x.PixelStrip

@@ -1,6 +1,6 @@
 # Print and heat up progress?
 from __future__ import absolute_import, unicode_literals
-from octoprint_rgb_led_status.util import blend_two_colors
+from octoprint_ws281x_led_status.util import blend_two_colors
 
 
 def progress(strip, queue, value, progress_color, base_color, max_brightness=255):
