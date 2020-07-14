@@ -26,3 +26,10 @@ or manually using this URL:
 ### Setting up SPI:
 
 Please see the Wiki for details of how to do this. There is also a configuration wizard that will sort this out for you.
+
+## Thanks
+[Gina Häußge](https://github.com/foosel) for creating OctoPrint
+
+[jneilliii](https://github.com/jneilliii) for always answering my questions on discord
+
+Andreas C. for jumping at the opportunity to beta-test!
