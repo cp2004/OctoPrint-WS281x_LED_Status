@@ -3,98 +3,62 @@ layout: plugin
 
 id: rgb_led_status
 title: OctoPrint-RGB LED Status
-description: Add some RGB LEDs to your printer for a quick status
+description: Add some RGB LEDs to your printer for a quick status update
 author: Charlie Powell
 license: AGPLv3
 
-# TODO
-date: today's date in format YYYY-MM-DD, e.g. 2015-04-21
+date: 2020-07-14
 
 homepage: https://github.com/cp2004/OctoPrint-RGB_LED_Status
 source: https://github.com/cp2004/OctoPrint-RGB_LED_Status
 archive: https://github.com/cp2004/OctoPrint-RGB_LED_Status/archive/master.zip
 
-# TODO
-# Set this to true if your plugin uses the dependency_links setup parameter to include
-# library versions not yet published on PyPi. SHOULD ONLY BE USED IF THERE IS NO OTHER OPTION!
-#follow_dependency_links: false
+follow_dependency_links: false
 
-# TODO
 tags:
-- a list
-- of tags
-- that apply
-- to your plugin
-- (take a look at the existing plugins for what makes sense here)
+- rgb led
+- status
+- progress
+- neopixel
+- ws281x
+- ws2811
+- ws2812
 
-# TODO
 screenshots:
-- url: url of a screenshot, /assets/img/...
-  alt: alt-text of a screenshot
-  caption: caption of a screenshot
-- url: url of another screenshot, /assets/img/...
-  alt: alt-text of another screenshot
-  caption: caption of another screenshot
-- ...
+- url: /assets/img/plugins/rgb_led_status/setup_wizard.jpg
+  alt: setup-wizard-screenshot
+  caption: Setup Wizard Screenshot
+- url: /assets/img/plugins/rgb_led_status/settings_overview.png
+  alt: settings-overview-screenshot
+  caption: Settings Overview Screenshot
+- url: /assets/img/plugins/rgb_led_status/settings_printing.png
+  alt: settings-printing-screenshot
+  caption: Printing Settings Screenshot
 
-# TODO
-featuredimage: url of a featured image for your plugin, /assets/img/...
-
-# TODO
-# You only need the following if your plugin requires specific OctoPrint versions or
-# specific operating systems to function - you can safely remove the whole
-# "compatibility" block if this is not the case.
+featuredimage: /assets/img/plugins/rgb_led_status/settings_overview.jpg
 
 compatibility:
 
-  # List of compatible versions
-  #
-  # A single version number will be interpretated as a minimum version requirement,
-  # e.g. "1.3.1" will show the plugin as compatible to OctoPrint versions 1.3.1 and up.
-  # More sophisticated version requirements can be modelled too by using PEP440
-  # compatible version specifiers.
-  #
-  # You can also remove the whole "octoprint" block. Removing it will default to all
-  # OctoPrint versions being supported.
-
   octoprint:
-  - 1.2.0
-
-  # List of compatible operating systems
-  #
-  # Valid values:
-  #
-  # - windows
-  # - linux
-  # - macos
-  # - freebsd
-  #
-  # There are also two OS groups defined that get expanded on usage:
-  #
-  # - posix: linux, macos and freebsd
-  # - nix: linux and freebsd
-  #
-  # You can also remove the whole "os" block. Removing it will default to all
-  # operating systems being supported.
+  - 1.4.0
 
   os:
   - linux
-  - windows
-  - macos
-  - freebsd
-  
-  # Compatible Python version
-  #
-  # Plugins should aim for compatibility for Python 2 and 3 for now, in which case the value should be ">=2.7,<4".
-  #
-  # Plugins that only wish to support Python 3 should set it to ">=3,<4". 
-  #
-  # If your plugin only supports Python 2 (worst case, not recommended for newly developed plugins since Python 2
-  # is EOL), leave at ">=2.7,<3"
-  
-  python: ">=2.7,<3"
+
+  python: ">=3,<4"
 
 ---
 
-**TODO**: Longer description of your plugin, configuration examples etc. This part will be visible on the page at
-http://plugins.octoprint.org/plugin/rgb_led_status/
+Supporting effects for various printing states as well as print and heating progress,
+you will always know what your printer is doing without needing to look at the web interface all the time.
+
+This plugin currently only supports Python 3, if you would like to upgrade your install to Python 3 I've got a handy script here [OctoPrint-Upgrade-To-Py3](https://github.com/cp2004/Octoprint-Upgrade-To-Py3)
+
+### Setting up SPI
+[See here](https://github.com/cp2004/OctoPrint-RGB_LED_Status/wiki/SPI-Setup-Running-without-root) for details of how to setup SPI so you can use your LEDs. There is also a configuration wizard that will do this for you on the first install, if you ask it nicely.
+
+### Wiring your LEDs
+[See here](https://github.com/cp2004/OctoPrint-RGB_LED_Status/wiki/Wiring-LEDS-to-your-Raspberry-Pi) for details of how to wire your LED strips to a Raspberry Pi.
+
+### Configuration options
+[See here](https://github.com/cp2004/OctoPrint-RGB_LED_Status/wiki/Configuration-options) for details of the various configuration options available for the plugin, and have a look at the screenshots below
