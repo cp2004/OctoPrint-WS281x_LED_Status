@@ -1,18 +1,21 @@
 # Basic effects; such as color wipe, pulse etc.
 from __future__ import absolute_import, unicode_literals
-from octoprint_ws281x_led_status.util import milli_sleep, wheel
+import time
 
+from octoprint_ws281x_led_status.util import milli_sleep, wheel
 
 DIRECTIONS = ['forward', 'backward']  # Used for effects that go 'out and back' kind of thing
 
 
-def solid_color(strip, queue, color, delay=None, max_brightness=255, set_brightness=True):
+def solid_color(strip, queue, color, delay=None, max_brightness=255, set_brightness=True, wait=True):
     # Set pixels to a solid color
     if set_brightness:
         strip.setBrightness(max_brightness)
     for p in range(strip.numPixels()):
         strip.setPixelColorRGB(p, *color)
     strip.show()
+    if wait:
+        time.sleep(0.1)
 
 
 def color_wipe(strip, queue, color, delay, max_brightness=255):
@@ -46,7 +49,7 @@ def color_wipe_2(strip, queue, color, delay, max_brightness=255):
 
 def simple_pulse(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(1)
-    solid_color(strip, queue, color, delay, max_brightness, set_brightness=False)
+    solid_color(strip, queue, color, delay, max_brightness, set_brightness=False, wait=False)
     for direction in DIRECTIONS:
         for b in range(max_brightness) if direction == 'forward' else reversed(range(max_brightness)):
             strip.setBrightness(b)
@@ -59,7 +62,7 @@ def simple_pulse(strip, queue, color, delay, max_brightness=255):
 def rainbow(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for i in range(256):
-        solid_color(strip, queue, wheel(i), delay, max_brightness, False)
+        solid_color(strip, queue, wheel(i), delay, max_brightness, set_brightness=False, wait=False)
         if not queue.empty():
             return
         milli_sleep(delay)
