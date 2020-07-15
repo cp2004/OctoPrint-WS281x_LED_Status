@@ -2,8 +2,14 @@
     <div data-bind="visible: settings.plugins.ws281x_led_status.active_hours_enabled()">
         <span class="fa-lg">
             <span class="fa fa-clock-o" style="color: limegreen"></span>
-            <span>Active hours: <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_start"></span> - <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_stop"></span>
+            <span>Active time: <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_start"></span> - <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_stop"></span></span>
         </span>
+    </div>
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.active_hours_enabled()">
+    <span class="fa-lg">
+        <span class="fa fa-clock-o" style="color: darkred"></span>
+        <span>Active times disabled</span>
+    </span>
     </div>
     <h4>Enabled effects</h4>
     <div data-bind="visible: settings.plugins.ws281x_led_status.idle_enabled()">
@@ -95,4 +101,4 @@
         </span>
     </div>
 </div>
-<!-- TODO Add overview of active hours -->
+
