@@ -64,6 +64,9 @@ def effect_runner(logger, queue, all_settings, previous_state):
         print("[RUNNER] Exiting effect runner")
         return
 
+    start_time = all_settings['active_start'].split(":") if all_settings['active_start'] else None
+    end_time = all_settings['active_stop'].split(":") if all_settings['active_stop'] else None
+
     msg = previous_state
     try:
         while True:
@@ -76,18 +79,23 @@ def effect_runner(logger, queue, all_settings, previous_state):
                     print("[RUNNER] Received KILL message")
                     on_exit(strip)
                     return
-                elif msg_split[0] in MODES:
-                    effect_settings = all_settings[msg_split[0]]  # dict containing 'enabled', 'effect', 'color', 'delay'/'base'
-                    if 'progress' in msg:
-                        value = msg_split[1]
-                        EFFECTS[msg_split[0]](strip, queue, int(value), hex_to_rgb(effect_settings['color']),
-                                              hex_to_rgb(effect_settings['base']), all_settings['strip']['led_brightness'])
-                    else:
-                        EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
-                                                           effect_settings['delay'], all_settings['strip']['led_brightness'])
                 else:
-                    time.sleep(0.1)
-            else:
+                    if check_times(start_time, end_time) and msg_split[0] in MODES:
+                        effect_settings = all_settings[msg_split[0]]  # dict containing 'enabled', 'effect', 'color', 'delay'/'base'
+                        if 'progress' in msg:
+                            value = msg_split[1]
+                            EFFECTS[msg_split[0]](strip, queue, int(value), hex_to_rgb(effect_settings['color']),
+                                                  hex_to_rgb(effect_settings['base']), all_settings['strip']['led_brightness'])
+                        else:
+                            EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
+                                                               effect_settings['delay'], all_settings['strip']['led_brightness'])
+
+                    elif not check_times(start_time, end_time):
+                        EFFECTS['solid'](strip, queue, [0, 0, 0])
+                        time.sleep(0.1)
+                    else:
+                        time.sleep(0.1)
+            elif check_times(start_time, end_time):
                 effect_settings = all_settings['startup']
                 if effect_settings['enabled']:
                     # Run startup effect (We haven't got a message yet)
@@ -95,6 +103,8 @@ def effect_runner(logger, queue, all_settings, previous_state):
                                                        effect_settings['delay'], all_settings['strip']['led_brightness'])
                 if not queue.empty():
                     time.sleep(0.1)
+            else:
+                time.sleep(0.1)
     except KeyboardInterrupt:
         on_exit(strip)
         return
@@ -119,6 +129,21 @@ def start_strip(logger, strip_settings):
         print("[RUNNER] Strip failed to initialize, no effects will be run.")
         print("[RUNNER] Exception: {}".format(e))
         return None
+
+
+def check_times(start_time, end_time):
+    """
+    Return true if time is after start, before end, false if outside
+    Times should be list, format [hh,mm]
+    """
+    if not start_time or not end_time:
+        return True
+    current_time = time.ctime(time.time()).split()[3].split(":")
+    ct_mins = (int(current_time[0]) * 60) + int(current_time[1])
+    st_mins = (int(start_time[0]) * 60) + int(start_time[1])
+    et_mins = (int(end_time[0]) * 60) + int(end_time[1])
+
+    return st_mins <= ct_mins < et_mins
 
 
 class FakeStrip:

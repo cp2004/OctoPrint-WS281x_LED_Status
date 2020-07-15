@@ -12,7 +12,7 @@ from octoprint_ws281x_led_status.effects import basic, progress
 MP_CONTEXT = get_context('fork')
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
-BLOCKING_TEMP_GCODES = ["M109","M190"]
+BLOCKING_TEMP_GCODES = ["M109", "M190"]
 
 STANDARD_EFFECT_NICE_NAMES = {
     'Solid Color': 'solid',
@@ -42,17 +42,17 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         'PrintDone': 'success',
         'PrintPaused': 'paused'
     }
-    current_effect_thread = None  # thread object
-    current_state = None  # Idle, startup, progress etc. Used to put the old effect back on settings change
+    current_effect_process = None  # multiprocessing Process object
+    current_state = None  # Idle, startup, progress etc. Used to put the old effect back on settings change/light switch
     effect_queue = MP_CONTEXT.Queue()  # pass name of effects here
 
     SETTINGS = {}  # Filled in on startup
-    PI_MODEL = None
+    PI_MODEL = None  # Filled in on startup
 
-    heating = False
+    heating = False   # True when heating is detected, options below are helpers for tracking heatup.
     temp_target = 0
     current_heater_heating = None
-    tool_to_target = 0
+    tool_to_target = 0  # Overridden by the plugin settings
 
     # Asset plugin
     def get_assets(self):
@@ -71,9 +71,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     # Shutdown plugin
     def on_shutdown(self):
         self._logger.info("RGB LED Status runner stopped")
-        if self.current_effect_thread is not None:
+        if self.current_effect_process is not None:
             self.effect_queue.put("KILL")
-            self.current_effect_thread.join()
+            self.current_effect_process.join()
 
     # Settings plugin
     def on_settings_save(self, data):
@@ -131,7 +131,11 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             progress_heatup_color='#ff0000',
             progress_heatup_tool_enabled=True,
             progress_heatup_bed_enabled=True,
-            progress_heatup_tool_key=0
+            progress_heatup_tool_key=0,
+
+            active_hours_enabled=False,
+            active_hours_start="09:00",
+            active_hours_stop="21:00"
         )
 
     # Template plugin
@@ -145,7 +149,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Wizard plugin bits
     def is_wizard_required(self):
-        return not any(self.get_wizard_details())
+        for item in self.get_wizard_details().values():
+            if not item:
+                return True
+        return False
 
     def get_wizard_details(self):
         return dict(
@@ -160,7 +167,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return 1
 
     def on_wizard_finish(self, handled):
-        self._logger.info("You will need to restart your Pi for the changes to take effect")  # TODO make this a popup? not very useful here
+        self._logger.info("You will need to restart your Pi for the changes to take effect")
+        # TODO make this a popup? not very useful here
 
     # Simple API plugin
     def get_api_commands(self):
@@ -173,17 +181,29 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         )
 
     def on_api_command(self, command, data):
-        api_to_command = {  # -S for sudo commands means accept password from stdin instead of terminal, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
+        api_to_command = {
+            # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
             'adduser': ['sudo', '-S', 'adduser', 'pi', 'gpio'],
             'enable_spi': ['sudo', '-S', 'bash', '-c', 'echo \'dtparam=spi=on\' >> /boot/config.txt'],
-            'set_core_freq': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq=250\' >> /boot/config.txt'],
+            'set_core_freq': ['sudo', '-S', 'bash', '-c',
+                              'echo \'core_freq=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq=250\' >> /boot/config.txt'],
             'set_core_freq_min': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq_min=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq_min=250\' >> /boot/config.txt'],
             'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
         }
-        stdout, error = self.run_system_command(api_to_command[command], data.get('password'))
-        return self.build_response(error)
+        api_command_validator = {
+            'adduser' : self.is_adduser_done,
+            'enable_spi': self.is_spi_enabled,
+            'set_core_freq': self.is_core_freq_set,
+            'set_core_freq_min': self.is_core_freq_min_set,
+            'spi_buffer_increase': self.is_spi_buffer_increased
+        }
+        if not api_command_validator[command]():
+            stdout, error = self.run_system_command(api_to_command[command], data.get('password'))
+        else:
+            error = None
+        return self.api_cmd_response(error)
 
-    def build_response(self, errors=None):
+    def api_cmd_response(self, errors=None):
         from flask import jsonify
         details = self.get_wizard_details()
         details.update(errors=errors)
@@ -216,7 +236,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def is_spi_enabled(self):
         with io.open('/boot/config.txt') as file:
             for line in file:
-                if 'dtparam=spi=on' in line:
+                if line.startswith('dtparam=spi=on'):
                     return True
         return False
 
@@ -228,19 +248,19 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return False
 
     def is_core_freq_set(self):
-        if self.PI_MODEL == '4':
-            return True
+        if self.PI_MODEL == '4':  # Pi 4's default is 500, which is compatible with SPI.
+            return True           # any change to core_freq is ignored on a Pi 4, so let's not bother.
         with io.open('/boot/config.txt') as file:
             for line in file:
-                if 'core_freq=250' in line:
+                if line.startswith('core_freq=250'):
                     return True
         return False
 
     def is_core_freq_min_set(self):
-        if int(self.PI_MODEL) == 4:
-            with io.open('/boot/config.txt') as file:
+        if int(self.PI_MODEL) == 4:                    # Pi 4 has a variable clock speed, which messes up SPI timing
+            with io.open('/boot/config.txt') as file:  # This is only required on pi 4, not other models.
                 for line in file:
-                    if 'core_freq_min=500' in line:
+                    if line.startswith('core_freq_min=500'):
                         return True
             return False
         else:
@@ -265,6 +285,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.tool_to_target = self._settings.get_int(['progress_heatup_tool_key'])
         if not self.tool_to_target:
             self.tool_to_target = 0
+
+        self.SETTINGS['active_start'] = self._settings.get(['active_hours_start']) if self._settings.get(['active_hours_enabled']) else None
+        self.SETTINGS['active_stop'] = self._settings.get(['active_hours_stop']) if self._settings.get(['active_hours_enabled']) else None
+
 
         self.SETTINGS['strip'] = {}
         for setting in STRIP_SETTINGS:
@@ -297,12 +321,12 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def start_effect_process(self):
         # Start effect runner here
-        self.current_effect_thread = MP_CONTEXT.Process(
+        self.current_effect_process = MP_CONTEXT.Process(
             target=effect_runner,
             name="RGB LED Status Effect Process",
             args=(self._logger, self.effect_queue, self.SETTINGS, self.current_state),
             daemon=True)
-        self.current_effect_thread.start()
+        self.current_effect_process.start()
         self._logger.info("RGB LED Status runner started")
 
     def stop_effect_process(self):
@@ -311,10 +335,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         As this can potentially hang the server for a fraction of a second while the final frame of the effect runs,
         it is not called often - only on update of settings & shutdown.
         """
-        self._logger.info("RGB LED Status runner stopped")
-        if self.current_effect_thread is not None:
+        if self.current_effect_process is not None:
             self.effect_queue.put("KILL")
-            self.current_effect_thread.join()
+            self.current_effect_process.join()
+        self._logger.info("RGB LED Status runner stopped")
 
     def update_effect(self, mode_name, value=None):
         """
