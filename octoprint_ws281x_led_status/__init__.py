@@ -182,7 +182,17 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             'set_core_freq_min': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq_min=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq_min=250\' >> /boot/config.txt'],
             'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
         }
-        stdout, error = self.run_system_command(api_to_command[command], data.get('password'))
+        api_command_validator = {
+            'adduser' : self.is_adduser_done,
+            'enable_spi': self.is_spi_enabled,
+            'set_core_freq': self.is_core_freq_set,
+            'set_core_freq_min': self.is_core_freq_min_set,
+            'spi_buffer_increase': self.is_spi_buffer_increased
+        }
+        if not api_command_validator[command]():
+            stdout, error = self.run_system_command(api_to_command[command], data.get('password'))
+        else:
+            error = None
         return self.api_cmd_response(error)
 
     def api_cmd_response(self, errors=None):
