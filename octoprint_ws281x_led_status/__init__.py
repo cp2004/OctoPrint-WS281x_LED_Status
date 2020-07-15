@@ -149,7 +149,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Wizard plugin bits
     def is_wizard_required(self):
-        return not any(self.get_wizard_details())
+        for item in self.get_wizard_details().values():
+            if not item:
+                return True
+        return False
 
     def get_wizard_details(self):
         return dict(
