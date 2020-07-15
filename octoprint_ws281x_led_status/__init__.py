@@ -42,17 +42,17 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         'PrintDone': 'success',
         'PrintPaused': 'paused'
     }
-    current_effect_thread = None  # thread object
-    current_state = None  # Idle, startup, progress etc. Used to put the old effect back on settings change
+    current_effect_process = None  # multiprocessing Process object
+    current_state = None  # Idle, startup, progress etc. Used to put the old effect back on settings change/light switch
     effect_queue = MP_CONTEXT.Queue()  # pass name of effects here
 
     SETTINGS = {}  # Filled in on startup
-    PI_MODEL = None
+    PI_MODEL = None  # Filled in on startup
 
-    heating = False
+    heating = False   # True when heating is detected, options below are helpers for tracking heatup.
     temp_target = 0
     current_heater_heating = None
-    tool_to_target = 0
+    tool_to_target = 0  # Overridden by the plugin settings
 
     # Asset plugin
     def get_assets(self):
@@ -71,9 +71,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     # Shutdown plugin
     def on_shutdown(self):
         self._logger.info("RGB LED Status runner stopped")
-        if self.current_effect_thread is not None:
+        if self.current_effect_process is not None:
             self.effect_queue.put("KILL")
-            self.current_effect_thread.join()
+            self.current_effect_process.join()
 
     # Settings plugin
     def on_settings_save(self, data):
@@ -131,7 +131,11 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             progress_heatup_color='#ff0000',
             progress_heatup_tool_enabled=True,
             progress_heatup_bed_enabled=True,
-            progress_heatup_tool_key=0
+            progress_heatup_tool_key=0,
+
+            active_hours_enabled=False,
+            active_hours_start="09:00",
+            active_hours_stop="21:00"
         )
 
     # Template plugin
@@ -160,7 +164,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return 1
 
     def on_wizard_finish(self, handled):
-        self._logger.info("You will need to restart your Pi for the changes to take effect")  # TODO make this a popup? not very useful here
+        self._logger.info("You will need to restart your Pi for the changes to take effect")
+        # TODO make this a popup? not very useful here
 
     # Simple API plugin
     def get_api_commands(self):
@@ -278,6 +283,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if not self.tool_to_target:
             self.tool_to_target = 0
 
+        self.SETTINGS['active_start'] = self._settings.get(['active_hours_start']) if self._settings.get(['active_hours_enabled']) else None
+        self.SETTINGS['active_stop'] = self._settings.get(['active_hours_stop']) if self._settings.get(['active_hours_enabled']) else None
+
+
         self.SETTINGS['strip'] = {}
         for setting in STRIP_SETTINGS:
             if setting == 'led_invert':  # Boolean settings
@@ -309,12 +318,12 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def start_effect_process(self):
         # Start effect runner here
-        self.current_effect_thread = MP_CONTEXT.Process(
+        self.current_effect_process = MP_CONTEXT.Process(
             target=effect_runner,
             name="RGB LED Status Effect Process",
             args=(self._logger, self.effect_queue, self.SETTINGS, self.current_state),
             daemon=True)
-        self.current_effect_thread.start()
+        self.current_effect_process.start()
         self._logger.info("RGB LED Status runner started")
 
     def stop_effect_process(self):
@@ -323,10 +332,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         As this can potentially hang the server for a fraction of a second while the final frame of the effect runs,
         it is not called often - only on update of settings & shutdown.
         """
-        self._logger.info("RGB LED Status runner stopped")
-        if self.current_effect_thread is not None:
+        if self.current_effect_process is not None:
             self.effect_queue.put("KILL")
-            self.current_effect_thread.join()
+            self.current_effect_process.join()
+        self._logger.info("RGB LED Status runner stopped")
 
     def update_effect(self, mode_name, value=None):
         """

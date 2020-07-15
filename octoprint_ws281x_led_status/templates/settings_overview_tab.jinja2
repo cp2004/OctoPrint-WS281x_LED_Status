@@ -1,4 +1,10 @@
 <div class=""> <!-- TODO Some Custom CSS? Looks good as is but maybe could be better -->
+    <div data-bind="visible: settings.plugins.ws281x_led_status.active_hours_enabled()">
+        <span class="fa-lg">
+            <span class="fa fa-clock-o" style="color: limegreen"></span>
+            <span>Active hours: <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_start"></span> - <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_stop"></span>
+        </span>
+    </div>
     <h4>Enabled effects</h4>
     <div data-bind="visible: settings.plugins.ws281x_led_status.idle_enabled()">
         <span class="fa-lg" title="Idle effect enabled">
@@ -89,3 +95,4 @@
         </span>
     </div>
 </div>
+<!-- TODO Add overview of active hours -->
