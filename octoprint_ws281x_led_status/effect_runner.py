@@ -89,12 +89,13 @@ def effect_runner(logger, queue, all_settings, previous_state):
                         else:
                             EFFECTS[effect_settings['effect']](strip, queue, hex_to_rgb(effect_settings['color']),
                                                                effect_settings['delay'], all_settings['strip']['led_brightness'])
+
+                    elif not check_times(start_time, end_time):
+                        EFFECTS['solid'](strip, queue, [0, 0, 0])
+                        time.sleep(0.1)
                     else:
                         time.sleep(0.1)
-            elif not check_times(start_time, end_time):
-                EFFECTS['solid'](strip, queue, [0, 0, 0])
-                time.sleep(0.1)
-            else:
+            elif check_times(start_time, end_time):
                 effect_settings = all_settings['startup']
                 if effect_settings['enabled']:
                     # Run startup effect (We haven't got a message yet)
@@ -102,6 +103,8 @@ def effect_runner(logger, queue, all_settings, previous_state):
                                                        effect_settings['delay'], all_settings['strip']['led_brightness'])
                 if not queue.empty():
                     time.sleep(0.1)
+            else:
+                time.sleep(0.1)
     except KeyboardInterrupt:
         on_exit(strip)
         return
