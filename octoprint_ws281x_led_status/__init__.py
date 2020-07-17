@@ -1,6 +1,13 @@
 # coding=utf-8
-from __future__ import absolute_import, unicode_literals
-from multiprocessing import get_context
+from __future__ import absolute_import, division, unicode_literals
+
+try:  # Stupid Python 3 compatibility
+    from multiprocessing import get_context
+    MP_CONTEXT = get_context('fork')
+except ImportError:
+    import multiprocessing
+    MP_CONTEXT = multiprocessing
+
 import re
 import io
 import subprocess
@@ -436,8 +443,8 @@ __plugin_name__ = "WS281x LED Status"
 # Python 2. New plugins should make sure to run under both versions for now. Uncomment one of the following
 # compatibility flags according to what Python versions your plugin supports!
 # __plugin_pythoncompat__ = ">=2.7,<3" # only python 2
-__plugin_pythoncompat__ = ">=3,<4" # only python 3
-# __plugin_pythoncompat__ = ">=2.7,<4" # python 2 and 3
+# __plugin_pythoncompat__ = ">=3,<4" # only python 3
+__plugin_pythoncompat__ = ">=2.7,<4" # python 2 and 3
 
 
 def __plugin_load__():
