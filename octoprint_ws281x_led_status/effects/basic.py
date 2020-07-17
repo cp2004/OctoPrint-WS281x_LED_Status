@@ -1,5 +1,5 @@
 # Basic effects; such as color wipe, pulse etc.
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, division
 import time
 
 from octoprint_ws281x_led_status.util import milli_sleep, wheel
