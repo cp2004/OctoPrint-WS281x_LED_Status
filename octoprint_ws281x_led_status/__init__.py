@@ -13,8 +13,9 @@ import io
 import subprocess
 
 import octoprint.plugin
+from flask import jsonify
 
-from octoprint_ws281x_led_status.effect_runner import STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES, effect_runner
+from octoprint_ws281x_led_status.runner import EffectRunner, STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES
 from octoprint_ws281x_led_status.effects import basic, progress
 
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
@@ -61,10 +62,13 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     current_heater_heating = None
     tool_to_target = 0  # Overridden by the plugin settings
 
+    lights_on = True
+
     # Asset plugin
     def get_assets(self):
         return dict(
-            js=['js/ws281x_led_status.js']
+            js=['js/ws281x_led_status.js'],
+            css=['css/fontawesome5_stripped.css']
         )
 
     # Startup plugin
@@ -90,6 +94,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def get_settings_defaults(self):
         return dict(
+            debug_logging=False,
+
             led_count=24,
             led_pin=10,
             led_freq_hz=800000,
@@ -180,6 +186,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     # Simple API plugin
     def get_api_commands(self):
         return dict(
+            toggle_lights=[],
             adduser=['password'],
             enable_spi=['password'],
             spi_buffer_increase=['password'],
@@ -188,6 +195,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         )
 
     def on_api_command(self, command, data):
+        if command == 'toggle_lights':
+            self.toggle_lights()
+            return jsonify(lights_status=self.get_lights_status())
+
         api_to_command = {
             # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
             'adduser': ['sudo', '-S', 'adduser', 'pi', 'gpio'],
@@ -210,8 +221,20 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             error = None
         return self.api_cmd_response(error)
 
+    def on_api_get(self, request):
+        return jsonify(
+            lights_status=self.get_lights_status()
+        )
+
+    def toggle_lights(self):
+        self.lights_on = False if self.lights_on else True  # Switch from False -> True or True -> False
+        self.update_effect('on' if self.lights_on else 'off')
+        self._logger.debug("Toggling lights to {}".format('on' if self.lights_on else 'off'))
+
+    def get_lights_status(self):
+        return self.lights_on
+
     def api_cmd_response(self, errors=None):
-        from flask import jsonify
         details = self.get_wizard_details()
         details.update(errors=errors)
         return jsonify(details)
@@ -329,10 +352,16 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def start_effect_process(self):
         # Start effect runner here
         self.current_effect_process = MP_CONTEXT.Process(
-            target=effect_runner,
+            target=EffectRunner,
             name="RGB LED Status Effect Process",
-            args=(self._logger, self.effect_queue, self.SETTINGS, self.current_state),
-            daemon=True)
+            args=(
+                self._settings.get_plugin_logfile_path(postfix="debug"),
+                self._settings.get_boolean(["debug_logging"]),
+                self.effect_queue,
+                self.SETTINGS,
+                self.current_state),
+        )
+        self.current_effect_process.daemon = True
         self.current_effect_process.start()
         self._logger.info("RGB LED Status runner started")
 
@@ -354,6 +383,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         :param mode_name: string of mode name
         :param value: percentage of how far through it is. None
         """
+        if mode_name in ['on', 'off']:
+            self.effect_queue.put(mode_name)
+            return
+
         if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple
             return
 
@@ -380,9 +413,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if (progress == 100 and self.current_state == 'success') or self.heating:
             return
         self.update_effect('progress_print', progress)
-        self._logger.info("Updating print progress to {}".format(progress))
 
-    def calculate_heatup_progress(self, current, target):
+    @staticmethod
+    def calculate_heatup_progress(current, target):
         return round((current / target) * 100)
 
     def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):

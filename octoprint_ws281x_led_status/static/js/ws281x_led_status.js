@@ -5,7 +5,7 @@
  * License: AGPLv3
  */
 $(function() {
-    function RGBLEDStatusWizardViewModel(parameters) {
+    function ws281xLEDStatusWizardViewModel(parameters) {
         var self = this;
 
         function runApiCommand(command) {
@@ -63,7 +63,7 @@ $(function() {
                 $('#coreFreqMinBtn').unbind('click').bind('click', function () {runApiCommand('set_core_freq_min')});
             }
         }
-        self.name = "RGBLEDStatusWiz"
+        self.name = "ws281xLEDStatusWiz"
         self.onWizardDetails = function (response) {
             process_steps(response.ws281x_led_status.details)
         };
@@ -72,10 +72,37 @@ $(function() {
         }
     }
     OCTOPRINT_VIEWMODELS.push({
-        construct: RGBLEDStatusWizardViewModel,
+        construct: ws281xLEDStatusWizardViewModel,
         dependencies: ['wizardViewModel'],
-        elements: ['#wizard_plugin_egb_led_status']
+        elements: ['#wizard_plugin_ws281x_led_status']
     });
-});
 
+    function ws281xLedStatusNavbarViewModel(parameters) {
+        var self = this;
+        var light_icon = $('#lightIcon')
+        var switch_icon = $('#toggleSwitch')
+        var timer_icon = $('#timerIndicator')
+
+        function update_light_status(response) {
+            if (response.lights_status) {
+                light_icon.removeClass('far-custom text-error').addClass('fas-custom text-success')
+                switch_icon.removeClass('fa-toggle-off text-error').addClass('fa-toggle-on text-success')
+            } else {
+                light_icon.removeClass('fas-custom text-success').addClass('far-custom text-error')
+                switch_icon.removeClass('fa-toggle-on text-success').addClass('fa-toggle-off text-error')
+            }
+        }
+        self.toggle_lights = function () {
+            OctoPrint.simpleApiCommand('ws281x_led_status', 'toggle_lights').done(update_light_status)
+        }
+
+        self.onBeforeBinding = function () {
+            OctoPrint.simpleApiGet('ws281x_led_status').done(update_light_status)
+        }
+    }
+    OCTOPRINT_VIEWMODELS.push({
+        construct: ws281xLedStatusNavbarViewModel,
+        elements: ['#navbar_plugin_ws281x_led_status']
+    })
+});
 
