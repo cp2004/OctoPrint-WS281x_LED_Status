@@ -24,7 +24,7 @@ plugin_description = """Add some WS281x RGB LEDs to your printer for a quick sta
 plugin_author = "Charlie Powell"
 
 # The plugin's author's mail address.
-plugin_author_email = "charlie.powell@gmail.com"
+plugin_author_email = "cp2004.github@gmail.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
 plugin_url = "https://github.com/cp2004/OctoPrint-WS281x_LED_Status"
