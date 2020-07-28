@@ -11,6 +11,7 @@ except ImportError:
 import re
 import io
 import subprocess
+import time
 
 import octoprint.plugin
 from flask import jsonify
@@ -158,7 +159,17 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         ]
 
     def get_template_vars(self):
-        return {'standard_names': STANDARD_EFFECT_NICE_NAMES, 'pi_model': self.PI_MODEL, 'strip_types': STRIP_TYPES}
+        return {
+            'standard_names': STANDARD_EFFECT_NICE_NAMES,
+            'pi_model': self.PI_MODEL,
+            'strip_types': STRIP_TYPES,
+            'timezone': self.get_timezone()
+        }
+
+    @staticmethod
+    def get_timezone():
+        return time.tzname
+
 
     # Wizard plugin bits
     def is_wizard_required(self):
