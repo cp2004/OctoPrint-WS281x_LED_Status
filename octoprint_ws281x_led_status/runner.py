@@ -81,7 +81,7 @@ class EffectRunner:
 
     def setup_custom_logger(self, path, debug):
         from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
-        # Cleaning handler will remove old logs on process startup, defined by 'backupCount'
+        # Cleaning handler will remove old logs, defined by 'backupCount'
         # 'D' specifies to roll over each day
         # TODO Need to tune the number of backups kept
         effect_runner_handler = CleaningTimedRotatingFileHandler(path, when="D", backupCount=2)
