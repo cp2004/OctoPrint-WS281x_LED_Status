@@ -13,6 +13,10 @@ Reacts to printing states; including connected, success, paused and cancelled
 
 Show your heating or print progress on the strip
 
+Set up a timer to turn the strip on and off
+
+Toggle the lights on and off from the navbar
+
 Easy to use but highly customizeable settings interface
 
 ## Effects
@@ -32,6 +36,6 @@ Please see the Wiki for details of how to do this. There is also a configuration
 ## Thanks
 [Gina Häußge](https://github.com/foosel) for creating OctoPrint
 
-[jneilliii](https://github.com/jneilliii) for always answering my questions on discord
+[jneilliii](https://github.com/jneilliii) for always answering my questions on discord, and making great plugins I could use as examples
 
 Andreas C. for jumping at the opportunity to beta-test!
