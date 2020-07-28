@@ -462,14 +462,14 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         # Plugin here. See https://docs.octoprint.org/en/master/bundledplugins/softwareupdate.html
         # for details.
         return dict(
-            rgb_led_status=dict(
-                displayName="RGB LED Status",
+            ws281x_led_status=dict(
+                displayName="WS281x LED Status",
                 displayVersion=self._plugin_version,
 
                 # version check: github repository
                 type="github_release",
                 user="cp2004",
-                repo="OctoPrint-RGB_LED_Status",
+                repo="OctoPrint-WS281x_LED_Status",
                 current=self._plugin_version,
 
                 # update method: pip
