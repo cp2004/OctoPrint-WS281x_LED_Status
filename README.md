@@ -7,7 +7,7 @@ _Based on the concepts of work [Eric Higdon](https://github.com/EricHigdon/OctoP
 ## Known incompatibility with [OctoPrint-TPLinkSmartplug](https://github.com/jneilliii/OctoPrint-TPLinkSmartplug). We are working to fix this.
 
 ## Features
-Supports WS281x strips, for specific supported types see \*\*WIKI LINK\*\*
+Supports WS281x strips, for specific supported types see the wiki
 
 Reacts to printing states; including connected, success, paused and cancelled
 
@@ -34,8 +34,8 @@ or manually using this URL:
 Please see the Wiki for details of how to do this. There is also a configuration wizard that will sort this out for you.
 
 ## Thanks
-[Gina Häußge](https://github.com/foosel) for creating OctoPrint
+[jneilliii](https://github.com/jneilliii) for always answering my questions on discord, and making great plugins I could use as examples.
 
-[jneilliii](https://github.com/jneilliii) for always answering my questions on discord, and making great plugins I could use as examples
+Andreas C. for jumping at the opportunity to beta-test, and providing great feedback!
 
-Andreas C. for jumping at the opportunity to beta-test!
+And, of course, [Gina Häußge](https://github.com/foosel) for creating OctoPrint
