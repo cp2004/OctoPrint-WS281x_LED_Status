@@ -2,22 +2,22 @@
 
 Add an WS2811 or similar LED strip to your printer for a quick status update.
 
-_Based on the concepts of work by [Eric Higdon](https://github.com/EricHigdon/OctoPrint-RGB_status), completely re-written for higher customizablility and new effects._
+_Based on the concepts behind work by [Eric Higdon](https://github.com/EricHigdon/OctoPrint-RGB_status), completely re-written for higher customizablility and new effects._
 
-## Known incompatibility with [OctoPrint-TPLinkSmartplug](https://github.com/jneilliii/OctoPrint-TPLinkSmartplug). We are working to fix this.
+### Currently there is a known incompatibility with [OctoPrint-TPLinkSmartplug](https://github.com/jneilliii/OctoPrint-TPLinkSmartplug). We are working to fix this.
 
 ## Features
-Supports WS281x strips, for specific supported types see the wiki
+* Supports WS281x strips, for specific supported types see the wiki
 
-Reacts to printing states; including connected, success, paused and cancelled
+* Reacts to printing states; including connected, success, paused and cancelled
 
-Show your heating or print progress on the strip
+* Show your heating or print progress on the strip
 
-Set up a timer to turn the strip on and off
+* Set up a timer to turn the strip on and off
 
-Toggle the lights on and off from the navbar
+* Toggle the lights on and off from the navbar
 
-Easy to use but highly customizeable settings interface
+* Easy to use but highly customizeable settings interface
 
 ## Effects
 Supporting effects inculding a color wipe, rainbow, bounce, pulse and more!
