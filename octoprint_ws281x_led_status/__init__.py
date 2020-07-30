@@ -383,7 +383,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         it is not called often - only on update of settings & shutdown.
         """
         if self.current_effect_process is not None:
-            self.effect_queue.put("KILL")
+            if self.current_effect_process.is_alive():
+                self.effect_queue.put("KILL")
             self.current_effect_process.join()
         self._logger.info("RGB LED Status runner stopped")
 
