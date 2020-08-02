@@ -383,6 +383,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.current_effect_process.daemon = True
         self.current_effect_process.start()
         self._logger.info("RGB LED Status runner started")
+        if self.lights_on:
+            self.update_effect('on')
+        else:
+            self.update_effect('off')
 
     def stop_effect_process(self):
         """

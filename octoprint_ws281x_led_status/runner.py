@@ -60,7 +60,7 @@ class EffectRunner:
         self.settings = all_settings
         self.max_brightness = all_settings['strip']['led_brightness']
         self.lights_on = True
-        self.previous_state = previous_state
+        self.previous_state = previous_state if previous_state is not None else 'startup'
 
         if not self.settings['active_start'] or not self.settings['active_stop']:
             self.start_time = None
