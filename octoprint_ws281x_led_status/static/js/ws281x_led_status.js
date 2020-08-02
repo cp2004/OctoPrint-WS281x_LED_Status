@@ -111,9 +111,7 @@ $(function() {
         var power_output = $('#power_req')
         var current_output = $('#current_req')
 
-        current_input.keyup(function () {
-            calculate_power()
-        })
+        $('#calc_btn').bind('click', function() {calculate_power()})
 
         function calculate_power() {
             current_ma = parseInt(current_input.val(), 10)
@@ -121,13 +119,16 @@ $(function() {
 
             current = (num_pixels * current_ma) / 1000
             power = current * 5
-            update_vals
+            update_vals(current, power)
         }
         function update_vals(power, current) {
-            power_output.text = power
-            current_output.text = current
+            $('#power_req').text(power + 'W')
+            $('#current_req').text(current + 'A')
         }
-        calculate_power()
     }
+    OCTOPRINT_VIEWMODELS.push({
+        construct: ws281xLedStatusSettingsViewModel,
+        dependencies: ['settingsViewModel']
+    })
 });
 
