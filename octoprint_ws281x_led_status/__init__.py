@@ -466,7 +466,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return parsed_temperatures
 
     def process_at_command(self, comm, phase, command, parameters, tags=None, *args, **kwargs):
-        self._logger.info("At command received: {}".format(command))
         if command not in AT_COMMANDS:
             return
 
