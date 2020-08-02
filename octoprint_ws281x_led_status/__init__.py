@@ -157,7 +157,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
             active_hours_enabled=False,
             active_hours_start="09:00",
-            active_hours_stop="21:00"
+            active_hours_stop="21:00",
+
+            at_command_reaction=True,
         )
 
     # Template plugin
@@ -466,7 +468,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return parsed_temperatures
 
     def process_at_command(self, comm, phase, command, parameters, tags=None, *args, **kwargs):
-        if command not in AT_COMMANDS:
+        if command not in AT_COMMANDS or not self._settings.get(['at_command_reaction']):
             return
 
         if command == ON_AT_COMMAND:
