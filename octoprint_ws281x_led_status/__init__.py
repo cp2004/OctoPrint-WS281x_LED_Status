@@ -22,6 +22,9 @@ from octoprint_ws281x_led_status.effects import basic, progress
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 BLOCKING_TEMP_GCODES = ["M109", "M190"]
+ON_AT_COMMAND = 'WS_LIGHTSON'
+OFF_AT_COMMAND = 'WS_LIGHTSOFF'
+AT_COMMANDS = [ON_AT_COMMAND, OFF_AT_COMMAND]
 
 STANDARD_EFFECT_NICE_NAMES = {
     'Solid Color': 'solid',
@@ -175,7 +178,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def get_timezone():
         return time.tzname
 
-
     # Wizard plugin bits
     def is_wizard_required(self):
         for item in self.get_wizard_details().values():
@@ -225,7 +227,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
         }
         api_command_validator = {
-            'adduser' : self.is_adduser_done,
+            'adduser': self.is_adduser_done,
             'enable_spi': self.is_spi_enabled,
             'set_core_freq': self.is_core_freq_set,
             'set_core_freq_min': self.is_core_freq_min_set,
@@ -335,7 +337,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.SETTINGS['active_start'] = self._settings.get(['active_hours_start']) if self._settings.get(['active_hours_enabled']) else None
         self.SETTINGS['active_stop'] = self._settings.get(['active_hours_stop']) if self._settings.get(['active_hours_enabled']) else None
 
-
         self.SETTINGS['strip'] = {}
         for setting in STRIP_SETTINGS:
             if setting == 'led_invert':  # Boolean settings
@@ -429,7 +430,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def on_print_progress(self, storage, path, progress):
         if (progress == 100 and self.current_state == 'success') or self.heating:
             return
-        if self._settings.get_boolean(['printing_enabled'] ):
+        if self._settings.get_boolean(['printing_enabled']):
             self.update_effect('printing')
         self.update_effect('progress_print', progress)
 
@@ -464,6 +465,20 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 self.update_effect('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
         return parsed_temperatures
 
+    def process_at_command(self, comm, phase, command, parameters, tags=None, *args, **kwargs):
+        self._logger.info("At command received: {}".format(command))
+        if command not in AT_COMMANDS:
+            return
+
+        if command == ON_AT_COMMAND:
+            self._logger.debug("Recieved gcode @ command for lights on")
+            self.lights_on = True
+            self.update_effect('on')
+        elif command == OFF_AT_COMMAND:
+            self._logger.debug("Recieved gcode @ command for lights off")
+            self.lights_on = False
+            self.update_effect('off')
+
     # Softwareupdate hook
     def get_update_information(self):
         # Define the configuration for your plugin to use with the Software Update
@@ -496,7 +511,7 @@ __plugin_name__ = "WS281x LED Status"
 # compatibility flags according to what Python versions your plugin supports!
 # __plugin_pythoncompat__ = ">=2.7,<3" # only python 2
 # __plugin_pythoncompat__ = ">=3,<4" # only python 3
-__plugin_pythoncompat__ = ">=2.7,<4" # python 2 and 3
+__plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
 
 
 def __plugin_load__():
@@ -507,6 +522,6 @@ def __plugin_load__():
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
         "octoprint.comm.protocol.gcode.queued": __plugin_implementation__.look_for_temperature,
-        "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received
+        "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received,
+        "octoprint.comm.protocol.atcommand.sending": __plugin_implementation__.process_at_command
     }
-
