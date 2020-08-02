@@ -104,5 +104,30 @@ $(function() {
         construct: ws281xLedStatusNavbarViewModel,
         elements: ['#navbar_plugin_ws281x_led_status']
     })
+
+    function ws281xLedStatusSettingsViewModel(parameters) {
+        var self = this
+        var current_input = $('#currentInput_mA')
+        var power_output = $('#power_req')
+        var current_output = $('#current_req')
+
+        current_input.keyup(function () {
+            calculate_power()
+        })
+
+        function calculate_power() {
+            current_ma = parseInt(current_input.val(), 10)
+            num_pixels = parseInt($('#ws281x_num_leds').val(), 10)
+
+            current = (num_pixels * current_ma) / 1000
+            power = current * 5
+            update_vals
+        }
+        function update_vals(power, current) {
+            power_output.text = power
+            current_output.text = current
+        }
+        calculate_power()
+    }
 });
 

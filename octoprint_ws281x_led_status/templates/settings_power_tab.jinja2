@@ -1,0 +1,17 @@
+<h5>Power calculator</h5>
+<p>This tab can help you calculate power requirements of your LED strip</p>
+<p>Please ensure your power supply is adequate, as it can cause confusing issues</p>
+<div id="ws281x_currentCalc">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label">Power consumption per LED (mA)</label>
+            <div class="controls">
+                <input id="currentInput_mA" type="number" class="input-medium" value="">
+            </div>
+        </div>
+    </form>
+    <div id="calc_output" class="well">
+        <p>Predicted power requirement: <code id="power_req"></code></p>
+        <p>Predicted current requirement (@5V): <code id="current_req"></code></p>
+    </div>
+</div>

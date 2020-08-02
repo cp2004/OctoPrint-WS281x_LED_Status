@@ -8,6 +8,7 @@
             <li><a href="#tabPrinting" data-toggle="tab">Printing effects</a></li>
             <li><a href="#tabProgress" data-toggle="tab">Progress effects</a></li>
             <li><a href="#tabTimer" data-toggle="tab">Timer</a></li>
+            <li><a href="#tabCurrent" data-toggle="tab">Power</a></li>
             <li><a href="#tabAbout" data-toggle="tab">About</a></li>
         </ul>
         <div class="tab-content">
@@ -22,6 +23,9 @@
             </div>
             <div class="tab-pane" id="tabTimer">
                 {%  include 'settings_time_tab.jinja2' %}
+            </div>
+            <div class="tab-pane" id="tabCurrent">
+                {% include 'settings_power_tab.jinja2' %}
             </div>
             <div class="tab-pane" id="tabAbout">
                 {%  include 'settings_about_tab.jinja2' %}
