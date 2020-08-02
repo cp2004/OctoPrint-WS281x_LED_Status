@@ -48,7 +48,8 @@ MODES = [
     'progress_heatup',
     'failed',
     'success',
-    'paused'
+    'paused',
+    'printing'
 ]
 
 

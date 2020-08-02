@@ -1,6 +1,6 @@
 <h5>Printing Effects</h5>
 <form class="form-horizontal">
-<label class="checkbox inline">
+    <label class="checkbox inline">
     <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.startup_enabled">Enable startup effect
     </label>
     <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.startup_enabled">
@@ -15,7 +15,7 @@
         <label class="inline"> Delay </label>
         <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.startup_delay">
     </div>
-    <br>
+<br>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.idle_enabled">Enable idle effect
     </label>
@@ -31,7 +31,7 @@
         <label class="inline"> Delay </label>
         <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.idle_delay">
     </div>
-    <br>
+<br>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.disconnected_enabled">Enable disconnected effect
     </label>
@@ -95,5 +95,22 @@
         <label class="inline"> Delay </label>
         <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.paused_delay">
     </div>
+<br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.printing_enabled">Enable printing effect
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.printing_enabled">
+    <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.ws281x_led_status.printing_effect">
+            {% for effect in plugin_ws281x_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.printing_color">
+        <label class="inline"> Delay </label>
+        <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.printing_delay">
+    </div>
+    <p class="help-block"><span class="label label-warning">Warning</span> Enabling this effect takes priority over the progress efffect</p>
 </form>
 

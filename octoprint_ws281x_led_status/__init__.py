@@ -140,6 +140,11 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             progress_print_color_base='#000000',
             progress_print_color='#00ff00',
 
+            printing_enabled=True,
+            printing_effect='Solid Color',
+            printing_color='#000000',
+            printing_delay=0,
+
             progress_heatup_enabled=True,
             progress_heatup_color_base='#0000ff',
             progress_heatup_color='#ff0000',
@@ -399,7 +404,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.effect_queue.put(mode_name)
             return
 
-        if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple
+        if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple...
             return
 
         if 'progress' in mode_name:
@@ -422,6 +427,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             pass
 
     def on_print_progress(self, storage, path, progress):
+        if self._settings.get_boolean(['printing_enabled']):
+            self.update_effect('printing')
         if (progress == 100 and self.current_state == 'success') or self.heating:
             return
         self.update_effect('progress_print', progress)
