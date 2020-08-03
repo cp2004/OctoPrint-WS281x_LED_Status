@@ -160,6 +160,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             active_hours_stop="21:00",
 
             at_command_reaction=True,
+            intercept_m150=True
         )
 
     # Template plugin
@@ -400,7 +401,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.current_effect_process.join()
         self._logger.info("RGB LED Status runner stopped")
 
-    def update_effect(self, mode_name, value=None):
+    def update_effect(self, mode_name, value=None, m150=None):
         """
         Change the effect displayed, using effect.EFFECTS for the correct names!
         If progress effect, value must be specified
@@ -409,6 +410,12 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         """
         if mode_name in ['on', 'off']:
             self.effect_queue.put(mode_name)
+            return
+        elif mode_name == 'M150':
+            if m150:
+                self.effect_queue.put(m150)
+            else:
+                self._logger.warning("No values supplied with M150, ignoring")
             return
 
         if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple...
@@ -444,16 +451,24 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def calculate_heatup_progress(current, target):
         return round((current / target) * 100)
 
-    def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
-        bed_or_tool = {
-            'M109': 'T{}'.format(self.tool_to_target) if self._settings.get_boolean(['progress_heatup_tool_enabled']) else None,
-            'M190': 'B' if self._settings.get_boolean(['progress_heatup_bed_enabled']) else None
-        }
-        if (gcode in BLOCKING_TEMP_GCODES) and bed_or_tool[gcode]:
-            self.heating = True
-            self.current_heater_heating = bed_or_tool[gcode]
-        else:
-            self.heating = False
+    def process_gcode_q(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
+        if not self._settings.get_boolean(['progress_heatup_bed_enabled']) and not self._settings.get_boolean(['progress_heatup_tool_enabled']) and not self._settings.get_boolean(['intercept_m150']):
+            return
+
+        if self._settings.get_boolean(['progress_heatup_bed_enabled']) or self._settings.get_boolean(['progress_heatup_tool_enabled']):
+            bed_or_tool = {
+                'M109': 'T{}'.format(self.tool_to_target) if self._settings.get_boolean(['progress_heatup_tool_enabled']) else None,
+                'M190': 'B' if self._settings.get_boolean(['progress_heatup_bed_enabled']) else None
+            }
+            if (gcode in BLOCKING_TEMP_GCODES) and bed_or_tool[gcode]:
+                self.heating = True
+                self.current_heater_heating = bed_or_tool[gcode]
+            else:
+                self.heating = False
+
+        if gcode == 'M150' and self._settings.get_boolean(['intercept_m150']):
+            self.update_effect('M150', m150=cmd)
+            return None
 
         return
 
@@ -526,7 +541,7 @@ def __plugin_load__():
     global __plugin_hooks__
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
-        "octoprint.comm.protocol.gcode.queued": __plugin_implementation__.look_for_temperature,
+        "octoprint.comm.protocol.gcode.queued": __plugin_implementation__.process_gcode_q,
         "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received,
         "octoprint.comm.protocol.atcommand.sending": __plugin_implementation__.process_at_command
     }
