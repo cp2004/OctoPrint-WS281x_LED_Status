@@ -144,27 +144,22 @@ class EffectRunner:
             self.previous_state = msg
 
     def parse_m150(self, msg):
-        red = green = blue = 0
-        brightness = self.max_brightness
+        red = green = blue = 0  # Start at 0, means sending 'M150' with no params turns LEDs off
+        brightness = self.max_brightness  # No 'P' param? Use set brightness
         matches = re.finditer(M150_REGEX, msg)
         for match in matches:
-            match_str = match.group('red')
-            if match_str:
-                red = min(int(match_str), 255)
-            match_str = match.group('green')
-            if match_str:
-                green = min(int(match_str), 255)
-            match_str = match.group('blue')
-            if match_str:
-                blue = min(int(match_str), 255)
-            match_str = match.group('brightness')
-            if match_str:
-                brightness = min(int(match_str), 255)
-            match_str = match.group('white')
-            if match_str:
-                red = green = blue = min(int(match_str), 255)
+            if match.group('red'):
+                red = min(int(match.group('red')), 255)
+            elif match.group('green'):
+                green = min(int(match.group('green')), 255)
+            elif match.group('blue'):
+                blue = min(int(match.group('blue')), 255)
+            elif match.group('white'):
+                red = green = blue = min(int(match.group('white')), 255)
+            elif match.group('brightness'):
+                brightness = min(int(match.group('brightness')), 255)
 
-        if self.check_times() and self.lights_on:
+        if self.check_times() and self.lights_on:  # Respect lights on/off
             EFFECTS['solid'](self.strip, self.queue, (red, green, blue), max_brightness=brightness)
         else:
             self.blank_leds()
