@@ -13,12 +13,18 @@
     <p class="help-block">Note this currently doesn't support the start time being later than end time(eg. 19:00 to 13:00), your LEDs will always be off.</p>
     <div class="alert alert-block">
         <h4>Heads up!</h4>
-        The plugin uses your system time, so this depends on a correct timezone which may not have been changed from the default.
+        <p>The plugin uses your system time, so this depends on a correct timezone which may not have been changed from the default.
         <br>
         <strong>Current timezone: {{ plugin_ws281x_led_status_timezone }}</strong>
-        <hr>
+        <br>
         If you want to change this, please run <code>sudo raspi-config</code> then change your location.
+        </p>
     </div>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.intercept_m150">Enable intercepting M150 commands
+    </label>
+    <p class="help-block">For details on the M150, and how you can use it, <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki">see the wiki entry here.</a></p>
+    <!-- TODO Create Wiki entry explaining how the command works -->
     <br>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.at_command_reaction">Enable reacting to @ Commands
@@ -31,10 +37,4 @@
         </ul>
         You may want to add one to a gcode script, either in slicer or OctoPrint for example to turn the LEDs on at the start of a print
     </div>
-    <br>
-    <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.intercept_m150">Enable intercepting M150 commands
-    </label>
-    <p class="help-block">For details on the M150, and how you can use it, <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki">see the wiki entry here.</a></p>
-    <!-- TODO Create Wiki entry explaining how the command works -->
 </form>
