@@ -11,7 +11,7 @@
     </div>
     <p class="help-block">The LED strip will turn on at the start time, off at the end time. Potentially useful if you don't want them on overnight.</p>
     <p class="help-block">Note this currently doesn't support the start time being later than end time(eg. 19:00 to 13:00), your LEDs will always be off.</p>
-    <div class="alert alert-block">
+    <div class="alert alert-block" data-bind="visible: settings.plugins.ws281x_led_status.active_hours_enabled">
         <h4>Heads up!</h4>
         <p>The plugin uses your system time, so this depends on a correct timezone which may not have been changed from the default.
         <br>
