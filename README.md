@@ -17,6 +17,8 @@ _Based on the concepts behind work by [Eric Higdon](https://github.com/EricHigdo
 
 * Toggle the lights on and off from the navbar
 
+* Control your strip from gcode scripts using M150
+
 * Easy to use but highly customizeable settings interface
 
 ## Effects
