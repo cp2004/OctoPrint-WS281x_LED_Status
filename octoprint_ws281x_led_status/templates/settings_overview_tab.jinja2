@@ -42,6 +42,12 @@
             <span>Paused</span>
         </span>
     </div>
+    <div data-bind="visible: settings.plugins.ws281x_led_status.printing_enabled()">
+        <span class="fa-lg" title="printing effect enabled">
+            <span class="fa fa-check" style="color: limegreen" ></span>
+            <span>Printing</span>
+        </span>
+    </div>
     <div data-bind="visible: settings.plugins.ws281x_led_status.progress_print_enabled()">
         <span class="fa-lg" title="progress_print effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
@@ -86,6 +92,12 @@
         <span class="fa-lg" title="paused effect enabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Paused</span>
+        </span>
+    </div>
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.printing_enabled()">
+        <span class="fa-lg" title="printing effect enabled">
+            <span class="fa fa-times" style="color: darkred" ></span>
+            <span>Printing</span>
         </span>
     </div>
     <div data-bind="visible: !settings.plugins.ws281x_led_status.progress_print_enabled()">
