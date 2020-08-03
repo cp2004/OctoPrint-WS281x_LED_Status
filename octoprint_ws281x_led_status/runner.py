@@ -166,6 +166,8 @@ class EffectRunner:
 
         if self.check_times() and self.lights_on:
             EFFECTS['solid'](self.strip, self.queue, (red, green, blue), max_brightness=brightness)
+        else:
+            self.blank_leds()
 
     def startup_effect(self):
         if self.previous_state != 'startup':
