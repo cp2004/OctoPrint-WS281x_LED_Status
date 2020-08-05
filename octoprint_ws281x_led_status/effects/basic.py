@@ -85,8 +85,8 @@ def rainbow_cycle(strip, queue, color, delay, max_brightness=255):
 def solo_bounce(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for direction in DIRECTIONS:
-        for i in range(strip.numPixels() - 1) if direction == 'forward' else reversed(range(strip.numPixels())):
-            strip.setPixelColorRGB(i + 1, *color)
+        for i in range(strip.numPixels()) if direction == 'forward' else reversed(range(strip.numPixels())):
+            strip.setPixelColorRGB(i, *color)
             for blank in range(strip.numPixels()):
                 if blank != i:
                     strip.setPixelColorRGB(blank, 0, 0, 0)
