@@ -33,7 +33,9 @@ STANDARD_EFFECT_NICE_NAMES = {
     'Pulse': 'pulse',
     'Bounce': 'bounce',
     'Rainbow': 'rainbow',
-    'Rainbow Cycle': 'cycle'
+    'Rainbow Cycle': 'cycle',
+    'Random': 'random',
+    'Blink': 'blink'
 }
 
 

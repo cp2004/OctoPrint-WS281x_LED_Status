@@ -38,6 +38,8 @@ EFFECTS = {
     'rainbow': basic.rainbow,
     'cycle': basic.rainbow_cycle,
     'bounce': basic.bounce,
+    'random': basic.random_single,
+    'blink': basic.blink,
     'progress_print': progress.progress,
     'progress_heatup': progress.progress
 }
