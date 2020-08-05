@@ -134,3 +134,20 @@ def blink(strip, queue, color, delay, max_brightness=255):
             if not queue.empty():         # Otherwise the effect may end up blocking the server, when settings
                 return                    # Are saved, or it shuts down.
             milli_sleep(2)
+
+
+def crossover(strip, queue, color, delay, max_brightness=255):
+    strip.setBrightness(max_brightness)
+    num_pixels = strip.numPixels()
+    if num_pixels % 2 != 1:
+        num_pixels -= 1
+
+    for i in range(num_pixels):
+        for p in range(num_pixels):
+            strip.setPixelColorRGB(p, 0, 0, 0)
+        strip.setPixelColorRGB(i, *color)
+        strip.setPixelColorRGB(num_pixels - 1 - i, *color)
+        strip.show()
+        if not queue.empty():
+            return
+        milli_sleep(delay)
