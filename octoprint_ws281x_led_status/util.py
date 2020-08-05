@@ -9,13 +9,18 @@ def hex_to_rgb(h):
     return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 
 
-def blend_two_colors(colour1, colour2):
+def blend_two_colors(colour1, colour2, percent_of_c1=None):
     """
     """
+    if percent_of_c1:
+        colour1 = [x * percent_of_c1 for x in colour1]
+        percent_of_c2 = 1 - percent_of_c1
+        colour2 = [x * percent_of_c2 for x in colour2]
+
     r = average(colour1[0], colour2[0])
     g = average(colour1[1], colour2[1])
     b = average(colour1[2], colour2[2])
-    return r, g, b
+    return tuple([int(r), int(g), int(b)])
 
 
 def average(a, b):
