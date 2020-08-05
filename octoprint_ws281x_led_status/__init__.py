@@ -16,8 +16,7 @@ import time
 import octoprint.plugin
 from flask import jsonify
 
-from octoprint_ws281x_led_status.runner import EffectRunner, STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES
-from octoprint_ws281x_led_status.effects import basic, progress
+from octoprint_ws281x_led_status.runner import EffectRunner, STRIP_TYPES, STRIP_SETTINGS, MODES
 
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
