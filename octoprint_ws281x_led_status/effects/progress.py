@@ -13,8 +13,6 @@ def progress(strip, queue, value, progress_color, base_color, max_brightness=255
     upper_remainder, upper_whole = math.modf(upper_bar)
     lower_base = ((100 - value) / 100) * num_pixels
     lower_remainder, lower_whole = math.modf(lower_base)
-    if int(upper_bar + lower_base) != strip.numPixels():
-        log.info("Progress sanity check failed!, (bar)%s +  (base)%s = (total)%s != (strip)%s", upper_bar, lower_base, upper_bar + lower_base, strip.numPixels())
     for i in range(int(upper_whole)):
         strip.setPixelColorRGB(i, *progress_color)
     if upper_remainder:
@@ -22,6 +20,5 @@ def progress(strip, queue, value, progress_color, base_color, max_brightness=255
         strip.setPixelColorRGB(int(upper_whole), *tween_color)
     for i in range(int(lower_whole)):
         strip.setPixelColorRGB(((num_pixels - 1) - i), *base_color)
-    log.info('Show strip')
     strip.show()
     time.sleep(0.1)
