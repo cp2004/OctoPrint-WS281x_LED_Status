@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals, division
 import time
 import random
+import math
 
 from octoprint_ws281x_led_status.util import milli_sleep, wheel
 
@@ -81,19 +82,33 @@ def rainbow_cycle(strip, queue, color, delay, max_brightness=255):
         milli_sleep(delay)
 
 
-def bounce(strip, queue, color, delay, max_brightness=255):
+def solo_bounce(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for direction in DIRECTIONS:
-        for i in range(strip.numPixels() - 2) if direction == 'forward' else reversed(range(strip.numPixels() - 2)):
-            active_pixels = [i, i + 1, i + 2]
-            for active in active_pixels:
-                strip.setPixelColorRGB(max(active, 0), *color)
+        for i in range(strip.numPixels() - 1) if direction == 'forward' else reversed(range(strip.numPixels())):
+            strip.setPixelColorRGB(i + 1, *color)
             for blank in range(strip.numPixels()):
-                if blank not in active_pixels:
+                if blank != i:
                     strip.setPixelColorRGB(blank, 0, 0, 0)
             strip.show()
             if not queue.empty():
                 return
+            milli_sleep(delay)
+
+
+def bounce(strip, queue, color, delay, max_brightness=255):
+    red, green, blue = color
+    size = 3
+    for direction in DIRECTIONS:
+        for i in range(0, (strip.numPixels() - size - 2)) if direction == 'forward' else range((strip.numPixels() - size - 2), 0, -1):
+            solid_color(strip, queue, (0, 0, 0), max_brightness=max_brightness, wait=False)
+            strip.setPixelColorRGB(i, *(int(math.floor(red / 10)), int(math.floor(green / 10)), int(math.floor(blue / 10))))
+            for j in range(1, (size + 1)):
+                strip.setPixelColorRGB(i + j, *(red, green, blue))
+            strip.setPixelColorRGB(i + size + 1, *(int(math.floor(red / 10)), int(math.floor(green / 10)), int(math.floor(blue / 10))))
+            if not queue.empty():
+                return
+            strip.show()
             milli_sleep(delay)
 
 

@@ -31,6 +31,7 @@ STANDARD_EFFECT_NICE_NAMES = {
     'Color Wipe 2': 'wipe2',
     'Pulse': 'pulse',
     'Bounce': 'bounce',
+    'Bounce Solo': 'bounce_solo',
     'Rainbow': 'rainbow',
     'Rainbow Cycle': 'cycle',
     'Random': 'random',
