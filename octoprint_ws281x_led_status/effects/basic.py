@@ -138,6 +138,7 @@ def blink(strip, queue, color, delay, max_brightness=255):
 
 def crossover(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
+    solid_color(strip, queue, (0, 0, 0), wait=False)
     num_pixels = strip.numPixels()
     if num_pixels % 2 != 1:
         num_pixels -= 1

@@ -12,6 +12,7 @@ import re
 import io
 import subprocess
 import time
+import threading
 
 import octoprint.plugin
 from flask import jsonify
@@ -70,6 +71,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     tool_to_target = 0  # Overridden by the plugin settings
 
     lights_on = True
+
+    return_timer = None
 
     # Asset plugin
     def get_assets(self):
@@ -136,6 +139,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             success_effect='Rainbow',
             success_color='#000000',
             success_delay='25',
+            success_return_idle='0',
 
             paused_enabled=True,
             paused_effect='Bounce',
@@ -411,6 +415,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         :param mode_name: string of mode name
         :param value: percentage of how far through it is. None
         """
+        if self.return_timer is not None and self.return_timer.is_alive():
+            self.return_timer.cancel()
+
         if mode_name in ['on', 'off']:
             self.effect_queue.put(mode_name)
             return
@@ -424,6 +431,13 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple...
             return
 
+        if 'success' in mode_name:
+            return_idle_time = self._settings.get_int(['success_return_idle'])
+            if return_idle_time > 0:
+                self.return_timer = threading.Timer(return_idle_time, self.return_to_idle)
+                self.return_timer.daemon = True
+                self.return_timer.start()
+
         if 'progress' in mode_name:
             if not value:
                 self._logger.warning("No value supplied with progress style effect, ignoring")
@@ -436,6 +450,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             # Do the thing
             self.effect_queue.put(mode_name)
             self.current_state = mode_name
+
+    def return_to_idle(self):
+        self.update_effect('idle')
 
     def on_event(self, event, payload):
         try:
