@@ -2,7 +2,10 @@
 
 Please take note of the few things below for contributing to the plugin, it's not extensive and designed to make contributions as smooth as possible
 
-* Please only create pull requests against `maintenance` or `devel`. Never master, as this is downloaded by users.
+* Please only create pull requests against:
+  * `maintenance` for bug fixes or improvements
+  * `devel` for new features
+  * Never `master`, as this is downloaded by users so must remain untouched until release. (EXCEPTION: Documentation, like this)
 * If your changes are large or disruptive, please open an issue first to dicuss. There may be things in the pipeline that would conflict
 * Read the detail below so you understand how the plugin works!
 
