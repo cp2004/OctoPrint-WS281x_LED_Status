@@ -1,0 +1,24 @@
+<h5>Power calculator</h5>
+<p>This tab is a useful tool to help you calculate power requirements of your LED strip.</p>
+<p>Please ensure your power supply is adequate, as it can cause hard-to-debug issues.</p>
+<p>You can see more details on this from Adafruit <a href="https://learn.adafruit.com/adafruit-neopixel-uberguide?view=all#estimating-power-requirements-2894486-11">Here</a><br>
+The nominal value is 40mA, as this is between their estimate of 20-60. Note that setting LEDs to solid white reqiuires the most power.</p>
+<div id="ws281x_currentCalc">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label">Power consumption per LED (mA)</label>
+            <div class="controls">
+                <div class="input-append">
+                    <input class="inline" id="currentInput_mA" type="number" class="input-medium" value="40">
+                    <span class="add-on">mA</span>
+                </div>
+                <button class="inline btn btn-success" id="calc_btn">Calculate</button>
+            </div>
+        </div>
+    </form>
+    <div id="calc_output" class="well">
+        <p>Number of leds configured: <code data-bind="text: settings.plugins.ws281x_led_status.led_count"></code>
+        <p>Predicted power requirement: <code id="power_req">--A</code></p>
+        <p>Predicted current requirement (@5V): <code id="current_req">--A</code></p>
+    </div>
+</div>

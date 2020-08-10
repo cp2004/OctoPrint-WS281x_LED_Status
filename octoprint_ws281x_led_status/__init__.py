@@ -22,6 +22,9 @@ from octoprint_ws281x_led_status.effects import basic, progress
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 BLOCKING_TEMP_GCODES = ["M109", "M190"]
+ON_AT_COMMAND = 'WS_LIGHTSON'
+OFF_AT_COMMAND = 'WS_LIGHTSOFF'
+AT_COMMANDS = [ON_AT_COMMAND, OFF_AT_COMMAND]
 
 STANDARD_EFFECT_NICE_NAMES = {
     'Solid Color': 'solid',
@@ -140,6 +143,11 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             progress_print_color_base='#000000',
             progress_print_color='#00ff00',
 
+            printing_enabled=False,
+            printing_effect='Solid Color',
+            printing_color='#ffffff',
+            printing_delay=0,
+
             progress_heatup_enabled=True,
             progress_heatup_color_base='#0000ff',
             progress_heatup_color='#ff0000',
@@ -149,7 +157,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
             active_hours_enabled=False,
             active_hours_start="09:00",
-            active_hours_stop="21:00"
+            active_hours_stop="21:00",
+
+            at_command_reaction=True,
+            intercept_m150=True
         )
 
     # Template plugin
@@ -169,7 +180,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     @staticmethod
     def get_timezone():
         return time.tzname
-
 
     # Wizard plugin bits
     def is_wizard_required(self):
@@ -220,7 +230,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
         }
         api_command_validator = {
-            'adduser' : self.is_adduser_done,
+            'adduser': self.is_adduser_done,
             'enable_spi': self.is_spi_enabled,
             'set_core_freq': self.is_core_freq_set,
             'set_core_freq_min': self.is_core_freq_min_set,
@@ -330,7 +340,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.SETTINGS['active_start'] = self._settings.get(['active_hours_start']) if self._settings.get(['active_hours_enabled']) else None
         self.SETTINGS['active_stop'] = self._settings.get(['active_hours_stop']) if self._settings.get(['active_hours_enabled']) else None
 
-
         self.SETTINGS['strip'] = {}
         for setting in STRIP_SETTINGS:
             if setting == 'led_invert':  # Boolean settings
@@ -375,6 +384,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.current_effect_process.daemon = True
         self.current_effect_process.start()
         self._logger.info("RGB LED Status runner started")
+        if self.lights_on:
+            self.update_effect('on')
+        else:
+            self.update_effect('off')
 
     def stop_effect_process(self):
         """
@@ -388,7 +401,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.current_effect_process.join()
         self._logger.info("RGB LED Status runner stopped")
 
-    def update_effect(self, mode_name, value=None):
+    def update_effect(self, mode_name, value=None, m150=None):
         """
         Change the effect displayed, using effect.EFFECTS for the correct names!
         If progress effect, value must be specified
@@ -398,8 +411,14 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if mode_name in ['on', 'off']:
             self.effect_queue.put(mode_name)
             return
+        elif mode_name == 'M150':
+            if m150:
+                self.effect_queue.put(m150)
+            else:
+                self._logger.warning("No values supplied with M150, ignoring")
+            return
 
-        if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple
+        if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple...
             return
 
         if 'progress' in mode_name:
@@ -424,22 +443,32 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def on_print_progress(self, storage, path, progress):
         if (progress == 100 and self.current_state == 'success') or self.heating:
             return
+        if self._settings.get_boolean(['printing_enabled']):
+            self.update_effect('printing')
         self.update_effect('progress_print', progress)
 
     @staticmethod
     def calculate_heatup_progress(current, target):
         return round((current / target) * 100)
 
-    def look_for_temperature(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
-        bed_or_tool = {
-            'M109': 'T{}'.format(self.tool_to_target) if self._settings.get_boolean(['progress_heatup_tool_enabled']) else None,
-            'M190': 'B' if self._settings.get_boolean(['progress_heatup_bed_enabled']) else None
-        }
-        if (gcode in BLOCKING_TEMP_GCODES) and bed_or_tool[gcode]:
-            self.heating = True
-            self.current_heater_heating = bed_or_tool[gcode]
-        else:
-            self.heating = False
+    def process_gcode_q(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
+        if not self._settings.get_boolean(['progress_heatup_bed_enabled']) and not self._settings.get_boolean(['progress_heatup_tool_enabled']) and not self._settings.get_boolean(['intercept_m150']):
+            return
+
+        if self._settings.get_boolean(['progress_heatup_bed_enabled']) or self._settings.get_boolean(['progress_heatup_tool_enabled']):
+            bed_or_tool = {
+                'M109': 'T{}'.format(self.tool_to_target) if self._settings.get_boolean(['progress_heatup_tool_enabled']) else None,
+                'M190': 'B' if self._settings.get_boolean(['progress_heatup_bed_enabled']) else None
+            }
+            if (gcode in BLOCKING_TEMP_GCODES) and bed_or_tool[gcode]:
+                self.heating = True
+                self.current_heater_heating = bed_or_tool[gcode]
+            else:
+                self.heating = False
+
+        if gcode == 'M150' and self._settings.get_boolean(['intercept_m150']):
+            self.update_effect('M150', m150=cmd)
+            return None
 
         return
 
@@ -456,6 +485,19 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if self.temp_target > 0:  # Prevent ZeroDivisionError, or showing progress when target is zero
                 self.update_effect('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
         return parsed_temperatures
+
+    def process_at_command(self, comm, phase, command, parameters, tags=None, *args, **kwargs):
+        if command not in AT_COMMANDS or not self._settings.get(['at_command_reaction']):
+            return
+
+        if command == ON_AT_COMMAND:
+            self._logger.debug("Recieved gcode @ command for lights on")
+            self.lights_on = True
+            self.update_effect('on')
+        elif command == OFF_AT_COMMAND:
+            self._logger.debug("Recieved gcode @ command for lights off")
+            self.lights_on = False
+            self.update_effect('off')
 
     # Softwareupdate hook
     def get_update_information(self):
@@ -489,7 +531,7 @@ __plugin_name__ = "WS281x LED Status"
 # compatibility flags according to what Python versions your plugin supports!
 # __plugin_pythoncompat__ = ">=2.7,<3" # only python 2
 # __plugin_pythoncompat__ = ">=3,<4" # only python 3
-__plugin_pythoncompat__ = ">=2.7,<4" # python 2 and 3
+__plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
 
 
 def __plugin_load__():
@@ -499,7 +541,7 @@ def __plugin_load__():
     global __plugin_hooks__
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
-        "octoprint.comm.protocol.gcode.queued": __plugin_implementation__.look_for_temperature,
-        "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received
+        "octoprint.comm.protocol.gcode.queued": __plugin_implementation__.process_gcode_q,
+        "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received,
+        "octoprint.comm.protocol.atcommand.sending": __plugin_implementation__.process_at_command
     }
-

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import time
 import logging
+import re
 
 import rpi_ws281x
 from rpi_ws281x import PixelStrip
@@ -56,8 +57,10 @@ MODES = [
     'progress_heatup',
     'failed',
     'success',
-    'paused'
+    'paused',
+    'printing'
 ]
+M150_REGEX = r"(^|[^A-Za-z])[Rr](?P<red>\d{1,3})|(^|[^A-Za-z])[GgUu](?P<green>\d{1,3})|(^|[^A-Za-z])[Bb](?P<blue>\d{1,3})|(^|[^A-Za-z])[Pp](?P<brightness>\d{1,3})|(^|[^A-Za-z])[Ww](?P<white>\d{1,3})"
 
 
 class EffectRunner:
@@ -67,7 +70,7 @@ class EffectRunner:
         self.settings = all_settings
         self.max_brightness = all_settings['strip']['led_brightness']
         self.lights_on = True
-        self.previous_state = previous_state
+        self.previous_state = previous_state if previous_state is not None else 'startup'
 
         if not self.settings['active_start'] or not self.settings['active_stop']:
             self.start_time = None
@@ -139,11 +142,35 @@ class EffectRunner:
             if msg != self.previous_state:
                 self._logger.debug("Recieved message to update progress: {}".format(msg))
             self.previous_state = msg
+        elif 'M150' in msg:
+            self.parse_m150(msg)
+            self.previous_state = msg
         else:
             self.standard_effect(msg)
             if msg != self.previous_state:
                 self._logger.debug("Recieved message to change effect: {}".format(msg))
             self.previous_state = msg
+
+    def parse_m150(self, msg):
+        red = green = blue = 0  # Start at 0, means sending 'M150' with no params turns LEDs off
+        brightness = self.max_brightness  # No 'P' param? Use set brightness
+        matches = re.finditer(M150_REGEX, msg)
+        for match in matches:
+            if match.group('red'):
+                red = min(int(match.group('red')), 255)
+            elif match.group('green'):
+                green = min(int(match.group('green')), 255)
+            elif match.group('blue'):
+                blue = min(int(match.group('blue')), 255)
+            elif match.group('white'):
+                red = green = blue = min(int(match.group('white')), 255)
+            elif match.group('brightness'):
+                brightness = min(int(match.group('brightness')), 255)
+
+        if self.check_times() and self.lights_on:  # Respect lights on/off
+            EFFECTS['solid'](self.strip, self.queue, (red, green, blue), max_brightness=brightness)
+        else:
+            self.blank_leds()
 
     def startup_effect(self):
         if self.previous_state != 'startup':
