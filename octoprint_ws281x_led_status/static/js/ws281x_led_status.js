@@ -125,6 +125,17 @@ $(function() {
             $('#power_req').text(power + 'W')
             $('#current_req').text(current + 'A')
         }
+
+        $('#led-test-red').bind('click', function() {send_m150(255, 0, 0)})
+        $('#led-test-green').bind('click', function() {send_m150(0, 255, 0)})
+        $('#led-test-blue').bind('click', function() {send_m150(0, 0, 255)})
+        $('#led-test-white').bind('click', function() {send_m150(255, 255, 255)})
+
+
+        function send_m150(r, g, b){
+            var command = 'M150 R' + r + ' G' + g + ' B' + b
+            OctoPrint.control.sendGcode(command)
+        }
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusSettingsViewModel,
