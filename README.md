@@ -6,7 +6,7 @@ _Based on the concepts behind work by [Eric Higdon](https://github.com/EricHigdo
 
 ### Currently there is a known incompatibility with [OctoPrint-TPLinkSmartplug](https://github.com/jneilliii/OctoPrint-TPLinkSmartplug). Fix has been proposed, just waiting for it to be released.
 
-### This issue also persists with [OctoPrint-Tasmota](https://github.com/jneilliii/OctoPrint-Tasmota)
+### ~~This issue also persists with [OctoPrint-Tasmota](https://github.com/jneilliii/OctoPrint-Tasmota)~~ The issue with Tasmota has now been fixed & released
 
 ## Features
 * Supports WS281x strips, for specific supported types see ['Supported hardware'](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Supported-hardware)
