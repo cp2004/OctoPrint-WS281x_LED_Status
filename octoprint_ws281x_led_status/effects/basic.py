@@ -1,5 +1,5 @@
-# Basic effects; such as color wipe, pulse etc.
 from __future__ import absolute_import, unicode_literals, division
+
 import time
 import random
 import math
@@ -148,6 +148,58 @@ def crossover(strip, queue, color, delay, max_brightness=255):
             strip.setPixelColorRGB(p, 0, 0, 0)
         strip.setPixelColorRGB(i, *color)
         strip.setPixelColorRGB(num_pixels - 1 - i, *color)
+        strip.show()
+        if not queue.empty():
+            return
+        milli_sleep(delay)
+
+
+# Credit to https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectBouncingBalls
+# Translated from c++ to Python by me
+def bouncy_balls(strip, queue, color, delay, max_brightness=255):
+    ball_count = 2
+    gravity = -9.81
+    start_height = 1
+
+    height = []
+    impact_velocity_start = math.sqrt(- 2 * gravity * start_height)
+    impact_velocity = []
+    time_since_last_bounce = []
+    position = []
+    clock_time_since_last_bounce = []
+    dampening = []
+
+    for i in range(ball_count):
+        clock_time_since_last_bounce.append(time.time() * 1000)
+        time_since_last_bounce.append(0)
+        height.append(start_height)
+        position.append(0)
+        impact_velocity.append(impact_velocity_start)
+        dampening.append(0.9 - (i / math.pow(ball_count, 2)))
+
+    while True:
+        for i in range(ball_count):
+            time_since_last_bounce[i] = time.time() * 1000 - clock_time_since_last_bounce[i]
+            height[i] = 0.5 * gravity * math.pow(time_since_last_bounce[i] / 1000, 2) + impact_velocity[i] * time_since_last_bounce[i] / 1000
+
+            if height[i] < 0:
+                height[i] = 0
+                impact_velocity[i] = dampening[i] * impact_velocity[i]
+                clock_time_since_last_bounce[i] = time.time() * 1000
+
+                if impact_velocity[i] < 0.01:
+                    impact_velocity[i] = impact_velocity_start
+
+            position[i] = round(height[i] * (strip.numPixels() - 1) / start_height)
+
+        for p in range(strip.numPixels()):
+            # Set to blank
+            strip.setPixelColorRGB(p, 0, 0, 0)
+
+        for i in range(ball_count):
+            # Light pixels that should be lit
+            strip.setPixelColorRGB(position[i], *color)
+
         strip.show()
         if not queue.empty():
             return

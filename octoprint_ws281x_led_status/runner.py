@@ -42,6 +42,7 @@ EFFECTS = {
     'random': basic.random_single,
     'blink': basic.blink,
     'cross': basic.crossover,
+    'balls': basic.bouncy_balls,
     'progress_print': progress.progress,
     'progress_heatup': progress.progress
 }

@@ -37,7 +37,8 @@ STANDARD_EFFECT_NICE_NAMES = {
     'Rainbow Cycle': 'cycle',
     'Random': 'random',
     'Blink': 'blink',
-    'Crossover': 'cross'
+    'Crossover': 'cross',
+    'Bouncy Balls': 'balls'
 }
 
 
