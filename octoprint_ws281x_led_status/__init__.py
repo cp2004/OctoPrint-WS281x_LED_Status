@@ -446,6 +446,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self._logger.debug("Updating progress effect {}, value {}".format(mode_name, value))
             # Do the thing
             self.effect_queue.put('{} {}'.format(mode_name, value))
+            self.current_state = '{} {}'.format(mode_name, value)
         else:
             self._logger.debug("Updating standard effect {}".format(mode_name))
             # Do the thing
