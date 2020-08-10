@@ -1,42 +1,11 @@
 <h5>LED Strip test</h5>
-<style>
-.test-btn-blue {
-    color: #fff;
-    text-shadow: 0 -1px 0 rgba(0,0,0,.25);
-    background-color: #006dcc;
-    background-image: -moz-linear-gradient(top,#08c,#04c);
-    background-image: -webkit-gradient(linear,0 0,0 100%,from(#08c),to(#04c));
-    background-image: -webkit-linear-gradient(top,#08c,#04c);
-    background-image: -o-linear-gradient(top,#08c,#04c);
-    background-image: linear-gradient(to bottom,#08c,#04c);
-    background-repeat: repeat-x;
-    border-color: #04c #04c #002a80;
-    border-color: rgba(0,0,0,.1) rgba(0,0,0,.1) rgba(0,0,0,.25);
-    background-color: #04c;
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-}
-.test-btn-green {
-    color: #fff;
-    text-shadow: 0 -1px 0 rgba(0,0,0,.25);
-    background-color: #5bb75b;
-    background-image: -moz-linear-gradient(top,#62c462,#51a351);
-    background-image: -webkit-gradient(linear,0 0,0 100%,from(#62c462),to(#51a351));
-    background-image: -webkit-linear-gradient(top,#62c462,#51a351);
-    background-image: -o-linear-gradient(top,#62c462,#51a351);
-    background-image: linear-gradient(to bottom,#62c462,#51a351);
-    background-repeat: repeat-x;
-    border-color: #51a351 #51a351 #387038;
-    border-color: rgba(0,0,0,.1) rgba(0,0,0,.1) rgba(0,0,0,.25);
-    *background-color: #51a351;
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-}
-</style>
 <p>Provided so you can test the individual colours of your LED Strip.</p>
-<p>Can help to diagnose both hardware problems (Such as red LEDs are broken), and help to select the correct strip type.</p>
-<button class="btn btn-danger" id="led-test-red">Test red</button>
-<button class="btn btn-success" id="led-test-green">Test green</button>
-<button class="btn btn-primary" id="led-test-blue">Test blue</button>
-<button class="btn" id="led-test-white">Test white</button>
+<p>Can help to diagnose both hardware problems (Such as specific LEDs are broken), and help to select the correct strip type.</p>
+<p>Sets LEDs to solid colour until the next event happens.</p>
+<button class="btn btn-danger" id="led-test-red"><i class="far-custom fa-custom-lightbulb"></i> Test red</button>
+<button class="btn btn-success" id="led-test-green"><i class="far-custom fa-custom-lightbulb"></i> Test green</button>
+<button class="btn btn-primary" id="led-test-blue"><i class="far-custom fa-custom-lightbulb"></i> Test blue</button>
+<button class="btn" id="led-test-white"><i class="far-custom fa-custom-lightbulb"></i> Test white</button>
 
 <h5>Power calculator</h5>
 <p>This tab is a useful tool to help you calculate power requirements of your LED strip.</p>
@@ -52,7 +21,7 @@ The nominal value is 40mA, as this is between their estimate of 20-60. Note that
                     <input class="inline" id="currentInput_mA" type="number" class="input-medium" value="40">
                     <span class="add-on">mA</span>
                 </div>
-                <button class="inline btn btn-success" id="calc_btn">Calculate</button>
+                <button class="inline btn btn-success" id="calc_btn"><i class="fas-custom fa-custom-calculator"></i> Calculate</button>
             </div>
         </div>
     </form>
