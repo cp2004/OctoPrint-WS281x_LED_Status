@@ -154,7 +154,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             printing_enabled=False,
             printing_effect='Solid Color',
             printing_color='#ffffff',
-            printing_delay=0,
+            printing_delay=1,
 
             progress_heatup_enabled=True,
             progress_heatup_color_base='#0000ff',
