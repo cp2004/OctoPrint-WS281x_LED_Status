@@ -92,7 +92,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Shutdown plugin
     def on_shutdown(self):
-        self._logger.info("RGB LED Status runner stopped")
+        self._logger.info("WS281x LED Status runner stopped")
         if self.current_effect_process is not None:
             self.effect_queue.put("KILL")
             self.current_effect_process.join()
@@ -381,7 +381,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         # Start effect runner here
         self.current_effect_process = MP_CONTEXT.Process(
             target=EffectRunner,
-            name="RGB LED Status Effect Process",
+            name="WS281x LED Status Effect Process",
             args=(
                 self._settings.get_plugin_logfile_path(postfix="debug"),
                 self._settings.get_boolean(["debug_logging"]),
@@ -391,7 +391,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         )
         self.current_effect_process.daemon = True
         self.current_effect_process.start()
-        self._logger.info("RGB LED Status runner started")
+        self._logger.info("Ws281x LED Status runner started")
         if self.lights_on:
             self.update_effect('on')
         else:
@@ -407,7 +407,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if self.current_effect_process.is_alive():
                 self.effect_queue.put("KILL")
             self.current_effect_process.join()
-        self._logger.info("RGB LED Status runner stopped")
+        self._logger.info("WS281x LED Status runner stopped")
 
     def update_effect(self, mode_name, value=None, m150=None):
         """
