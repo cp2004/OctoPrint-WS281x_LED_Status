@@ -269,8 +269,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return jsonify(details)
 
     def run_system_command(self, command, password=None):
-        if password and password != 'raspberry':
-            self._logger.error("Incorrect password")
         process = subprocess.Popen(
             command,
             stdin=subprocess.PIPE,
