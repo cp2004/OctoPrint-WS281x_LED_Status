@@ -92,10 +92,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Shutdown plugin
     def on_shutdown(self):
-        self._logger.info("WS281x LED Status runner stopped")
         if self.current_effect_process is not None:
             self.effect_queue.put("KILL")
             self.current_effect_process.join()
+        self._logger.info("WS281x LED Status runner stopped")
 
     # Settings plugin
     def on_settings_save(self, data):
