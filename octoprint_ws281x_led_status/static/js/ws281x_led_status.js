@@ -1,5 +1,5 @@
 /*
- * View model for OctoPrint-RGB LED Status
+ * View model for OctoPrint-WS281x LED Status
  *
  * Author: Charlie Powell
  * License: AGPLv3
@@ -79,6 +79,8 @@ $(function() {
 
     function ws281xLedStatusNavbarViewModel(parameters) {
         var self = this;
+        self.settingsViewModel = parameters[0]
+
         var light_icon = $('#lightIcon')
         var switch_icon = $('#toggleSwitch')
         var torch_icon = $('#torchIcon')
@@ -101,7 +103,15 @@ $(function() {
             OctoPrint.simpleApiCommand('ws281x_led_status', 'toggle_lights').done(update_light_status)
         }
         self.activate_torch = function() {
+            var torch_time = self.settingsViewModel.settings.plugins.ws281x_led_status.torch_timer()
+            console.log(torch_time)
             OctoPrint.simpleApiCommand('ws281x_led_status', 'activate_torch').done(update_light_status)
+            setTimeout(self.torch_off, parseInt(torch_time, 10) * 1000)
+        }
+
+        self.torch_off = function() {
+            console.log("LEDs off?")
+            torch_icon.attr('src', 'plugin/ws281x_led_status/static/svg/flashlight-outline.svg')
         }
 
         self.onBeforeBinding = function () {
@@ -110,7 +120,8 @@ $(function() {
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusNavbarViewModel,
-        elements: ['#navbar_plugin_ws281x_led_status']
+        dependencies: [ "settingsViewModel" ],
+        elements: ["#navbar_plugin_ws281x_led_status"],
     })
 
     function ws281xLedStatusSettingsViewModel(parameters) {
