@@ -63,7 +63,8 @@ MODES = [
     'failed',
     'success',
     'paused',
-    'printing'
+    'printing',
+    'torch'
 ]
 M150_REGEX = r"(^|[^A-Za-z])[Rr](?P<red>\d{1,3})|(^|[^A-Za-z])[GgUu](?P<green>\d{1,3})|(^|[^A-Za-z])[Bb](?P<blue>\d{1,3})|(^|[^A-Za-z])[Pp](?P<brightness>\d{1,3})|(^|[^A-Za-z])[Ww](?P<white>\d{1,3})"
 

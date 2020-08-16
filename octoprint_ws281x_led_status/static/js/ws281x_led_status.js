@@ -81,7 +81,7 @@ $(function() {
         var self = this;
         var light_icon = $('#lightIcon')
         var switch_icon = $('#toggleSwitch')
-        var timer_icon = $('#timerIndicator')
+        var torch_icon = $('#torchIcon')
 
         function update_light_status(response) {
             if (response.lights_status) {
@@ -91,9 +91,17 @@ $(function() {
                 light_icon.removeClass('fas-custom text-success').addClass('far-custom text-error')
                 switch_icon.removeClass('fa-toggle-on text-success').addClass('fa-toggle-off text-error')
             }
+            if (response.torch_status) {
+                torch_icon.attr('src', 'plugin/ws281x_led_status/static/svg/flashlight.svg')
+            } else {
+                torch_icon.attr('src', 'plugin/ws281x_led_status/static/svg/flashlight-outline.svg')
+            }
         }
         self.toggle_lights = function () {
             OctoPrint.simpleApiCommand('ws281x_led_status', 'toggle_lights').done(update_light_status)
+        }
+        self.activate_torch = function() {
+            OctoPrint.simpleApiCommand('ws281x_led_status', 'activate_torch').done(update_light_status)
         }
 
         self.onBeforeBinding = function () {
