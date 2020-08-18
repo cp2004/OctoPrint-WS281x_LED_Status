@@ -30,6 +30,8 @@ If you use this plugin and appreciate the work that has gone in to making it as 
 ## Supporters
 <a href="https://www.jetbrains.com/?from=cp2004"><img align="left" width="100" height="100" src="jetbrains-variant-2.png" alt="JetBrains Logo"></a> Thanks to JetBrains for supporting an open source license for their brilliant IDEs!
 
+See the sponsors link above for details of how to get your name on the list here!
+
 ## Setup
 
 Install via the bundled [Plugin Manager](https://docs.octoprint.org/en/master/bundledplugins/pluginmanager.html)
