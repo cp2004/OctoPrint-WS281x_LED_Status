@@ -22,13 +22,21 @@ _Based on the concepts behind work by [Eric Higdon](https://github.com/EricHigdo
 ## Effects
 Supporting effects inculding a color wipe, rainbow, bounce, pulse and more! You can see them all on [this wiki page](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Configuration-options#effects)
 
+## Support My Work!
+If you use this plugin and appreciate the work that has gone in to making it as good as it can be, then you can support development!
+
+[Sponsor through GitHub here](https://github.com/sponsors/cp2004), to make your contribution.
+
+## Supporters
+<a href="https://www.jetbrains.com/?from=cp2004"><img align="left" width="100" height="100" src="jetbrains-variant-2.png" alt="JetBrains Logo"></a> Thanks to JetBrains for supporting an open source license for their brilliant IDEs!
+
 ## Setup
 
 Install via the bundled [Plugin Manager](https://docs.octoprint.org/en/master/bundledplugins/pluginmanager.html)
 or manually using this URL:
 
     https://github.com/cp2004/OctoPrint-WS281x_LED_Status/archive/master.zip
-    
+
 Once you have installed and enabled the plugin, OctoPrint will prompt you to restart the server. Once it is back up, please note **you may have to refresh the page in order for the wizard dialog to show up.**
 
 ### Setting up SPI:
