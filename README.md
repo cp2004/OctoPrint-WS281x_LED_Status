@@ -32,6 +32,8 @@ If you use this plugin and appreciate the work that has gone in to making it as 
 
 See the sponsors link above for details of how to get your name on the list here!
 
+
+.
 ## Setup
 
 Install via the bundled [Plugin Manager](https://docs.octoprint.org/en/master/bundledplugins/pluginmanager.html)
