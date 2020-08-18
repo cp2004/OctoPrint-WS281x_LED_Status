@@ -4,10 +4,6 @@ Add an WS2811 or similar LED strip to your printer for a quick status update.
 
 _Based on the concepts behind work by [Eric Higdon](https://github.com/EricHigdon/OctoPrint-RGB_status), completely re-written for higher customizablility and new effects._
 
-### ~~Currently there is a known incompatibility with [OctoPrint-TPLinkSmartplug](https://github.com/jneilliii/OctoPrint-TPLinkSmartplug).~~ This issue has now been fixed and released in 0.9.24
-
-### ~~This issue also persists with [OctoPrint-Tasmota](https://github.com/jneilliii/OctoPrint-Tasmota)~~ The issue with Tasmota has now been fixed & released in 0.8.14
-
 ## Features
 * Supports WS281x strips, for specific supported types see ['Supported hardware'](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Supported-hardware)
 
