@@ -81,6 +81,8 @@ $(function() {
         var self = this;
         self.settingsViewModel = parameters[0]
 
+        self.torch_enabled = ko.observable(true)
+
         var light_icon = $('#lightIcon')
         var switch_icon = $('#toggleSwitch')
         var torch_icon = $('#torchIcon')
@@ -104,18 +106,18 @@ $(function() {
         }
         self.activate_torch = function() {
             var torch_time = self.settingsViewModel.settings.plugins.ws281x_led_status.torch_timer()
-            console.log(torch_time)
             OctoPrint.simpleApiCommand('ws281x_led_status', 'activate_torch').done(update_light_status)
             setTimeout(self.torch_off, parseInt(torch_time, 10) * 1000)
         }
-
         self.torch_off = function() {
-            console.log("LEDs off?")
             torch_icon.attr('src', 'plugin/ws281x_led_status/static/svg/flashlight-outline.svg')
         }
-
         self.onBeforeBinding = function () {
             OctoPrint.simpleApiGet('ws281x_led_status').done(update_light_status)
+            self.torch_enabled(self.settingsViewModel.settings.plugins.ws281x_led_status.torch_enabled())
+        }
+        self.onSettingsBeforeSave = function () {
+            self.torch_enabled(self.settingsViewModel.settings.plugins.ws281x_led_status.torch_enabled())
         }
     }
     OCTOPRINT_VIEWMODELS.push({
