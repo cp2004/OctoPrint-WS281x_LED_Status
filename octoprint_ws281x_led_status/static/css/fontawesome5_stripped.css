@@ -26,7 +26,8 @@
 readers do not read off random characters that represent icons */
 .fa-custom-lightbulb:before {
   content: "\f0eb"; }
-
+.fa-custom-calculator:before {
+  content: "\f1ec"; }
 
 @font-face {
   font-family: 'Font Awesome 5 Brands';

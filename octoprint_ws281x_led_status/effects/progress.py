@@ -1,5 +1,6 @@
 # Print and heat up progress?
 from __future__ import absolute_import, unicode_literals, division
+import math
 import time
 
 from octoprint_ws281x_led_status.util import blend_two_colors
@@ -8,14 +9,16 @@ from octoprint_ws281x_led_status.util import blend_two_colors
 def progress(strip, queue, value, progress_color, base_color, max_brightness=255):
     strip.setBrightness(max_brightness)
     num_pixels = strip.numPixels()
-    upper_bar = int(round((value / 100) * num_pixels))
-    lower_base = int(round(((100 - value) / 100) * num_pixels))
-    if upper_bar + lower_base != strip.numPixels():
-        print("Progress sanity check failed!, (bar){} +  (base){} = (total){} != (strip){}".format(
-            upper_bar, lower_base, upper_bar + lower_base, strip.numPixels()))
-    for i in range(upper_bar):
+    upper_bar = (value / 100) * num_pixels
+    upper_remainder, upper_whole = math.modf(upper_bar)
+    lower_base = ((100 - value) / 100) * num_pixels
+    lower_remainder, lower_whole = math.modf(lower_base)
+    for i in range(int(upper_whole)):
         strip.setPixelColorRGB(i, *progress_color)
-    for i in range(lower_base):
+    if upper_remainder:
+        tween_color = blend_two_colors(progress_color, base_color, upper_remainder)
+        strip.setPixelColorRGB(int(upper_whole), *tween_color)
+    for i in range(int(lower_whole)):
         strip.setPixelColorRGB(((num_pixels - 1) - i), *base_color)
     strip.show()
     time.sleep(0.1)

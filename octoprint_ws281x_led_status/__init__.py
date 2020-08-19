@@ -12,12 +12,12 @@ import re
 import io
 import subprocess
 import time
+import threading
 
 import octoprint.plugin
 from flask import jsonify
 
-from octoprint_ws281x_led_status.runner import EffectRunner, STRIP_TYPES, STRIP_SETTINGS, EFFECTS, MODES
-from octoprint_ws281x_led_status.effects import basic, progress
+from octoprint_ws281x_led_status.runner import EffectRunner, STRIP_TYPES, STRIP_SETTINGS, MODES
 
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
@@ -32,8 +32,13 @@ STANDARD_EFFECT_NICE_NAMES = {
     'Color Wipe 2': 'wipe2',
     'Pulse': 'pulse',
     'Bounce': 'bounce',
+    'Bounce Solo': 'bounce_solo',
     'Rainbow': 'rainbow',
-    'Rainbow Cycle': 'cycle'
+    'Rainbow Cycle': 'cycle',
+    'Random': 'random',
+    'Blink': 'blink',
+    'Crossover': 'cross',
+    'Bouncy Balls': 'balls'
 }
 
 
@@ -55,7 +60,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         'PrintPaused': 'paused'
     }
     current_effect_process = None  # multiprocessing Process object
-    current_state = None  # Idle, startup, progress etc. Used to put the old effect back on settings change/light switch
+    current_state = 'startup'  # Idle, startup, progress etc. Used to put the old effect back on settings change/light switch
     effect_queue = MP_CONTEXT.Queue()  # pass name of effects here
 
     SETTINGS = {}  # Filled in on startup
@@ -66,13 +71,17 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     current_heater_heating = None
     tool_to_target = 0  # Overridden by the plugin settings
 
-    lights_on = True
+    lights_on = True  # Lights should be on by default, makes sense.
+    torch_on = False  # Torch is off by default, because who would want that?
+
+    torch_timer = None  # Timer for torch function
+    return_timer = None  # Timer object when we want to return to idle.
 
     # Asset plugin
     def get_assets(self):
         return dict(
             js=['js/ws281x_led_status.js'],
-            css=['css/fontawesome5_stripped.css']
+            css=['css/fontawesome5_stripped.css', 'css/ws281x_led_status.css'],
         )
 
     # Startup plugin
@@ -85,10 +94,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # Shutdown plugin
     def on_shutdown(self):
-        self._logger.info("RGB LED Status runner stopped")
         if self.current_effect_process is not None:
             self.effect_queue.put("KILL")
             self.current_effect_process.join()
+        self._logger.info("WS281x LED Status runner stopped")
 
     # Settings plugin
     def on_settings_save(self, data):
@@ -133,6 +142,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             success_effect='Rainbow',
             success_color='#000000',
             success_delay='25',
+            success_return_idle='0',
 
             paused_enabled=True,
             paused_effect='Bounce',
@@ -146,7 +156,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             printing_enabled=False,
             printing_effect='Solid Color',
             printing_color='#ffffff',
-            printing_delay=0,
+            printing_delay=1,
 
             progress_heatup_enabled=True,
             progress_heatup_color_base='#0000ff',
@@ -154,6 +164,12 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             progress_heatup_tool_enabled=True,
             progress_heatup_bed_enabled=True,
             progress_heatup_tool_key=0,
+
+            torch_enabled=True,
+            torch_effect='Solid Color',
+            torch_color='#ffffff',
+            torch_delay=1,
+            torch_timer=15,
 
             active_hours_enabled=False,
             active_hours_start="09:00",
@@ -208,6 +224,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def get_api_commands(self):
         return dict(
             toggle_lights=[],
+            activate_torch=[],
             adduser=['password'],
             enable_spi=['password'],
             spi_buffer_increase=['password'],
@@ -218,7 +235,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def on_api_command(self, command, data):
         if command == 'toggle_lights':
             self.toggle_lights()
-            return jsonify(lights_status=self.get_lights_status())
+            return self.on_api_get()
+        elif command == 'activate_torch':
+            self.activate_torch()
+            return self.on_api_get()
 
         api_to_command = {
             # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
@@ -242,9 +262,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             error = None
         return self.api_cmd_response(error)
 
-    def on_api_get(self, request):
+    def on_api_get(self, request=None):
         return jsonify(
-            lights_status=self.get_lights_status()
+            lights_status=self.get_lights_status(),
+            torch_status=self.get_torch_status()
         )
 
     def toggle_lights(self):
@@ -252,8 +273,28 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.update_effect('on' if self.lights_on else 'off')
         self._logger.debug("Toggling lights to {}".format('on' if self.lights_on else 'off'))
 
+    def activate_torch(self):
+        if self.torch_timer and self.torch_timer.is_alive():
+            self.torch_timer.cancel()
+
+        self._logger.debug("Starting timer for {} secs, to deativate torch".format(self._settings.get_int(['torch_timer'])))
+        self.torch_timer = threading.Timer(int(self._settings.get_int(['torch_timer'])), self.deactivate_torch)
+        self.torch_timer.daemon = True
+        self.torch_timer.start()
+        self.torch_on = True
+        self.update_effect('torch')
+
+    def deactivate_torch(self):
+        self._logger.debug("Deactivating torch mode, torch on currently: {}".format(self.torch_on))
+        if self.torch_on:
+            self.update_effect(self.current_state)
+            self.torch_on = False
+
     def get_lights_status(self):
         return self.lights_on
+
+    def get_torch_status(self):
+        return self.torch_on
 
     def api_cmd_response(self, errors=None):
         details = self.get_wizard_details()
@@ -261,8 +302,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return jsonify(details)
 
     def run_system_command(self, command, password=None):
-        if password and password != 'raspberry':
-            self._logger.error("Incorrect password")
         process = subprocess.Popen(
             command,
             stdin=subprocess.PIPE,
@@ -373,7 +412,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         # Start effect runner here
         self.current_effect_process = MP_CONTEXT.Process(
             target=EffectRunner,
-            name="RGB LED Status Effect Process",
+            name="WS281x LED Status Effect Process",
             args=(
                 self._settings.get_plugin_logfile_path(postfix="debug"),
                 self._settings.get_boolean(["debug_logging"]),
@@ -383,7 +422,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         )
         self.current_effect_process.daemon = True
         self.current_effect_process.start()
-        self._logger.info("RGB LED Status runner started")
+        self._logger.info("Ws281x LED Status runner started")
         if self.lights_on:
             self.update_effect('on')
         else:
@@ -399,7 +438,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if self.current_effect_process.is_alive():
                 self.effect_queue.put("KILL")
             self.current_effect_process.join()
-        self._logger.info("RGB LED Status runner stopped")
+        self._logger.info("WS281x LED Status runner stopped")
 
     def update_effect(self, mode_name, value=None, m150=None):
         """
@@ -408,6 +447,12 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         :param mode_name: string of mode name
         :param value: percentage of how far through it is. None
         """
+        if self.return_timer is not None and self.return_timer.is_alive():
+            self.return_timer.cancel()
+
+        if mode_name != 'torch' and self.torch_on:
+            self.torch_on = False
+
         if mode_name in ['on', 'off']:
             self.effect_queue.put(mode_name)
             return
@@ -421,6 +466,13 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if not self.SETTINGS[mode_name]['enabled']:  # If the effect is not enabled, we won't run it. Simple...
             return
 
+        if 'success' in mode_name:
+            return_idle_time = self._settings.get_int(['success_return_idle'])
+            if return_idle_time > 0:
+                self.return_timer = threading.Timer(return_idle_time, self.return_to_idle)
+                self.return_timer.daemon = True
+                self.return_timer.start()
+
         if 'progress' in mode_name:
             if not value:
                 self._logger.warning("No value supplied with progress style effect, ignoring")
@@ -428,11 +480,16 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self._logger.debug("Updating progress effect {}, value {}".format(mode_name, value))
             # Do the thing
             self.effect_queue.put('{} {}'.format(mode_name, value))
+            self.current_state = '{} {}'.format(mode_name, value)
         else:
             self._logger.debug("Updating standard effect {}".format(mode_name))
             # Do the thing
             self.effect_queue.put(mode_name)
-            self.current_state = mode_name
+            if mode_name != 'torch':
+                self.current_state = mode_name
+
+    def return_to_idle(self):
+        self.update_effect('idle')
 
     def on_event(self, event, payload):
         try:

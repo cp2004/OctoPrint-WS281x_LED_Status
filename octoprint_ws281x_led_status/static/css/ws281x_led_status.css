@@ -1,0 +1,17 @@
+/*
+ * Custom CSS for the ws281x_led_status
+ *
+ * Author: Charlie Powell
+ * License: AGPLv3
+ */
+
+.ws-nav-btn-l {
+    font-size: 20px;
+    float: left!important;
+    padding-left: 10px!important;
+}
+.ws-nav-btn-r {
+    font-size: 20px;
+    float: left!important;
+    padding-right: 10px!important;
+}

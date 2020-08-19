@@ -10,7 +10,7 @@
         <input type="time" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.active_hours_stop">
     </div>
     <p class="help-block">The LED strip will turn on at the start time, off at the end time. Potentially useful if you don't want them on overnight.</p>
-    <p class="help-block">Note this currently doesn't support the start time being later than end time(eg. 19:00 to 13:00), your LEDs will always be off.</p>
+    <p data-bind="visible: settings.plugins.ws281x_led_status.active_hours_enabled" class="help-block">Note this currently doesn't support the start time being later than end time(eg. 19:00 to 13:00), your LEDs will always be off.</p>
     <div class="alert alert-block" data-bind="visible: settings.plugins.ws281x_led_status.active_hours_enabled">
         <h4>Heads up!</h4>
         <p>The plugin uses your system time, so this depends on a correct timezone which may not have been changed from the default.
@@ -19,6 +19,31 @@
         <br>
         If you want to change this, please run <code>sudo raspi-config</code> then change your location.
         </p>
+    </div>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.torch_enabled">Enable torch effect and button
+    </label>
+    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.torch_enabled">
+        <label class="inline">Effect </label>
+        <select class="input-large" data-bind="value: settings.plugins.ws281x_led_status.torch_effect">
+            {% for effect in plugin_ws281x_led_status_standard_names %}
+                <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        <label class="inline"> Colour </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.torch_color">
+        <label class="inline"> Delay </label>
+        <div class="input-append">
+            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.torch_delay">
+            <span class="add-on">ms</span>
+        </div>
+    </div>
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: settings.plugins.ws281x_led_status.torch_enabled">
+        <label class="inline">Torch lasts for</label>
+        <div class="input-append">
+            <input class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.torch_timer">
+            <span class="add-on">secs</span>
+        </div>
     </div>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.intercept_m150">Enable intercepting M150 commands
@@ -36,4 +61,6 @@
         </ul>
         You may want to add one to a gcode script, either in slicer or OctoPrint for example to turn the LEDs on at the start of a print
     </div>
+    <label class="inline"><input type="checkbox" class="inline" data-bind="checked: settings.plugins.ws281x_led_status.debug_logging">Enable debug logging</label>
+    <p class="help-block">This is very helpful in debugging issues with running effects, if you have a bug to report please enable this.</p>
 </form>
