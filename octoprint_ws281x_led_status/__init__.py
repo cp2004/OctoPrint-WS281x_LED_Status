@@ -169,7 +169,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             torch_effect='Solid Color',
             torch_color='#ffffff',
             torch_delay=1,
-            torch_timer=30,
+            torch_timer=15,
 
             active_hours_enabled=False,
             active_hours_start="09:00",
