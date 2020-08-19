@@ -277,7 +277,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if self.torch_timer and self.torch_timer.is_alive():
             self.torch_timer.cancel()
 
-        self._logger.info("Starting timer for {} secs, to deativate torch".format(self._settings.get_int(['torch_timer'])))
+        self._logger.debug("Starting timer for {} secs, to deativate torch".format(self._settings.get_int(['torch_timer'])))
         self.torch_timer = threading.Timer(int(self._settings.get_int(['torch_timer'])), self.deactivate_torch)
         self.torch_timer.daemon = True
         self.torch_timer.start()
@@ -285,9 +285,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self.update_effect('torch')
 
     def deactivate_torch(self):
-        self._logger.info("Deactivating torch mode, torch on: {}".format(self.torch_on))
+        self._logger.debug("Deactivating torch mode, torch on currently: {}".format(self.torch_on))
         if self.torch_on:
-            self._logger.info(self.current_state)
             self.update_effect(self.current_state)
             self.torch_on = False
 
