@@ -135,12 +135,12 @@ $(function() {
         $('#calc_btn').bind('click', function() {calculate_power()})
 
         function calculate_power() {
-            current_ma = parseInt(current_input.val(), 10)
-            num_pixels = parseInt($('#ws281x_num_leds').val(), 10)
+            var current_ma = parseInt(current_input.val(), 10)
+            var num_pixels = parseInt($('#ws281x_num_leds').val(), 10)
 
-            current = (num_pixels * current_ma) / 1000
-            power = current * 5
-            update_vals(current, power)
+            var current = (num_pixels * current_ma) / 1000
+            var power = current * 5
+            update_vals(power, current)
         }
         function update_vals(power, current) {
             $('#power_req').text(power + 'W')
