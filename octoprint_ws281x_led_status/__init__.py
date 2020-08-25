@@ -512,7 +512,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if not self._settings.get_boolean(['progress_heatup_bed_enabled']) and not self._settings.get_boolean(['progress_heatup_tool_enabled']) and not self._settings.get_boolean(['intercept_m150']):
             return
 
-        if self._settings.get_boolean(['progress_heatup_bed_enabled']) or self._settings.get_boolean(['progress_heatup_tool_enabled']):
+        if gcode in BLOCKING_TEMP_GCODES and (self._settings.get_boolean(['progress_heatup_bed_enabled']) or self._settings.get_boolean(['progress_heatup_tool_enabled'])):
             bed_or_tool = {
                 'M109': 'T{}'.format(self.tool_to_target) if self._settings.get_boolean(['progress_heatup_tool_enabled']) else None,
                 'M190': 'B' if self._settings.get_boolean(['progress_heatup_bed_enabled']) else None
@@ -522,10 +522,12 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 self.current_heater_heating = bed_or_tool[gcode]
             else:
                 self.heating = False
+        else:
+            self.heating = False
 
         if gcode == 'M150' and self._settings.get_boolean(['intercept_m150']):
             self.update_effect('M150', m150=cmd)
-            return None
+            return None,
 
         return
 
