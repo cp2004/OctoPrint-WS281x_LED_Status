@@ -4,7 +4,7 @@ import time
 import random
 import math
 
-from octoprint_ws281x_led_status.util import milli_sleep, wheel
+from octoprint_ws281x_led_status.util import milli_sleep, q_poll_milli_sleep, q_poll_sleep, wheel
 
 DIRECTIONS = ['forward', 'backward']  # Used for effects that go 'out and back' kind of thing
 
@@ -17,7 +17,8 @@ def solid_color(strip, queue, color, delay=None, max_brightness=255, set_brightn
         strip.setPixelColorRGB(p, *color)
     strip.show()
     if wait:
-        time.sleep(0.1)
+        if not q_poll_sleep(0.1, queue):
+            return
 
 
 def color_wipe(strip, queue, color, delay, max_brightness=255):
@@ -25,15 +26,13 @@ def color_wipe(strip, queue, color, delay, max_brightness=255):
     for i in range(strip.numPixels()):
         strip.setPixelColorRGB(i, *color)
         strip.show()
-        if not queue.empty():
+        if not q_poll_milli_sleep(delay, queue):
             return
-        milli_sleep(delay)
     for i in range(strip.numPixels()):
         strip.setPixelColorRGB(i, 0, 0, 0)
         strip.show()
-        if not queue.empty():
+        if not q_poll_milli_sleep(delay, queue):
             return
-        milli_sleep(delay)
 
 
 def color_wipe_2(strip, queue, color, delay, max_brightness=255):
@@ -44,9 +43,8 @@ def color_wipe_2(strip, queue, color, delay, max_brightness=255):
                 color = (0, 0, 0)
             strip.setPixelColorRGB(i, *color)
             strip.show()
-            if not queue.empty():
+            if not q_poll_milli_sleep(delay, queue):
                 return
-            milli_sleep(delay)
 
 
 def simple_pulse(strip, queue, color, delay, max_brightness=255):
@@ -56,18 +54,16 @@ def simple_pulse(strip, queue, color, delay, max_brightness=255):
         for b in range(max_brightness) if direction == 'forward' else reversed(range(max_brightness)):
             strip.setBrightness(b)
             strip.show()
-            if not queue.empty():
+            if not q_poll_milli_sleep(delay, queue):
                 return
-            milli_sleep(delay)
 
 
 def rainbow(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for i in range(256):
         solid_color(strip, queue, wheel(i), delay, max_brightness, set_brightness=False, wait=False)
-        if not queue.empty():
+        if not q_poll_milli_sleep(delay, queue):
             return
-        milli_sleep(delay)
 
 
 def rainbow_cycle(strip, queue, color, delay, max_brightness=255):
@@ -77,9 +73,8 @@ def rainbow_cycle(strip, queue, color, delay, max_brightness=255):
             strip.setPixelColorRGB(i, *wheel(
                 (int(i * 256 / strip.numPixels()) + j) & 255))
         strip.show()
-        if not queue.empty():
+        if not q_poll_milli_sleep(delay, queue):
             return
-        milli_sleep(delay)
 
 
 def solo_bounce(strip, queue, color, delay, max_brightness=255):
@@ -91,9 +86,8 @@ def solo_bounce(strip, queue, color, delay, max_brightness=255):
                 if blank != i:
                     strip.setPixelColorRGB(blank, 0, 0, 0)
             strip.show()
-            if not queue.empty():
+            if not q_poll_milli_sleep(delay, queue):
                 return
-            milli_sleep(delay)
 
 
 def bounce(strip, queue, color, delay, max_brightness=255):
@@ -106,10 +100,9 @@ def bounce(strip, queue, color, delay, max_brightness=255):
             for j in range(1, (size + 1)):
                 strip.setPixelColorRGB(i + j, *(red, green, blue))
             strip.setPixelColorRGB(i + size + 1, *(int(math.floor(red / 10)), int(math.floor(green / 10)), int(math.floor(blue / 10))))
-            if not queue.empty():
-                return
             strip.show()
-            milli_sleep(delay)
+            if not q_poll_milli_sleep(delay, queue):
+                return
 
 
 def random_single(strip, queue, color, delay, max_brightness=255):
@@ -120,9 +113,8 @@ def random_single(strip, queue, color, delay, max_brightness=255):
     while True:
         strip.setPixelColorRGB(random.randint(0, strip.numPixels()), *wheel(random.randint(0, 255)))
         strip.show()
-        if not queue.empty():
+        if not q_poll_milli_sleep(delay, queue):
             return
-        milli_sleep(delay)
 
 
 def blink(strip, queue, color, delay, max_brightness=255):
@@ -130,10 +122,9 @@ def blink(strip, queue, color, delay, max_brightness=255):
     for direction in DIRECTIONS:
         strip.setBrightness(max_brightness if direction == 'forward' else 0)
         strip.show()
-        for ms in range(int(delay / 2)):  # We do it this way so we can check the q more often
-            if not queue.empty():         # Otherwise the effect may end up blocking the server, when settings
-                return                    # Are saved, or it shuts down.
-            milli_sleep(2)
+        for ms in range(int(delay / 2)):          # We do it this way so we can check the q more often, as for blink
+            if not q_poll_milli_sleep(2, queue):  # delay may be high. Otherwise the effect may end up blocking the
+                return                            # server, when settings are saved, or it shuts down.
 
 
 def crossover(strip, queue, color, delay, max_brightness=255):
@@ -149,14 +140,14 @@ def crossover(strip, queue, color, delay, max_brightness=255):
         strip.setPixelColorRGB(i, *color)
         strip.setPixelColorRGB(num_pixels - 1 - i, *color)
         strip.show()
-        if not queue.empty():
+        if not q_poll_milli_sleep(delay, queue):
             return
-        milli_sleep(delay)
 
 
 # Credit to https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectBouncingBalls
 # Translated from c++ to Python by me
 def bouncy_balls(strip, queue, color, delay, max_brightness=255):
+    strip.setBrightness(max_brightness)
     ball_count = 2
     gravity = -9.81
     start_height = 1
@@ -201,6 +192,5 @@ def bouncy_balls(strip, queue, color, delay, max_brightness=255):
             strip.setPixelColorRGB(position[i], *color)
 
         strip.show()
-        if not queue.empty():
+        if not q_poll_milli_sleep(delay, queue):
             return
-        milli_sleep(delay)

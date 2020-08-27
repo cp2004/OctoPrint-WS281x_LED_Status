@@ -31,6 +31,30 @@ def milli_sleep(m_secs):
     sleep(m_secs / 1000)
 
 
+def q_poll_sleep(secs, queue):
+    """
+    Polls the queue before sleeping, so that we can abort effect if necessary
+    :param secs: time in seconds
+    :param queue: multiprocessing.queue() object
+    :return: bool: False if we should not proceed, true if we can
+    """
+    if not queue.empty():
+        return False
+    else:
+        sleep(secs)
+        return True
+
+
+def q_poll_milli_sleep(m_secs, queue):
+    """
+        Polls the queue before sleeping, so that we can abort effect if necessary
+        :param m_secs: time in milliseconds
+        :param queue: multiprocessing.queue() object
+        :return: bool: False if we should not proceed, true if we can
+    """
+    return q_poll_sleep(m_secs / 1000, queue)
+
+
 def wheel(pos):
     """Get a 3 tuple r, g, b value for a position 0-255
     From Adafruit's strandtest.py
