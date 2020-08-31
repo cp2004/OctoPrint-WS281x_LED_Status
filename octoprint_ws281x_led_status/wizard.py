@@ -7,19 +7,17 @@ from flask import jsonify
 from octoprint_ws281x_led_status.util import run_system_command
 
 
-command_to_system = {
-    # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
-    'adduser': ['sudo', '-S', 'adduser', 'pi', 'gpio'],
-    'enable_spi': ['sudo', '-S', 'bash', '-c', 'echo \'dtparam=spi=on\' >> /boot/config.txt'],
-    'set_core_freq': ['sudo', '-S', 'bash', '-c',
-                      'echo \'core_freq=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq=250\' >> /boot/config.txt'],
-    'set_core_freq_min': ['sudo', '-S', 'bash', '-c',
-                          'echo \'core_freq_min=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq_min=250\' >> /boot/config.txt'],
-    'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
-}
-
-
 def run_wizard_command(cmd, data, pi_model):
+    command_to_system = {
+        # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
+        'adduser': ['sudo', '-S', 'adduser', 'pi', 'gpio'],
+        'enable_spi': ['sudo', '-S', 'bash', '-c', 'echo \'dtparam=spi=on\' >> /boot/config.txt'],
+        'set_core_freq': ['sudo', '-S', 'bash', '-c',
+                          'echo \'core_freq=500\' >> /boot/config.txt' if pi_model == '4' else 'echo \'core_freq=250\' >> /boot/config.txt'],
+        'set_core_freq_min': ['sudo', '-S', 'bash', '-c',
+                              'echo \'core_freq_min=500\' >> /boot/config.txt' if pi_model == '4' else 'echo \'core_freq_min=250\' >> /boot/config.txt'],
+        'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
+    }
     validators = {
         'adduser': is_adduser_done,
         'enable_spi': is_spi_enabled,

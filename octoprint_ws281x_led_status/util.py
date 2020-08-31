@@ -71,7 +71,7 @@ def wheel(pos):
         return 0, int(pos * 3), int(255 - pos * 3)
 
 
-def run_system_command(self, command, password=None):
+def run_system_command(command, password=None):
     process = subprocess.Popen(
         command,
         stdin=subprocess.PIPE,
@@ -85,7 +85,6 @@ def run_system_command(self, command, password=None):
 
     if stderr and 'Sorry' in stderr.decode('utf-8') or 'no password' in stderr.decode('utf-8'):
         # .decode for Python 2/3 compatibility, make sure utf-8
-        self._logger.error("Running command for {}, but password incorrect".format(command))
         return stdout.decode('utf-8'), 'password'
     else:
         return stdout.decode('utf-8'), None
