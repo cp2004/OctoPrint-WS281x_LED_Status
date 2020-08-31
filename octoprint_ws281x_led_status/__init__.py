@@ -18,10 +18,13 @@ import octoprint.plugin
 from flask import jsonify
 
 from octoprint_ws281x_led_status.runner import EffectRunner, STRIP_TYPES, STRIP_SETTINGS, MODES
+import octoprint_ws281x_led_status.wizard
+
 
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
-BLOCKING_TEMP_GCODES = ["M109", "M190"]
+BLOCKING_TEMP_GCODES = ["M109", "M190"]  # TODO make configurable?
+
 ON_AT_COMMAND = 'WS_LIGHTSON'
 OFF_AT_COMMAND = 'WS_LIGHTSOFF'
 AT_COMMANDS = [ON_AT_COMMAND, OFF_AT_COMMAND]
@@ -205,13 +208,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return False
 
     def get_wizard_details(self):
-        return dict(
-            adduser_done=self.is_adduser_done(),
-            spi_enabled=self.is_spi_enabled(),
-            spi_buffer_increase=self.is_spi_buffer_increased(),
-            core_freq_set=self.is_core_freq_set(),
-            core_freq_min_set=self.is_core_freq_min_set()
-        )
+        return wizard.get_wizard_info(self.PI_MODEL)
 
     def get_wizard_version(self):
         return 1
@@ -219,6 +216,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     def on_wizard_finish(self, handled):
         self._logger.info("You will need to restart your Pi for the changes to take effect")
         # TODO make this a popup? not very useful here
+        # Requires implementing a plugin message system...
 
     # Simple API plugin
     def get_api_commands(self):
@@ -240,27 +238,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.activate_torch()
             return self.on_api_get()
 
-        api_to_command = {
-            # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
-            'adduser': ['sudo', '-S', 'adduser', 'pi', 'gpio'],
-            'enable_spi': ['sudo', '-S', 'bash', '-c', 'echo \'dtparam=spi=on\' >> /boot/config.txt'],
-            'set_core_freq': ['sudo', '-S', 'bash', '-c',
-                              'echo \'core_freq=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq=250\' >> /boot/config.txt'],
-            'set_core_freq_min': ['sudo', '-S', 'bash', '-c', 'echo \'core_freq_min=500\' >> /boot/config.txt' if self.PI_MODEL == '4' else 'echo \'core_freq_min=250\' >> /boot/config.txt'],
-            'spi_buffer_increase': ['sudo', '-S', 'sed', '-i', '$ s/$/ spidev.bufsiz=32768/', '/boot/cmdline.txt']
-        }
-        api_command_validator = {
-            'adduser': self.is_adduser_done,
-            'enable_spi': self.is_spi_enabled,
-            'set_core_freq': self.is_core_freq_set,
-            'set_core_freq_min': self.is_core_freq_min_set,
-            'spi_buffer_increase': self.is_spi_buffer_increased
-        }
-        if not api_command_validator[command]():
-            stdout, error = self.run_system_command(api_to_command[command], data.get('password'))
-        else:
-            error = None
-        return self.api_cmd_response(error)
+        return wizard.run_wizard_command(command, data, self.PI_MODEL)
 
     def on_api_get(self, request=None):
         return jsonify(
@@ -295,66 +273,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def get_torch_status(self):
         return self.torch_on
-
-    def api_cmd_response(self, errors=None):
-        details = self.get_wizard_details()
-        details.update(errors=errors)
-        return jsonify(details)
-
-    def run_system_command(self, command, password=None):
-        process = subprocess.Popen(
-            command,
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-        )
-        if password:
-            stdout, stderr = process.communicate('{}\n'.format(password).encode())
-        else:
-            stdout, stderr = process.communicate()
-
-        if stderr and 'Sorry' in stderr.decode('utf-8') or 'no password' in stderr.decode('utf-8'):  # .decode for Python 2/3 compatibility, make sure utf-8
-            self._logger.error("Running command for {}, but password incorrect".format(command))
-            return stdout.decode('utf-8'), 'password'
-        else:
-            return stdout.decode('utf-8'), None
-
-    def is_adduser_done(self):
-        groups, error = self.run_system_command(['groups', 'pi'])
-        return 'gpio' in groups
-
-    def is_spi_enabled(self):
-        with io.open('/boot/config.txt') as file:
-            for line in file:
-                if line.startswith('dtparam=spi=on'):
-                    return True
-        return False
-
-    def is_spi_buffer_increased(self):
-        with io.open('/boot/cmdline.txt') as file:
-            for line in file:
-                if 'spidev.bufsiz=32768' in line:
-                    return True
-        return False
-
-    def is_core_freq_set(self):
-        if self.PI_MODEL == '4':  # Pi 4's default is 500, which is compatible with SPI.
-            return True           # any change to core_freq is ignored on a Pi 4, so let's not bother.
-        with io.open('/boot/config.txt') as file:
-            for line in file:
-                if line.startswith('core_freq=250'):
-                    return True
-        return False
-
-    def is_core_freq_min_set(self):
-        if int(self.PI_MODEL) == 4:                    # Pi 4 has a variable clock speed, which messes up SPI timing
-            with io.open('/boot/config.txt') as file:  # This is only required on pi 4, not other models.
-                for line in file:
-                    if line.startswith('core_freq_min=500'):
-                        return True
-            return False
-        else:
-            return True
 
     # My methods
     def determine_pi_version(self):
