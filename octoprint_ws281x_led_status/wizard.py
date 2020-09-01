@@ -29,7 +29,7 @@ def run_wizard_command(cmd, data, pi_model):
         stdout, error = run_system_command(command_to_system[cmd], data.get('password'))
     else:
         error = None
-    return wizard_cmd_response(error)
+    return wizard_cmd_response(pi_model, error)
 
 
 def wizard_cmd_response(pi_model, errors=None):
