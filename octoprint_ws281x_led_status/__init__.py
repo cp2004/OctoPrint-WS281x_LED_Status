@@ -10,7 +10,6 @@ except ImportError:
 
 import re
 import io
-import subprocess
 import time
 import threading
 
