@@ -20,7 +20,7 @@ Features include:
 * Power calculator
 * ... and more!
 
-For the most up-to-date feature list, please checkout the [plugin's homepage](https://github.com/cp2004/OctoPrint-WS281x_LED_Status) as well as the [wiki](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki) for more information.
+You can take a look at the [wiki](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki) for more information about all that the plugin has to offer.
 
 ![rainbow effect](/assets/color_wipe.gif)
 
