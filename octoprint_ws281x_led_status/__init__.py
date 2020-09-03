@@ -167,6 +167,12 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             progress_heatup_bed_enabled=True,
             progress_heatup_tool_key=0,
 
+            progress_cooling_enabled=True,
+            progress_cooling_color_base='#0000ff',
+            progress_cooling_color='#ff0000',
+            progress_cooling_bed_or_tool='tool',
+            progress_cooling_threshold='40',
+
             torch_enabled=True,
             torch_effect='Solid Color',
             torch_color='#ffffff',
@@ -449,6 +455,15 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return
 
     def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
+        if not self._printer.is_printing() and not self._printer.is_paused():  # In other words, print not happening cooling down
+            settings_to_tool = {  # maps 'progress_cooling_bed_or_tool' to the parsed temp
+                'tool': 'T{}'.format(self.tool_to_target),
+                'bed': 'B'
+            }
+            current_temp = parsed_temperatures[settings_to_tool[(self._settings.get(['progress_cooling_bed_or_tool']))]][0]
+            if current_temp > self._settings.get_int(['progress_cooling_threshold']):  # Printer is hot, cooling down
+                self.update_effect('progress_cooling', self.calculate_heatup_progress(current_temp, self.temp_target))
+
         if self.heating and self.current_heater_heating:
             try:
                 current_temp, target_temp = parsed_temperatures[self.current_heater_heating]

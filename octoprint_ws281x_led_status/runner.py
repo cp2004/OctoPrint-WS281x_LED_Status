@@ -52,7 +52,8 @@ EFFECTS = {
     'cross': basic.crossover,
     'balls': basic.bouncy_balls,
     'progress_print': progress.progress,
-    'progress_heatup': progress.progress
+    'progress_heatup': progress.progress,
+    'progress_cooling': progress.progress
 }
 MODES = [
     'startup',
@@ -60,6 +61,7 @@ MODES = [
     'disconnected',
     'progress_print',
     'progress_heatup',
+    'progress_cooling',
     'failed',
     'success',
     'paused',
