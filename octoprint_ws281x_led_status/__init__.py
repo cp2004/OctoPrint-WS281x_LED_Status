@@ -532,7 +532,7 @@ def __plugin_load__():
     global __plugin_hooks__
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
-        "octoprint.comm.protocol.gcode.queued": __plugin_implementation__.process_gcode_q,
+        "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.process_gcode_q,
         "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received,
         "octoprint.comm.protocol.atcommand.sending": __plugin_implementation__.process_at_command
     }
