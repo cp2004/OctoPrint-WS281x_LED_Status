@@ -27,8 +27,7 @@ jobs:
     - name: Install OctoPrint & Flake 8
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
-        pip install octoprint
+        pip install flake8 pytest octoprint setuptools wheel
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
