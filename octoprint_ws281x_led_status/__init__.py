@@ -26,7 +26,8 @@ BLOCKING_TEMP_GCODES = ["M109", "M190"]  # TODO make configurable?
 
 ON_AT_COMMAND = 'WS_LIGHTSON'
 OFF_AT_COMMAND = 'WS_LIGHTSOFF'
-AT_COMMANDS = [ON_AT_COMMAND, OFF_AT_COMMAND]
+TORCH_AT_COMMAND = 'WS_TORCH'
+AT_COMMANDS = [ON_AT_COMMAND, OFF_AT_COMMAND, TORCH_AT_COMMAND]
 
 STANDARD_EFFECT_NICE_NAMES = {
     'Solid Color': 'solid',
@@ -489,6 +490,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self._logger.debug("Recieved gcode @ command for lights off")
             self.lights_on = False
             self.update_effect('off')
+        elif command == TORCH_AT_COMMAND:
+            self._logger.debug("Recieved gcode @ command for torch")
+            self.activate_torch()
 
     # Softwareupdate hook
     def get_update_information(self):
