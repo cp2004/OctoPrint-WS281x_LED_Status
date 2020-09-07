@@ -323,7 +323,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 effect_nice_name = self._settings.get(['{}_effect'.format(mode)])
                 effect_name = STANDARD_EFFECT_NICE_NAMES[effect_nice_name]
                 mode_settings['effect'] = effect_name
-                mode_settings['delay'] = self._settings.get_int(['{}_delay'.format(mode)])
+                mode_settings['delay'] = round(float(self._settings.get(['{}_delay'.format(mode)])), 1)
             self.SETTINGS[mode] = mode_settings
 
         self._logger.info("Settings refreshed")
@@ -428,8 +428,11 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self.update_effect('printing')
         self.update_effect('progress_print', progress)
 
-    @staticmethod
-    def calculate_heatup_progress(current, target):
+    def calculate_heatup_progress(self, current, target):
+        if target <= 0:
+            self._logger.warning("Tried to calculate heating progress but target was zero")
+            self._logger.warning("If you come across this please let me know on the issue tracker! - "
+                                 "https://github.com/cp2004/OctoPrint-WS281x_LED_Status")
         return round((current / target) * 100)
 
     def process_gcode_q(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
