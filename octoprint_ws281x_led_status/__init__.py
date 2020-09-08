@@ -433,6 +433,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self._logger.warning("Tried to calculate heating progress but target was zero")
             self._logger.warning("If you come across this please let me know on the issue tracker! - "
                                  "https://github.com/cp2004/OctoPrint-WS281x_LED_Status")
+            return 0
         return round((current / target) * 100)
 
     def process_gcode_q(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
