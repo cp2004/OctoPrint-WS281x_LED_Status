@@ -282,6 +282,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     # My methods
     def determine_pi_version(self):
+        """
+        Determines Raspberry Pi version for use in the wizard (and potentially later to warn of config issues)
+        :return: (str) Pi Model, if found, else None
+        """
         with io.open(_PROC_DT_MODEL_PATH, 'rt', encoding='utf-8') as f:
             _proc_dt_model = f.readline().strip(" \t\r\n\0")
         if _proc_dt_model:
@@ -329,10 +333,23 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         self._logger.info("Settings refreshed")
 
     def restart_strip(self):
+        """
+        Shortcut to restart the LED runner process.
+        :return: None
+        """
         self.stop_effect_process()
         self.start_effect_process()
 
     def start_effect_process(self):
+        """
+        Begin the LED runner process, with the user's settings, and some other config
+        Sets internally self.current_effect_process
+        Sets the current lights on/off status as well.
+        :return: None
+        """
+        # Sanity check that I don't call this while it is alive
+        if not self.current_effect_process.is_alive():
+            self.stop_effect_process()
         # Start effect runner here
         self.current_effect_process = MP_CONTEXT.Process(
             target=EffectRunner,
