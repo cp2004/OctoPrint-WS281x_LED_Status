@@ -68,7 +68,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     cooling = False
 
     # Target temperature is stored here, for use with temp tracking.
-    target_temperature = 0
+    target_temperature = {"tool": 0, "bed": 0}
     current_heater_heating = None
 
     previous_event_q = []  # Add effects to this list, if you want them to run after things like progress, torch, etc.
@@ -350,7 +350,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         :return: None
         """
         # Sanity check that I don't call this while it is alive
-        if not self.current_effect_process.is_alive():
+        if self.current_effect_process and not self.current_effect_process.is_alive():
             self.stop_effect_process()
         # Start effect runner here
         self.current_effect_process = multiprocessing.Process(
