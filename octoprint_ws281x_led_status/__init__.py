@@ -1,13 +1,7 @@
 # coding=utf-8
 from __future__ import absolute_import, division, unicode_literals
 
-try:  # Stupid Python 3 compatibility
-    from multiprocessing import get_context
-    MP_CONTEXT = get_context('fork')
-except ImportError:
-    import multiprocessing
-    MP_CONTEXT = multiprocessing
-
+import multiprocessing
 import re
 import io
 import time
@@ -22,7 +16,7 @@ import octoprint_ws281x_led_status.wizard
 
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
-BLOCKING_TEMP_GCODES = ["M109", "M190"]  # TODO make configurable?
+BLOCKING_TEMP_GCODES = ["M109", "M190"]  # TODO make configurable? No one has complained about it yet...
 
 ON_AT_COMMAND = 'WS_LIGHTSON'
 OFF_AT_COMMAND = 'WS_LIGHTSOFF'
@@ -63,16 +57,21 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         'PrintPaused': 'paused'
     }
     current_effect_process = None  # multiprocessing Process object
-    current_state = 'startup'  # Idle, startup, progress etc. Used to put the old effect back on settings change/light switch
-    effect_queue = MP_CONTEXT.Queue()  # pass name of effects here
+    current_state = 'startup'  # Used to put the old effect back on settings change/light switch
+    effect_queue = multiprocessing.Queue()  # pass name of effects here
 
     SETTINGS = {}  # Filled in on startup
     PI_MODEL = None  # Filled in on startup
 
-    heating = False   # True when heating is detected, options below are helpers for tracking heatup.
-    temp_target = 0
+    # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
+    heating = False
+    cooling = False
+
+    # Target temperature is stored here, for use with temp tracking.
+    target_temperature = 0
     current_heater_heating = None
-    tool_to_target = 0  # Overridden by the plugin settings
+
+    previous_event_q = []  # Add effects to this list, if you want them to run after things like progress, torch, etc.
 
     lights_on = True  # Lights should be on by default, makes sense.
     torch_on = False  # Torch is off by default, because who would want that?
@@ -261,7 +260,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if self.torch_timer and self.torch_timer.is_alive():
             self.torch_timer.cancel()
 
-        self._logger.debug("Starting timer for {} secs, to deativate torch".format(self._settings.get_int(['torch_timer'])))
+        self._logger.debug("Torch Timer started for {} secs".format(self._settings.get_int(['torch_timer'])))
         self.torch_timer = threading.Timer(int(self._settings.get_int(['torch_timer'])), self.deactivate_torch)
         self.torch_timer.daemon = True
         self.torch_timer.start()
@@ -304,8 +303,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if not self.tool_to_target:
             self.tool_to_target = 0
 
-        self.SETTINGS['active_start'] = self._settings.get(['active_hours_start']) if self._settings.get(['active_hours_enabled']) else None
-        self.SETTINGS['active_stop'] = self._settings.get(['active_hours_stop']) if self._settings.get(['active_hours_enabled']) else None
+        self.SETTINGS['active_start'] = self._settings.get(['active_hours_start']) \
+            if self._settings.get(['active_hours_enabled']) else None
+        self.SETTINGS['active_stop'] = self._settings.get(['active_hours_stop']) \
+            if self._settings.get(['active_hours_enabled']) else None
 
         self.SETTINGS['strip'] = {}
         for setting in STRIP_SETTINGS:
@@ -314,7 +315,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             elif setting == 'strip_type':  # String settings
                 self.SETTINGS['strip']['strip_type'] = self._settings.get([setting])
             elif setting == 'led_brightness':  # Percentage
-                self.SETTINGS['strip']['led_brightness'] = min(int(round((self._settings.get_int([setting]) / 100) * 255)), 255)
+                self.SETTINGS['strip']['led_brightness'] = min(
+                    int(round((self._settings.get_int([setting]) / 100) * 255)), 255)
             else:  # Integer settings
                 self.SETTINGS['strip'][setting] = self._settings.get_int([setting])
 
@@ -351,7 +353,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if not self.current_effect_process.is_alive():
             self.stop_effect_process()
         # Start effect runner here
-        self.current_effect_process = MP_CONTEXT.Process(
+        self.current_effect_process = multiprocessing.Process(
             target=EffectRunner,
             name="WS281x LED Status Effect Process",
             args=(
@@ -383,7 +385,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def update_effect(self, mode_name, value=None, m150=None):
         """
-        Change the effect displayed, using effect.EFFECTS for the correct names!
+        Change the effect displayed, use effects.EFFECTS for the correct names!
         If progress effect, value must be specified
         :param mode_name: string of mode name
         :param value: percentage of how far through it is. None
@@ -434,7 +436,13 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
     def on_event(self, event, payload):
         try:
-            self.update_effect(self.supported_events[event])
+            if event == 'PrintDone':
+                self.cooling = True
+
+            if self.heating or self.cooling:  # We want to hold back effects while we are cooling in most cases.
+                self.add_to_backlog(event)
+            else:
+                self.update_effect(self.supported_events[event])
         except KeyError:  # The event isn't supported
             pass
 
@@ -453,51 +461,81 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             return 0
         return round((current / target) * 100)
 
-    def process_gcode_q(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
-        if not self._settings.get_boolean(['progress_heatup_bed_enabled']) and not self._settings.get_boolean(['progress_heatup_tool_enabled']) and not self._settings.get_boolean(['intercept_m150']):
-            return
+    def process_previous_event_q(self):
+        """
+        Runs the last event again, to put it back in the case of heating or cooling finishing, then clears the backlog.
+        :return: None
+        """
+        self.on_event(self.previous_event_q[-1], payload={})
+        self.previous_event_q = []
 
-        if gcode in BLOCKING_TEMP_GCODES and (self._settings.get_boolean(['progress_heatup_bed_enabled']) or self._settings.get_boolean(['progress_heatup_tool_enabled'])):
+    def add_to_backlog(self, event):
+        self.previous_event_q.append(event)
+
+    def process_gcode_q(self, comm_instance, phase, cmd, cmd_type, gcode, subcode=None, tags=None, *args, **kwargs):
+        if gcode in BLOCKING_TEMP_GCODES:
             bed_or_tool = {
-                'M109': 'T{}'.format(self.tool_to_target) if self._settings.get_boolean(['progress_heatup_tool_enabled']) else None,
-                'M190': 'B' if self._settings.get_boolean(['progress_heatup_bed_enabled']) else None
+                'M109': "tool",
+                'M190': "bed"
             }
-            if (gcode in BLOCKING_TEMP_GCODES) and bed_or_tool[gcode]:
-                self.heating = True
-                self.current_heater_heating = bed_or_tool[gcode]
-            else:
-                self.heating = False
+            # Everything is tracked, regardless of settings. Makes it easier to track the state, and then just back out
+            # of showing the effect in self.update_effect() rather than getting complex here.
+            self.heating = True
+            self.current_heater_heating = bed_or_tool[gcode]
         else:
-            self.heating = False
+            if self.heating:  # State is switching to non-heating, so we should process the backlog.
+                self.heating = False
+                self.process_previous_event_q()
 
         if gcode == 'M150' and self._settings.get_boolean(['intercept_m150']):
             self.update_effect('M150', m150=cmd)
             return None,
 
-        return
-
     def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
-        if not self._printer.is_printing() and not self._printer.is_paused():  # In other words, print not happening cooling down
-            settings_to_tool = {  # maps 'progress_cooling_bed_or_tool' to the parsed temp
-                'tool': 'T{}'.format(self.tool_to_target),
-                'bed': 'B'
-            }
-            current_temp = parsed_temperatures[settings_to_tool[(self._settings.get(['progress_cooling_bed_or_tool']))]][0]
-            if current_temp > self._settings.get_int(['progress_cooling_threshold']):  # Printer is hot, cooling down
-                self.update_effect('progress_cooling', self.calculate_heatup_progress(current_temp, self.temp_target))
+        tool_temp_target = parsed_temperatures['T{}'.format(self._settings.get_int(['progress_heatup_tool_key']))][1]
+        bed_temp_target = parsed_temperatures['B'][1]
 
-        if self.heating and self.current_heater_heating:
+        self.target_temperature = {
+            "tool": tool_temp_target if tool_temp_target > 0 else self.target_temperature["tool"],
+            "bed": bed_temp_target if bed_temp_target > 0 else self.target_temperature["bed"]
+        }
+
+        if self.heating:
+            self._logger.debug("State: heating, temp recv: {}".format(parsed_temperatures[self.current_heater_heating]))
             try:
-                current_temp, target_temp = parsed_temperatures[self.current_heater_heating]
+                current_temp = parsed_temperatures[self.current_heater_heating][0]
             except KeyError:
-                self._logger.error("Could not find temperature of tool T{}, not able to show heatup progress.".format(self.current_heater_heating))
+                self._logger.error(
+                    "T{} not found, cannot show progress. Check configuration".format(self.current_heater_heating))
                 self.heating = False
+                self.process_previous_event_q()
                 return
-            if target_temp:  # Sometimes we don't get everything, so to update more frequently we'll store the target
-                self.temp_target = target_temp
-            if self.temp_target > 0:  # Prevent ZeroDivisionError, or showing progress when target is zero
-                self.update_effect('progress_heatup', self.calculate_heatup_progress(current_temp, self.temp_target))
-        return parsed_temperatures
+            if self.target_temperature[self.current_heater_heating] > 0:
+                self.update_effect('progress_heating', self.calculate_heatup_progress(
+                    current_temp,
+                    self.target_temperature[self.current_heater_heating]
+                ))
+
+        elif self.cooling:
+            self._logger.debug("State: heating, temp recv: {}".format(parsed_temperatures[self.current_heater_heating]))
+            if self._printer.is_printing() or self._printer.is_paused():
+                # User has likely started a new print - we can clear the queue, and carry on.
+                self.previous_event_q = []
+                self.cooling = False
+                return
+            settings_to_tool = {  # maps 'progress_cooling_bed_or_tool' to the parsed temp
+                "tool": "T{}".format(self.tool_to_target),
+                "bed": "B"
+            }
+            current = parsed_temperatures[settings_to_tool[self._settings.get(['progress_cooling_bed_or_tool'])]][0]
+            if current < self._settings.get_int(['progress_cooling_threshold']):
+                self.cooling = False
+                self.process_previous_event_q()  # should hopefully put back the old effect (maybe progress)
+                return
+            self.update_effect('progress_cooling', self.calculate_heatup_progress(
+                current,
+                self.target_temperature[self._settings.get(['progress_cooling_bed_or_tool'])]
+            ))
 
     def process_at_command(self, comm, phase, command, parameters, tags=None, *args, **kwargs):
         if command not in AT_COMMANDS or not self._settings.get(['at_command_reaction']):
@@ -537,16 +575,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         )
 
 
-# If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
-# ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
-# can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "WS281x LED Status"
-
-# Starting with OctoPrint 1.4.0 OctoPrint will also support to run under Python 3 in addition to the deprecated
-# Python 2. New plugins should make sure to run under both versions for now. Uncomment one of the following
-# compatibility flags according to what Python versions your plugin supports!
-# __plugin_pythoncompat__ = ">=2.7,<3" # only python 2
-# __plugin_pythoncompat__ = ">=3,<4" # only python 3
 __plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
 
 
