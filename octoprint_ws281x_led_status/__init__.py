@@ -492,42 +492,61 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             return None,
 
     def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
-        tool_temp_target = parsed_temperatures['T{}'.format(self._settings.get_int(['progress_heatup_tool_key']))][1]
-        bed_temp_target = parsed_temperatures['B'][1]
+        self._logger.info(parsed_temperatures)
+        try:
+            tool_temp_target = parsed_temperatures['T{}'.format(
+                self._settings.get_int(['progress_heatup_tool_key']))][1]
+        except KeyError:
+            tool_temp_target = self.target_temperature["tool"]
+
+        if not tool_temp_target:  # When heating, firmware reports more frequently but *without* target
+            # It comes through to the handler as 'None', so we must check for this
+            tool_temp_target = self.target_temperature["tool"]
+
+        try:
+            bed_temp_target = parsed_temperatures["B"][1]
+        except KeyError:
+            bed_temp_target = self.target_temperature["tool"]
+
+        if not bed_temp_target:
+            # Similarly to tool temp, sometimes comes through as NoneType
+            bed_temp_target = self.target_temperature["bed"]
 
         self.target_temperature = {
             "tool": tool_temp_target if tool_temp_target > 0 else self.target_temperature["tool"],
             "bed": bed_temp_target if bed_temp_target > 0 else self.target_temperature["bed"]
         }
-
+        words_to_tool = {  # maps 'progress_cooling_bed_or_tool' to the parsed temp
+            "tool": "T{}".format(self.tool_to_target),
+            "bed": "B"
+        }
         if self.heating:
-            self._logger.debug("State: heating, temp recv: {}".format(parsed_temperatures[self.current_heater_heating]))
             try:
-                current_temp = parsed_temperatures[self.current_heater_heating][0]
+                current_temp = parsed_temperatures[words_to_tool[self.current_heater_heating]][0]
             except KeyError:
                 self._logger.error(
-                    "T{} not found, cannot show progress. Check configuration".format(self.current_heater_heating))
+                    "Heater {} not found, can't show progress. Check configuration".format(self.current_heater_heating))
                 self.heating = False
                 self.process_previous_event_q()
                 return
+
+            self._logger.debug("State: heating, temp recv: {}".format(current_temp))
             if self.target_temperature[self.current_heater_heating] > 0:
-                self.update_effect('progress_heating', self.calculate_heatup_progress(
+                self.update_effect('progress_heatup', self.calculate_heatup_progress(
                     current_temp,
                     self.target_temperature[self.current_heater_heating]
                 ))
 
         elif self.cooling:
-            self._logger.debug("State: heating, temp recv: {}".format(parsed_temperatures[self.current_heater_heating]))
             if self._printer.is_printing() or self._printer.is_paused():
                 # User has likely started a new print - we can clear the queue, and carry on.
                 self.previous_event_q = []
                 self.cooling = False
                 return
-            settings_to_tool = {  # maps 'progress_cooling_bed_or_tool' to the parsed temp
-                "tool": "T{}".format(self.tool_to_target),
-                "bed": "B"
-            }
-            current = parsed_temperatures[settings_to_tool[self._settings.get(['progress_cooling_bed_or_tool'])]][0]
+
+            current = parsed_temperatures[words_to_tool[self._settings.get(['progress_cooling_bed_or_tool'])]][0]
+            self._logger.debug("State: cooling, temp recv: {}".format(current))
+
             if current < self._settings.get_int(['progress_cooling_threshold']):
                 self.cooling = False
                 self.process_previous_event_q()  # should hopefully put back the old effect (maybe progress)
@@ -536,6 +555,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 current,
                 self.target_temperature[self._settings.get(['progress_cooling_bed_or_tool'])]
             ))
+
+        return parsed_temperatures
 
     def process_at_command(self, comm, phase, command, parameters, tags=None, *args, **kwargs):
         if command not in AT_COMMANDS or not self._settings.get(['at_command_reaction']):
