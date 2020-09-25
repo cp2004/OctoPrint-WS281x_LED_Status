@@ -31,4 +31,28 @@
         <label class="inline"> Base color </label>
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_heatup_color_base">
     </div>
+    <br>
+    <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.progress_cooling_enabled">
+    </label>
+    <br>
+    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled">
+        <label class="inline" for>Track cooling on bed or tool:</label>
+        <select class="input-large" data-bind="value: settings.plugins.ws281x_led_status.bed_or_tool">
+            <option value="tool">Track Tool</option>
+            <option value="bed">Track Bed</option>
+        </select>
+    </div>
+    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled">
+        <label class="inline"> Progress bar color </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_color">
+        <label class="inline"> Base color </label>
+        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_color_base">
+    </div>
+    <br>
+    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled">
+        <label class="inline" for="ws_temp_threshold">Temperature threshold</label>
+        <input id="ws_temp_threshold" class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_threshold">
+        <p class="help-block">When the temperature drops below this value, cooling tracking will stop.</p>
+    </div>
 </form>
