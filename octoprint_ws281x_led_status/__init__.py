@@ -494,7 +494,6 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             return None,
 
     def temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
-        self._logger.info(parsed_temperatures)
         try:
             tool_temp_target = parsed_temperatures['T{}'.format(
                 self._settings.get_int(['progress_heatup_tool_key']))][1]
