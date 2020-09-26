@@ -439,7 +439,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if event == 'PrintDone':
                 self.cooling = True
 
-            if self.heating or self.cooling:  # We want to hold back effects while we are cooling in most cases.
+            if (self.heating and self._settings.get_boolean(["progress_heatup_enabled"])) \
+                    or (self.cooling and self._settings.get_boolean(["progress_cooling_enabled"])):
+                # We want to hold back effects while we are heating/cooling tracking (unless they are disabled)
                 self.add_to_backlog(event)
             else:
                 self.update_effect(self.supported_events[event])
