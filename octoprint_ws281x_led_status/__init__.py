@@ -67,6 +67,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     heating = False
     cooling = False
 
+    current_progress = 0
+
     # Target temperature is stored here, for use with temp tracking.
     target_temperature = {"tool": 0, "bed": 0}
     current_heater_heating = None
@@ -439,21 +441,19 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if event == 'PrintDone':
                 self.cooling = True
 
-            if (self.heating and self._settings.get_boolean(["progress_heatup_enabled"])) \
-                    or (self.cooling and self._settings.get_boolean(["progress_cooling_enabled"])):
-                # We want to hold back effects while we are heating/cooling tracking (unless they are disabled)
-                self.add_to_backlog(event)
-            else:
-                self.update_effect(self.supported_events[event])
+            self.update_effect(self.supported_events[event])
+            # add all events to a backlog, so we know what the last one was.
+            self.add_to_backlog(event)
         except KeyError:  # The event isn't supported
             pass
 
-    def on_print_progress(self, storage, path, progress):
+    def on_print_progress(self, storage="", path="", progress=1):
         if (progress == 100 and self.current_state == 'success') or self.heating:
             return
         if self._settings.get_boolean(['printing_enabled']):
             self.update_effect('printing')
         self.update_effect('progress_print', progress)
+        self.current_progress = progress
 
     def calculate_heatup_progress(self, current, target):
         if target <= 0:
@@ -468,7 +468,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         Runs the last event again, to put it back in the case of heating or cooling finishing, then clears the backlog.
         :return: None
         """
-        self.on_event(self.previous_event_q[-1], payload={})
+        if len(self.previous_event_q):
+            self.on_event(self.previous_event_q[-1], payload={})
         self.previous_event_q = []
 
     def add_to_backlog(self, event):
@@ -488,6 +489,10 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if self.heating:  # State is switching to non-heating, so we should process the backlog.
                 self.heating = False
                 self.process_previous_event_q()
+                self._logger.info("Heating finished")
+                if self._printer.is_printing():
+                    self._logger.info("On print progress called with value {}".format(self.current_progress))
+                    self.on_print_progress(progress=self.current_progress)
 
         if gcode == 'M150' and self._settings.get_boolean(['intercept_m150']):
             self.update_effect('M150', m150=cmd)
@@ -540,8 +545,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
 
         elif self.cooling:
             if self._printer.is_printing() or self._printer.is_paused():
-                # User has likely started a new print - we can clear the queue, and carry on.
-                self.previous_event_q = []
+                # User has likely started a new print - stop cooling effect??
                 self.cooling = False
                 return
 
