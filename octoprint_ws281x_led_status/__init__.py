@@ -440,6 +440,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         try:
             if event == 'PrintDone':
                 self.cooling = True
+            elif event == 'PrintStarted':
+                self.current_progress = 0
 
             self.update_effect(self.supported_events[event])
             # add all events to a backlog, so we know what the last one was.
