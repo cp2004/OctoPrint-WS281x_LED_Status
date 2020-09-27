@@ -51,14 +51,20 @@
     </div>
     <br>
     <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled">
-        <label class="inline" for="ws_temp_threshold">Temperature threshold</label>
-        <input id="ws_temp_threshold" class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_threshold">
-        <p class="help-block">When the temperature drops below this value, cooling tracking will stop.</p>
+        <label class="inline" for="ws_temp_threshold">Cooling temperature threshold</label>
+        <div class="input-append">
+            <input id="ws_temp_threshold" class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_threshold">
+            <span class="add-on">C</span>
+        </div>
+        <p class="help-block">When the temperature drops below this value, cooling tracking will stop. Note that if this is <strong><em class="text-warning">below</em></strong> room temperature, cooling tracking will <strong class="text-error">never stop.</strong></p>
     </div>
     <br>
     <div class="form-inline">
         <label class="inline" for="ws_temp_start">Set base temperature</label>
-        <input id="ws_temp_start" class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.progress_temp_start">
-        <p class="help-block">Heating/cooling progress bar will make '0' the temperature specified. Suggested value is just below room temperature</p>
+        <div class="input-append">
+            <input id="ws_temp_start" min="0" class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.progress_temp_start">
+            <span class="add-on">C</span>
+        </div>
+        <p class="help-block">Heating/cooling progress bar will make '0' the temperature specified. Suggested value is just below room temperature, so that the progress bar starts closer to the end of the strip.</p>
     </div>
 </form>
