@@ -175,6 +175,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             progress_cooling_bed_or_tool='tool',
             progress_cooling_threshold='40',
 
+            progress_temp_start=0,
+
             torch_enabled=True,
             torch_effect='Solid Color',
             torch_color='#ffffff',
@@ -419,7 +421,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
                 self.return_timer.start()
 
         if 'progress' in mode_name:
-            if not value:
+            if value is None:
                 self._logger.warning("No value supplied with progress style effect, ignoring")
                 return
             self._logger.debug("Updating progress effect {}, value {}".format(mode_name, value))
@@ -463,7 +465,17 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             self._logger.warning("If you come across this please let me know on the issue tracker! - "
                                  "https://github.com/cp2004/OctoPrint-WS281x_LED_Status")
             return 0
-        return round((current / target) * 100)
+
+        # Allows for setting a baseline, so heating display doesn't start halfway down the strip.
+        current = max(current - self._settings.get_int(["progress_temp_start"]), 0)
+        target = max(target - self._settings.get_int(["progress_temp_start"]), 0)
+
+        try:
+            value = round((current / target) * 100)
+        except ZeroDivisionError:
+            value = 0
+
+        return value
 
     def process_previous_event_q(self):
         """
