@@ -491,9 +491,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             if self.heating:  # State is switching to non-heating, so we should process the backlog.
                 self.heating = False
                 self.process_previous_event_q()
-                self._logger.info("Heating finished")
                 if self._printer.is_printing():
-                    self._logger.info("On print progress called with value {}".format(self.current_progress))
                     self.on_print_progress(progress=self.current_progress)
 
         if gcode == 'M150' and self._settings.get_boolean(['intercept_m150']):
