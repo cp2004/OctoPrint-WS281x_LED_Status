@@ -68,7 +68,11 @@ MODES = [
     'printing',
     'torch'
 ]
-M150_REGEX = r"(^|[^A-Za-z])[Rr](?P<red>\d{1,3})|(^|[^A-Za-z])[GgUu](?P<green>\d{1,3})|(^|[^A-Za-z])[Bb](?P<blue>\d{1,3})|(^|[^A-Za-z])[Pp](?P<brightness>\d{1,3})|(^|[^A-Za-z])[Ww](?P<white>\d{1,3})"
+
+# Example command: M150 R10 G200 B300
+# more -> https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#m150-intercept
+M150_REGEX = r"(^|[^A-Za-z])[Rr](?P<red>\d{1,3})|(^|[^A-Za-z])[GgUu](?P<green>\d{1,3})|(^|[^A-Za-z])" \
+             r"[Bb](?P<blue>\d{1,3})|(^|[^A-Za-z])[Pp](?P<brightness>\d{1,3})|(^|[^A-Za-z])[Ww](?P<white>\d{1,3})"
 
 
 class EffectRunner:
@@ -161,17 +165,24 @@ class EffectRunner:
 
     def parse_m150(self, msg):
         red = green = blue = 0  # Start at 0, means sending 'M150' with no params turns LEDs off
+        red_included = green_included = blue_included = False
         brightness = self.max_brightness  # No 'P' param? Use set brightness
         matches = re.finditer(M150_REGEX, msg)
         for match in matches:
             if match.group('red'):
                 red = min(int(match.group('red')), 255)
+                red_included = True
             elif match.group('green'):
                 green = min(int(match.group('green')), 255)
+                green_included = True
             elif match.group('blue'):
                 blue = min(int(match.group('blue')), 255)
+                blue_included = True
             elif match.group('white'):
-                red = green = blue = min(int(match.group('white')), 255)
+                # See issue #33 for details of why this was changed. R/G/B params take priority over white, rather than
+                # the other way (w max priority). For compatibility with https://github.com/horfee/OctoPrint-M150control
+                if not red_included and not blue_included and not green_included:
+                    red = green = blue = min(int(match.group('white')), 255)
             elif match.group('brightness'):
                 brightness = min(int(match.group('brightness')), 255)
 
