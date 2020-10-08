@@ -202,7 +202,8 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             'standard_names': STANDARD_EFFECT_NICE_NAMES,
             'pi_model': self.PI_MODEL,
             'strip_types': STRIP_TYPES,
-            'timezone': self.get_timezone()
+            'timezone': self.get_timezone(),
+            'version': self._plugin_version
         }
 
     @staticmethod
