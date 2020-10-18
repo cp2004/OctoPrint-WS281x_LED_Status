@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 # Print and heat up progress?
-from __future__ import absolute_import, unicode_literals, division
+from __future__ import absolute_import, division, unicode_literals
+
 import math
 import time
 
