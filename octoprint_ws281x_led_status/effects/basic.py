@@ -1,15 +1,26 @@
-from __future__ import absolute_import, unicode_literals, division
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, unicode_literals
 
-import time
-import random
 import math
+import random
+import time
 
-from octoprint_ws281x_led_status.util import milli_sleep, q_poll_milli_sleep, q_poll_sleep, wheel
+from octoprint_ws281x_led_status.util import (
+    milli_sleep,
+    q_poll_milli_sleep,
+    q_poll_sleep,
+    wheel,
+)
 
-DIRECTIONS = ['forward', 'backward']  # Used for effects that go 'out and back' kind of thing
+DIRECTIONS = [
+    "forward",
+    "backward",
+]  # Used for effects that go 'out and back' kind of thing
 
 
-def solid_color(strip, queue, color, delay=None, max_brightness=255, set_brightness=True, wait=True):
+def solid_color(
+    strip, queue, color, delay=None, max_brightness=255, set_brightness=True, wait=True
+):
     # Set pixels to a solid color
     if set_brightness:
         strip.setBrightness(max_brightness)
@@ -38,8 +49,12 @@ def color_wipe(strip, queue, color, delay, max_brightness=255):
 def color_wipe_2(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for direction in DIRECTIONS:
-        for i in range(strip.numPixels()) if direction == 'forward' else reversed(range(strip.numPixels())):
-            if direction == 'backward':
+        for i in (
+            range(strip.numPixels())
+            if direction == "forward"
+            else reversed(range(strip.numPixels()))
+        ):
+            if direction == "backward":
                 color = (0, 0, 0)
             strip.setPixelColorRGB(i, *color)
             strip.show()
@@ -49,9 +64,15 @@ def color_wipe_2(strip, queue, color, delay, max_brightness=255):
 
 def simple_pulse(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(1)
-    solid_color(strip, queue, color, delay, max_brightness, set_brightness=False, wait=False)
+    solid_color(
+        strip, queue, color, delay, max_brightness, set_brightness=False, wait=False
+    )
     for direction in DIRECTIONS:
-        for b in range(max_brightness) if direction == 'forward' else reversed(range(max_brightness)):
+        for b in (
+            range(max_brightness)
+            if direction == "forward"
+            else reversed(range(max_brightness))
+        ):
             strip.setBrightness(b)
             strip.show()
             if not q_poll_milli_sleep(delay, queue):
@@ -61,7 +82,15 @@ def simple_pulse(strip, queue, color, delay, max_brightness=255):
 def rainbow(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for i in range(256):
-        solid_color(strip, queue, wheel(i), delay, max_brightness, set_brightness=False, wait=False)
+        solid_color(
+            strip,
+            queue,
+            wheel(i),
+            delay,
+            max_brightness,
+            set_brightness=False,
+            wait=False,
+        )
         if not q_poll_milli_sleep(delay, queue):
             return
 
@@ -70,8 +99,9 @@ def rainbow_cycle(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for j in range(256):
         for i in range(strip.numPixels()):
-            strip.setPixelColorRGB(i, *wheel(
-                (int(i * 256 / strip.numPixels()) + j) & 255))
+            strip.setPixelColorRGB(
+                i, *wheel((int(i * 256 / strip.numPixels()) + j) & 255)
+            )
         strip.show()
         if not q_poll_milli_sleep(delay, queue):
             return
@@ -80,7 +110,11 @@ def rainbow_cycle(strip, queue, color, delay, max_brightness=255):
 def solo_bounce(strip, queue, color, delay, max_brightness=255):
     strip.setBrightness(max_brightness)
     for direction in DIRECTIONS:
-        for i in range(strip.numPixels()) if direction == 'forward' else reversed(range(strip.numPixels())):
+        for i in (
+            range(strip.numPixels())
+            if direction == "forward"
+            else reversed(range(strip.numPixels()))
+        ):
             strip.setPixelColorRGB(i, *color)
             for blank in range(strip.numPixels()):
                 if blank != i:
@@ -94,12 +128,32 @@ def bounce(strip, queue, color, delay, max_brightness=255):
     red, green, blue = color
     size = 3
     for direction in DIRECTIONS:
-        for i in range(0, (strip.numPixels() - size - 2)) if direction == 'forward' else range((strip.numPixels() - size - 2), 0, -1):
-            solid_color(strip, queue, (0, 0, 0), max_brightness=max_brightness, wait=False)
-            strip.setPixelColorRGB(i, *(int(math.floor(red / 10)), int(math.floor(green / 10)), int(math.floor(blue / 10))))
+        for i in (
+            range(0, (strip.numPixels() - size - 2))
+            if direction == "forward"
+            else range((strip.numPixels() - size - 2), 0, -1)
+        ):
+            solid_color(
+                strip, queue, (0, 0, 0), max_brightness=max_brightness, wait=False
+            )
+            strip.setPixelColorRGB(
+                i,
+                *(
+                    int(math.floor(red / 10)),
+                    int(math.floor(green / 10)),
+                    int(math.floor(blue / 10)),
+                )
+            )
             for j in range(1, (size + 1)):
                 strip.setPixelColorRGB(i + j, *(red, green, blue))
-            strip.setPixelColorRGB(i + size + 1, *(int(math.floor(red / 10)), int(math.floor(green / 10)), int(math.floor(blue / 10))))
+            strip.setPixelColorRGB(
+                i + size + 1,
+                *(
+                    int(math.floor(red / 10)),
+                    int(math.floor(green / 10)),
+                    int(math.floor(blue / 10)),
+                )
+            )
             strip.show()
             if not q_poll_milli_sleep(delay, queue):
                 return
@@ -111,7 +165,9 @@ def random_single(strip, queue, color, delay, max_brightness=255):
         strip.setPixelColorRGB(p, *wheel(random.randint(0, 255)))
     strip.show()
     while True:
-        strip.setPixelColorRGB(random.randint(0, strip.numPixels()), *wheel(random.randint(0, 255)))
+        strip.setPixelColorRGB(
+            random.randint(0, strip.numPixels()), *wheel(random.randint(0, 255))
+        )
         strip.show()
         if not q_poll_milli_sleep(delay, queue):
             return
@@ -120,11 +176,15 @@ def random_single(strip, queue, color, delay, max_brightness=255):
 def blink(strip, queue, color, delay, max_brightness=255):
     solid_color(strip, queue, color, delay, max_brightness, wait=False)
     for direction in DIRECTIONS:
-        strip.setBrightness(max_brightness if direction == 'forward' else 0)
+        strip.setBrightness(max_brightness if direction == "forward" else 0)
         strip.show()
-        for ms in range(int(delay / 2)):          # We do it this way so we can check the q more often, as for blink
-            if not q_poll_milli_sleep(2, queue):  # delay may be high. Otherwise the effect may end up blocking the
-                return                            # server, when settings are saved, or it shuts down.
+        for ms in range(
+            int(delay / 2)
+        ):  # We do it this way so we can check the q more often, as for blink
+            if not q_poll_milli_sleep(
+                2, queue
+            ):  # delay may be high. Otherwise the effect may end up blocking the
+                return  # server, when settings are saved, or it shuts down.
 
 
 def crossover(strip, queue, color, delay, max_brightness=255):
@@ -153,7 +213,7 @@ def bouncy_balls(strip, queue, color, delay, max_brightness=255):
     start_height = 1
 
     height = []
-    impact_velocity_start = math.sqrt(- 2 * gravity * start_height)
+    impact_velocity_start = math.sqrt(-2 * gravity * start_height)
     impact_velocity = []
     time_since_last_bounce = []
     position = []
@@ -170,8 +230,13 @@ def bouncy_balls(strip, queue, color, delay, max_brightness=255):
 
     while True:
         for i in range(ball_count):
-            time_since_last_bounce[i] = time.time() * 1000 - clock_time_since_last_bounce[i]
-            height[i] = 0.5 * gravity * math.pow(time_since_last_bounce[i] / 1000, 2) + impact_velocity[i] * time_since_last_bounce[i] / 1000
+            time_since_last_bounce[i] = (
+                time.time() * 1000 - clock_time_since_last_bounce[i]
+            )
+            height[i] = (
+                0.5 * gravity * math.pow(time_since_last_bounce[i] / 1000, 2)
+                + impact_velocity[i] * time_since_last_bounce[i] / 1000
+            )
 
             if height[i] < 0:
                 height[i] = 0

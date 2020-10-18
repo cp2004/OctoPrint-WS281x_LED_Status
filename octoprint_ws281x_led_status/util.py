@@ -1,18 +1,19 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import, division
-from time import sleep
+
 import subprocess
+from time import sleep
 
 
 def hex_to_rgb(h):
     if h is None:
         return 0, 0, 0
     h = h[1:7]
-    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    return tuple(int(h[i : i + 2], 16) for i in (0, 2, 4))
 
 
 def blend_two_colors(colour1, colour2, percent_of_c1=None):
-    """
-    """
+    """"""
     if percent_of_c1:
         colour1 = [x * percent_of_c1 for x in colour1]
         percent_of_c2 = 1 - percent_of_c1
@@ -48,10 +49,10 @@ def q_poll_sleep(secs, queue):
 
 def q_poll_milli_sleep(m_secs, queue):
     """
-        Polls the queue before sleeping, so that we can abort effect if necessary
-        :param m_secs: time in milliseconds
-        :param queue: multiprocessing.queue() object
-        :return: bool: False if we should not proceed, true if we can
+    Polls the queue before sleeping, so that we can abort effect if necessary
+    :param m_secs: time in milliseconds
+    :param queue: multiprocessing.queue() object
+    :return: bool: False if we should not proceed, true if we can
     """
     return q_poll_sleep(m_secs / 1000, queue)
 
@@ -79,12 +80,16 @@ def run_system_command(command, password=None):
         stdout=subprocess.PIPE,
     )
     if password:
-        stdout, stderr = process.communicate('{}\n'.format(password).encode())
+        stdout, stderr = process.communicate("{}\n".format(password).encode())
     else:
         stdout, stderr = process.communicate()
 
-    if stderr and 'Sorry' in stderr.decode('utf-8') or 'no password' in stderr.decode('utf-8'):
+    if (
+        stderr
+        and "Sorry" in stderr.decode("utf-8")
+        or "no password" in stderr.decode("utf-8")
+    ):
         # .decode for Python 2/3 compatibility, make sure utf-8
-        return stdout.decode('utf-8'), 'password'
+        return stdout.decode("utf-8"), "password"
     else:
-        return stdout.decode('utf-8'), None
+        return stdout.decode("utf-8"), None
