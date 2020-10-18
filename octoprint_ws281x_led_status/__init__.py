@@ -91,9 +91,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
     # Startup plugin
     def on_startup(self, host, port):
         self.PI_MODEL = self.determine_pi_version()
+        self.refresh_settings()
 
     def on_after_startup(self):
-        self.refresh_settings()
         self.start_effect_process()
 
     # Shutdown plugin
@@ -182,6 +182,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             torch_color='#ffffff',
             torch_delay=1,
             torch_timer=15,
+            torch_toggle=False,
 
             active_hours_enabled=False,
             active_hours_start="09:00",
@@ -233,6 +234,7 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         return dict(
             toggle_lights=[],
             activate_torch=[],
+            deactivate_torch=[],
             adduser=['password'],
             enable_spi=['password'],
             spi_buffer_increase=['password'],
@@ -246,6 +248,9 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
             return self.on_api_get()
         elif command == 'activate_torch':
             self.activate_torch()
+            return self.on_api_get()
+        elif command == 'deactivate_torch':
+            self.deactivate_torch()
             return self.on_api_get()
 
         return wizard.run_wizard_command(command, data, self.PI_MODEL)
@@ -265,18 +270,24 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if self.torch_timer and self.torch_timer.is_alive():
             self.torch_timer.cancel()
 
-        self._logger.debug("Torch Timer started for {} secs".format(self._settings.get_int(['torch_timer'])))
-        self.torch_timer = threading.Timer(int(self._settings.get_int(['torch_timer'])), self.deactivate_torch)
-        self.torch_timer.daemon = True
-        self.torch_timer.start()
-        self.torch_on = True
-        self.update_effect('torch')
+        if self._settings.get_boolean(["torch_toggle"]):
+            # Torch mode is blocking until it is turned off
+            self._logger.debug("Torch toggling on, forever")
+            self.torch_on = True
+            self.update_effect('torch')
+        else:
+            self._logger.debug("Torch Timer started for {} secs".format(self._settings.get_int(['torch_timer'])))
+            self.torch_timer = threading.Timer(int(self._settings.get_int(['torch_timer'])), self.deactivate_torch)
+            self.torch_timer.daemon = True
+            self.torch_timer.start()
+            self.torch_on = True
+            self.update_effect('torch')
 
     def deactivate_torch(self):
         self._logger.debug("Deactivating torch mode, torch on currently: {}".format(self.torch_on))
         if self.torch_on:
-            self.update_effect(self.current_state)
             self.torch_on = False
+            self.update_effect(self.current_state)
 
     def get_lights_status(self):
         return self.lights_on
@@ -398,8 +409,16 @@ class WS281xLedStatusPlugin(octoprint.plugin.StartupPlugin,
         if self.return_timer is not None and self.return_timer.is_alive():
             self.return_timer.cancel()
 
-        if mode_name != 'torch' and self.torch_on:
+        if not self._settings.get_boolean(["torch_toggle"]) and mode_name != 'torch' and self.torch_on:
             self.torch_on = False
+        else:
+            if mode_name != 'torch' and self.torch_on:
+                # Catch all other effects while torch is on - except M150
+                if mode_name != 'M150':
+                    if 'progress' in mode_name:
+                        self.current_state = '{} {}'.format(mode_name, value)
+                    else:
+                        self.current_state = mode_name
 
         if mode_name in ['on', 'off']:
             self.effect_queue.put(mode_name)

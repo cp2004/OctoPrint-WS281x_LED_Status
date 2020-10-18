@@ -39,9 +39,17 @@
         </div>
     </div>
     <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: settings.plugins.ws281x_led_status.torch_enabled">
+        <label class="checkbox inline">
+            <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.torch_toggle">Torch mode is a toggle
+        </label>
+        <p class="help-block">
+            This overrides the timer, so you have to manually turn torch mode off again.
+        </p>
+    </div>
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: settings.plugins.ws281x_led_status.torch_enabled">
         <label class="inline">Torch lasts for</label>
         <div class="input-append">
-            <input class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.torch_timer">
+            <input class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.torch_timer, enable: !settings.plugins.ws281x_led_status.torch_toggle()">
             <span class="add-on">secs</span>
         </div>
     </div>
