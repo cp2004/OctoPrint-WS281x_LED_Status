@@ -181,7 +181,7 @@ def bouncy_balls(strip, queue, color, delay, max_brightness=255):
                 if impact_velocity[i] < 0.01:
                     impact_velocity[i] = impact_velocity_start
 
-            position[i] = round(height[i] * (strip.numPixels() - 1) / start_height)
+            position[i] = int(round(height[i] * (strip.numPixels() - 1) / start_height))
 
         for p in range(strip.numPixels()):
             # Set to blank
