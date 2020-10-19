@@ -1,0 +1,48 @@
+name: "Issue Labeler"
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  label-opened-and-edited:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let labels = [];
+            let setLabels = false;
+            context.payload.issue.labels.forEach(label => { labels.push(label.name) });
+            switch (context.payload.action) {
+              case 'opened':
+              case 'edited': {
+                if (context.payload.issue.title.match(/\[request\]|feature request/i)) {
+                  labels.push('request');
+                  if (!labels.includes("solved")) {
+                    labels.push('needs review');
+                    setLabels = true;
+                  }
+                }
+                if (context.payload.issue.title.match(/bug/i)) {
+                  if (!labels.includes("confirmed bug")){
+                    labels.push('potential bug');
+                    labels.push('needs review');
+                    setLabels = true;
+                  }
+                }
+                if (labels.length === 0) {
+                  labels.push('needs triage');
+                  setLabels = true;
+                }
+                break;
+              }
+            }
+            if (setLabels) {
+              github.issues.setLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: labels
+              })
+            }
