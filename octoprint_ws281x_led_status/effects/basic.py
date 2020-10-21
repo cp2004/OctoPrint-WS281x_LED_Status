@@ -5,12 +5,7 @@ import math
 import random
 import time
 
-from octoprint_ws281x_led_status.util import (
-    milli_sleep,
-    q_poll_milli_sleep,
-    q_poll_sleep,
-    wheel,
-)
+from octoprint_ws281x_led_status.util import q_poll_milli_sleep, q_poll_sleep, wheel
 
 DIRECTIONS = [
     "forward",

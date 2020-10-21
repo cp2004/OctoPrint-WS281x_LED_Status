@@ -9,6 +9,7 @@ import time
 
 import octoprint.plugin
 from flask import jsonify
+from octoprint.events import Events
 
 import octoprint_ws281x_led_status.wizard
 from octoprint_ws281x_led_status.runner import (
@@ -64,11 +65,11 @@ class WS281xLedStatusPlugin(
     octoprint.plugin.RestartNeedingPlugin,
 ):
     supported_events = {
-        "Connected": "idle",
-        "Disconnected": "disconnected",
-        "PrintFailed": "failed",
-        "PrintDone": "success",
-        "PrintPaused": "paused",
+        Events.CONNECTED: "idle",
+        Events.DISCONNECTED: "disconnected",
+        Events.PRINT_FAILED: "failed",
+        Events.PRINT_DONE: "success",
+        Events.PRINT_PAUSED: "paused",
     }
     current_effect_process = None  # multiprocessing Process object
     current_state = (
@@ -500,10 +501,12 @@ class WS281xLedStatusPlugin(
 
     def on_event(self, event, payload):
         try:
-            if event == "PrintDone":
+            if event == Events.PRINT_DONE:
                 self.cooling = True
-            elif event == "PrintStarted":
+            elif event == Events.PRINT_STARTED:
                 self.current_progress = 0
+            elif event == Events.PRINT_RESUMED:
+                self.update_effect("progress_print", self.current_progress)
 
             self.update_effect(self.supported_events[event])
             # add all events to a backlog, so we know what the last one was.
