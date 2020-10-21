@@ -1,0 +1,26 @@
+# Configuration file for the versioneer lookup, manually mapping tags based on branches
+#
+# Format is
+#
+#   <branch-regex> <tag> <reference commit>
+#
+# The file is processed from top to bottom, the first matching line wins. If <tag> or <reference commit> are left out,
+# the lookup table does not apply to the matched branches
+
+# master, rc and prerelease shall not use the lookup table, only tags
+master
+prerelease
+rc/.*
+
+# neither should disconnected checkouts, e.g. 'git checkout <tag>'
+HEAD
+\(detached.*
+
+# maintenance is currently the branch for (if needed) 0.5.2
+maintenance 0.5.2 2f7cec9d462e7073c8f65530b0951b8c4cf2dd50 pep440-dev
+
+# devel is currently the branch for work towards 0.6.0
+devel 0.6.0 2f7cec9d462e7073c8f65530b0951b8c4cf2dd50 pep440-dev
+
+# Every other branch is also development, so is resolved to 0.6.0 as well.
+.* 0.6.0 2f7cec9d462e7073c8f65530b0951b8c4cf2dd50 pep440-dev
