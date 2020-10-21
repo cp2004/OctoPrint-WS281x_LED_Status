@@ -11,28 +11,28 @@ jobs:
     runs-on: ubuntu-latest
     name: Assign to project
     steps:
-    - name: 'potential bug' assignment 
+    - name: potential bug assignment 
       uses: srggrs/assign-one-project-github-action@1.2.0
       if: contains(github.event.issue.labels.*.name, 'potential bug')
       with:
         project: 'https://github.com/cp2004/OctoPrint-WS281x_LED_Status/projects/1'
         column_name: 'To analyse'
 
-    - name: 'confirmed bug' assignment
+    - name: confirmed bug assignment
       uses: srggrs/assign-one-project-github-action@1.2.0
       if: contains(github.event.issue.labels.*.name, 'confirmed bug')
       with:
         project: 'https://github.com/cp2004/OctoPrint-WS281x_LED_Status/projects/1'
         column_name: 'To fix'
-        
-    - name: 'request' assignment
+
+    - name: request assignment
       uses: srggrs/assign-one-project-github-action@1.2.0
       if: contains(github.event.issue.labels.*.name, 'request')
       with:
         project: 'https://github.com/cp2004/OctoPrint-WS281x_LED_Status/projects/2'
         column_name: 'Needs triage'
-        
-    - name: 'request solved' assignment
+
+    - name: request solved assignment
       uses: srggrs/assign-one-project-github-action@1.2.0
       if: |
         contains(github.event.issue.labels.*.name, 'request') &&
@@ -40,8 +40,8 @@ jobs:
       with:
         project: 'https://github.com/cp2004/OctoPrint-WS281x_LED_Status/projects/2'
         column_name: 'Solved'
-        
-    - name: 'confirmed bug - solved' assignment
+
+    - name: confirmed bug solved assignment
       uses: srggrs/assign-one-project-github-action@1.2.0
       if: |
         contains(github.event.issue.labels.*.name, 'confirmed bug') &&

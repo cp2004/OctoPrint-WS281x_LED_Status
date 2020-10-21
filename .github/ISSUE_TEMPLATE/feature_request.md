@@ -2,8 +2,8 @@
 name: Feature request
 about: Got a great feature in mind? Use this
 title: "[Feature Request]"
-labels: "type: request"
-assignees: ""
+assignees: ''
+
 ---
 
 **Is your feature request related to a problem? Please describe.**

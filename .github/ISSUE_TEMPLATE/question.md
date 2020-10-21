@@ -1,9 +1,10 @@
 ---
 name: Question
 about: Need help with using the plugin, or configuration options?
-title: ""
-labels: "type: question"
-assignees: ""
+title: ''
+labels: 'question'
+assignees: ''
+
 ---
 
 **What's your question?**
