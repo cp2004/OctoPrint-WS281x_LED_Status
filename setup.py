@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-########################################################################################################################
-### Do not forget to adjust the following variables to your own plugin.
+import versioneer
 
 # The plugin's identifier, has to be unique
 plugin_identifier = "ws281x_led_status"
@@ -14,7 +13,10 @@ plugin_package = "octoprint_ws281x_led_status"
 plugin_name = "OctoPrint-WS281x LED Status"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "0.6.0-dev"
+plugin_version = versioneer.get_version()
+
+# cmd_class - versioneer thing
+plugin_cmdclass = versioneer.get_cmdclass()
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
@@ -92,6 +94,7 @@ setup_parameters = octoprint_setuptools.create_plugin_setup_parameters(
     additional_packages=plugin_additional_packages,
     ignored_packages=plugin_ignored_packages,
     additional_data=plugin_additional_data,
+    cmdclass=plugin_cmdclass,
 )
 
 if len(additional_setup_parameters):

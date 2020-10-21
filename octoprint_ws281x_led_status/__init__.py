@@ -18,6 +18,11 @@ from octoprint_ws281x_led_status.runner import (
     EffectRunner,
 )
 
+from ._version import get_versions
+
+__version__ = get_versions()["version"]
+del get_versions
+
 PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 BLOCKING_TEMP_GCODES = [
@@ -710,6 +715,7 @@ class WS281xLedStatusPlugin(
 
 __plugin_name__ = "WS281x LED Status"
 __plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
+__plugin_version__ = __version__
 
 
 def __plugin_load__():
