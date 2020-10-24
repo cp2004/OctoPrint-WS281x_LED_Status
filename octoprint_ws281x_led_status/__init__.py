@@ -110,6 +110,13 @@ class WS281xLedStatusPlugin(
     # Startup plugin
     def on_startup(self, host, port):
         self.PI_MODEL = self.determine_pi_version()
+        cfg_test_thread = threading.Thread(
+            target=self.run_os_config_check,
+            kwargs={"send_ui": False},
+            name="WS281X LED Status OS config test",
+        )
+        cfg_test_thread.daemon = True
+        cfg_test_thread.start()
         self.refresh_settings()
 
     def on_after_startup(self):
