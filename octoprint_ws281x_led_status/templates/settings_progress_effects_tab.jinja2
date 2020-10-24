@@ -20,7 +20,10 @@
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.progress_heatup_tool_enabled">
         <label class="inline" style="padding-right: 10px"> Track tool heating </label>
         <label class="inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_heatup_tool_enabled"> Index of Tool to track: </label>
-        <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_heatup_tool_key, visible: settings.plugins.ws281x_led_status.progress_heatup_tool_enabled">
+        <div class="input-prepend">
+            <span class="add-on">T</span>
+            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_heatup_tool_key, visible: settings.plugins.ws281x_led_status.progress_heatup_tool_enabled">
+        </div>
     </div>
     <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_heatup_enabled">
         <label class="inline"> Progress bar color </label>

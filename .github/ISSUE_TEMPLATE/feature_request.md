@@ -2,19 +2,18 @@
 name: Feature request
 about: Got a great feature in mind? Use this
 title: "[Feature Request]"
-labels: 'type: request'
 assignees: ''
 
 ---
 
 **Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+<!-- You have a specific use case, or a problem to be solved by this feature -->
 
 **Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<!-- Clear description of what you want -->
 
 **Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+<!-- Clear description of other solutions you may have thought of -->
 
 **Additional context**
-Add any other context or screenshots about the feature request here.
+<!-- Got a video of an effect, or somewhere this is introduced elsewhere, a link is greatly appreciated. -->

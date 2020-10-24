@@ -1,0 +1,18 @@
+/*
+ * Custom CSS for the ws281x_led_status
+ *
+ * Author: Charlie Powell
+ * License: AGPLv3
+ */
+
+#settings_plugin_ws281x_led_status .well {
+    /*
+    Themify does not contain styles for wells, so this overrides the color in there to make sure it is right.
+    Only in my settings - I'm not interfering with other plugins!
+    */
+    color: #333;
+}
+
+.themeify.nighttime #settings_plugin_ws281x_led_status .well code {
+    color: #333;
+}

@@ -29,6 +29,14 @@ STRIP_TYPES = {  # Adding any more strips requires a request, then testing
     'WS2811_STRIP_GBR': rpi_ws281x.WS2811_STRIP_GBR,
     'WS2811_STRIP_BGR': rpi_ws281x.WS2811_STRIP_BGR,
     'WS2811_STRIP_BRG': rpi_ws281x.WS2811_STRIP_BRG,
+    'SK6812_STRIP': rpi_ws281x.SK6812_STRIP,
+    'SK6812W_STRIP': rpi_ws281x.SK6812W_STRIP,
+    'SK6812_STRIP_RGBW': rpi_ws281x.SK6812_STRIP_RGBW,
+    'SK6812_STRIP_RBGW': rpi_ws281x.SK6812_STRIP_RBGW,
+    'SK6812_STRIP_GRBW': rpi_ws281x.SK6812_STRIP_GRBW,
+    'SK6812_STRIP_GBRW': rpi_ws281x.SK6812_STRIP_GBRW,
+    'SK6812_STRIP_BRGW': rpi_ws281x.SK6812_STRIP_BRGW,
+    'SK6812_STRIP_BGRW': rpi_ws281x.SK6812_STRIP_BGRW
 }
 EFFECTS = {
     'solid': basic.solid_color,
@@ -38,6 +46,11 @@ EFFECTS = {
     'rainbow': basic.rainbow,
     'cycle': basic.rainbow_cycle,
     'bounce': basic.bounce,
+    'bounce_solo': basic.solo_bounce,
+    'random': basic.random_single,
+    'blink': basic.blink,
+    'cross': basic.crossover,
+    'balls': basic.bouncy_balls,
     'progress_print': progress.progress,
     'progress_heatup': progress.progress
 }
@@ -50,7 +63,8 @@ MODES = [
     'failed',
     'success',
     'paused',
-    'printing'
+    'printing',
+    'torch'
 ]
 M150_REGEX = r"(^|[^A-Za-z])[Rr](?P<red>\d{1,3})|(^|[^A-Za-z])[GgUu](?P<green>\d{1,3})|(^|[^A-Za-z])[Bb](?P<blue>\d{1,3})|(^|[^A-Za-z])[Pp](?P<brightness>\d{1,3})|(^|[^A-Za-z])[Ww](?P<white>\d{1,3})"
 

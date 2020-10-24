@@ -1,0 +1,39 @@
+<h5>LED Strip test</h5>
+<p>Provided so you can test the individual colours of your LED Strip.</p>
+<p>Can help to diagnose both hardware problems (Such as specific LEDs are broken), and help to select the correct strip type.</p>
+<p>Sets LEDs to solid colour until the next event happens.</p>
+<button class="btn btn-danger" id="led-test-red" data-bind="enable: settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test red</button>
+<button class="btn btn-success" id="led-test-green" data-bind="enable: settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test green</button>
+<button class="btn btn-primary" id="led-test-blue" data-bind="enable: settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test blue</button>
+<button class="btn" id="led-test-white" data-bind="enable: settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test white</button>
+<br>
+<div class="alert alert-block" style="margin-top: 7px;" data-bind="visible: !settings.plugins.ws281x_led_status.intercept_m150()">
+    <p><strong>Note:</strong> Using these buttons requires M150 intercept to be enabled in the 'Features' page.
+        Remember to press save first, so the setting is sent back to the server!
+    </p>
+</div>
+
+<h5>Power calculator</h5>
+<p>This tab is a useful tool to help you calculate power requirements of your LED strip.</p>
+<p>Please ensure your power supply is adequate, as it can cause hard-to-debug issues.</p>
+<p>You can see more details on this from Adafruit <a href="https://learn.adafruit.com/adafruit-neopixel-uberguide?view=all#estimating-power-requirements-2894486-11">Here</a><br>
+The nominal value is 40mA, as this is between their estimate of 20-60. Note that setting LEDs to solid white reqiuires the most power.</p>
+<div id="ws281x_currentCalc">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label">Power consumption per LED (mA)</label>
+            <div class="controls">
+                <div class="input-append">
+                    <input class="inline" id="currentInput_mA" type="number" class="input-medium" value="40">
+                    <span class="add-on">mA</span>
+                </div>
+                <button class="inline btn btn-success" id="calc_btn"><i class="fas-custom fa-custom-calculator"></i> Calculate</button>
+            </div>
+        </div>
+    </form>
+    <div id="calc_output" class="well">
+        <p>Number of leds configured: <code data-bind="text: settings.plugins.ws281x_led_status.led_count"></code>
+        <p>Predicted power requirement: <code id="power_req">--W</code></p>
+        <p>Predicted current requirement (@5V): <code id="current_req">--A</code></p>
+    </div>
+</div>
