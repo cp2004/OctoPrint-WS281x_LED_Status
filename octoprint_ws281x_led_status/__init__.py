@@ -11,7 +11,7 @@ import octoprint.plugin
 from flask import jsonify
 from octoprint.events import Events
 
-import octoprint_ws281x_led_status.wizard
+from octoprint_ws281x_led_status import wizard
 from octoprint_ws281x_led_status.runner import (
     MODES,
     STRIP_SETTINGS,
@@ -198,7 +198,10 @@ class WS281xLedStatusPlugin(
 
     # Template plugin
     def get_template_configs(self):
-        return [{"type": "settings", "custom_bindings": False}]
+        return [
+            {"type": "settings", "custom_bindings": False},
+            {"type": "generic", "custom_bindings": True},
+        ]
 
     def get_template_vars(self):
         return {
@@ -244,6 +247,7 @@ class WS281xLedStatusPlugin(
             "spi_buffer_increase": ["password"],
             "set_core_freq": ["password"],
             "set_core_freq_min": ["password"],
+            "test_os_config": [],
         }
 
     def on_api_command(self, command, data):
@@ -256,8 +260,59 @@ class WS281xLedStatusPlugin(
         elif command == "deactivate_torch":
             self.deactivate_torch()
             return self.on_api_get()
+        elif command == "test_os_config":
+            thread = threading.Thread(
+                target=self.run_os_config_check, name="WS281x OS Config Test"
+            )
+            thread.daemon = True
+            thread.start()
+            return
 
         return wizard.run_wizard_command(command, data, self.PI_MODEL)
+
+    def run_os_config_check(self, send_ui=True):
+        """
+        Run a check on all of the OS level configuration required to run the plugin
+        Logs output to octoprint.log
+        :param send_ui: (bool) whether to send the results to the UI
+        :return: None
+        """
+        _UI_MSG_TYPE = "os_config_test"
+        self._logger.info("Running OS config test (api call)")
+        tests = {
+            "adduser": wizard.is_adduser_done,
+            "spi_enabled": wizard.is_spi_enabled,
+            "spi_buffer_increase": wizard.is_spi_buffer_increased,
+            "set_core_freq": wizard.is_core_freq_set,
+            "set_core_freq_min": wizard.is_core_freq_min_set,
+        }
+        statuses = {}
+
+        for test_key, test_func in tests.items():
+            if send_ui:
+                self._send_UI_msg(
+                    {"type": _UI_MSG_TYPE, "test": test_key, "status": "in_progress"}
+                )
+            status = "passed" if tests[test_key](self.PI_MODEL) else "failed"
+            if send_ui:
+                self._send_UI_msg(
+                    {"type": _UI_MSG_TYPE, "test": test_key, "status": status}
+                )
+            statuses[test_key] = status
+            time.sleep(0.5)
+
+        log_content = "OS config test complete. Results:"
+        for test_key, status in statuses.items():
+            log_content = log_content + "\n| - " + test_key + ": " + status
+
+        self._send_UI_msg(
+            {"type": _UI_MSG_TYPE, "test": "complete", "status": "complete"}
+        )
+
+        self._logger.info(log_content)
+
+    def _send_UI_msg(self, data):
+        self._plugin_manager.send_plugin_message("ws281x_led_status", data)
 
     def on_api_get(self, request=None):
         return jsonify(

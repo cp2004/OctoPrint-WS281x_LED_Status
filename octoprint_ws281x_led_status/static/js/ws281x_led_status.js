@@ -217,6 +217,8 @@ $(function () {
 
     function ws281xLedStatusSettingsViewModel(parameters) {
         var self = this;
+        self.testRunning = ko.observable(false);
+
         var current_input = $("#currentInput_mA");
         var power_output = $("#power_req");
         var current_output = $("#current_req");
@@ -237,6 +239,8 @@ $(function () {
             $("#power_req").text(power + "W");
             $("#current_req").text(current + "A");
         }
+
+        /* LED Test buttons - TODO swap to SimpleAPI calls - see #39 */
 
         $("#led-test-red").bind("click", function () {
             send_m150(255, 0, 0);
@@ -260,4 +264,130 @@ $(function () {
         construct: ws281xLedStatusSettingsViewModel,
         dependencies: ["settingsViewModel"],
     });
+
+    function ws281x_led_status_config_test_VM(parametera){
+        var self = this;
+        /* Configuration testing */
+
+        self.testInProgress = ko.observable(false);
+        self.currentTest = ko.observable("")
+        self.testSuccess = ko.observable(false)
+        self.testFailures = ko.observable(false)
+
+        self.passwordForPi = ko.observable("")
+
+        self.addUserStatus = ko.observable("");
+        self.spiEnabledStatus = ko.observable("");
+        self.spiBufferStatus = ko.observable("");
+        self.coreFreqStatus = ko.observable("");
+        self.coreFreqMinStatus = ko.observable("");
+
+        self.runConfigTest = function () {
+            console.log("Starting ws281x_led_status OS configuration test");
+            self.testInProgress(true);
+            self.testSuccess(false);
+            self.testFailures(false);
+
+            self.passwordForPi("");
+
+            self.addUserStatus("");
+            self.spiEnabledStatus("");
+            self.spiBufferStatus("");
+            self.coreFreqStatus("");
+            self.coreFreqMinStatus("");
+
+            OctoPrint.simpleApiCommand("ws281x_led_status", "test_os_config");
+        };
+
+        self.onDataUpdaterPluginMessage = function(plugin, data){
+            if (plugin !== "ws281x_led_status"){
+                return;
+            }
+            if (data.type === "os_config_test"){
+                // Received data for the config test
+                if (data.status === "in_progress") {
+                    if (data.test === "adduser") {
+                        self.currentTest("User pi in gpio group")
+                    } else if (data.test === "spi_enabled") {
+                        self.currentTest("SPI enabled")
+                    } else if (data.test === "spi_buffer_increase") {
+                        self.currentTest("SPI Buffer size increased")
+                    } else if (data.test === "set_core_freq") {
+                        self.currentTest("core_freq set in /boot/config.txt")
+                    } else if (data.test === "set_core_freq_min") {
+                        self.currentTest("core_freq_min set in /boot/config.txt")
+                    }
+                } else {
+                    if (data.test === "adduser"){
+                        self.addUserStatus(data.status)
+                    } else if (data.test === "spi_enabled") {
+                        self.spiEnabledStatus(data.status)
+                    } else if (data.test === "spi_buffer_increase") {
+                        self.spiBufferStatus(data.status)
+                    } else if (data.test === "set_core_freq") {
+                        self.coreFreqStatus(data.status)
+                    } else if (data.test === "set_core_freq_min") {
+                        self.coreFreqMinStatus(data.status)
+                    } else if (data.test === "complete"){
+                        if (!self.testFailures()){
+                            self.testSuccess(true);
+                        }
+                        self.testInProgress(false)
+                    }
+                }
+                // if any tests fail, this will tell the user to do something & show password
+                if (data.status === "failed") {
+                    self.testFailures(true)
+                }
+            }
+        }
+
+        self.fixAddUser = function () {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "adduser", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
+        }
+        self.fixEnableSpi = function () {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "enable_spi", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
+        }
+        self.fixIncreaseSpiBuffer = function () {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "spi_buffer_increase", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
+        }
+        self.fixCoreFreq = function () {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "set_core_freq", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
+        }
+        self.fixCoreFreqMin = function () {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "set_core_freq_min", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
+        }
+
+        self.processApiCmdResponse = function (response) {
+
+            if (response.errors === "password") {
+                $('#cfgTestPasswordField').popover('show')
+            }
+            if (response.adduser_done) {
+                self.addUserStatus("passed")
+            }
+            if (response.spi_enabled) {
+                self.spiEnabledStatus("passed")
+            }
+            if (response.spi_buffer_increase) {
+                self.spiBufferStatus("passed")
+            }
+            if (response.core_freq_set) {
+                self.coreFreqStatus("passed")
+            }
+            if (response.core_freq_min_set) {
+                self.coreFreqMinStatus("passed")
+            }
+        }
+        self.passwdPopoverRemove = function () {
+            $('#cfgTestPasswordField').popover('hide')
+            return true;
+        }
+    }
+    OCTOPRINT_VIEWMODELS.push({
+        construct: ws281x_led_status_config_test_VM,
+        dependencies: [],
+        elements: ["#generic_plugin_ws281x_led_status"],
+    });
+
 });
