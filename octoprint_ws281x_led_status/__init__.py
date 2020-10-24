@@ -771,6 +771,18 @@ class WS281xLedStatusPlugin(
                 "type": "github_release",
                 "user": "cp2004",
                 "repo": "OctoPrint-WS281x_LED_Status",
+                "stable_branch": {
+                    "name": "Stable",
+                    "branch": "master",
+                    "comittish": ["master"],
+                },
+                "prerelease_branches": [
+                    {
+                        "name": "Release Candidate",
+                        "branch": "pre-release",
+                        "comittish": ["pre-release", "master"],
+                    }
+                ],
                 "current": self._plugin_version,
                 # update method: pip
                 "pip": "https://github.com/cp2004/OctoPrint-WS281x_LED_Status/archive/{target_version}.zip",
