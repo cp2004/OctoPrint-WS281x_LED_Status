@@ -50,6 +50,12 @@
             <span>Heating progress</span>
         </span>
     </div>
+    <div data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled()">
+        <span class="fa-lg" title="progress_cooling effect enabled">
+            <span class="fa fa-check" style="color: limegreen" ></span>
+            <span>Cooling progress</span>
+        </span>
+    </div>
     </div>
     <br>
     <div>
@@ -100,6 +106,12 @@
         <span class="fa-lg" title="progress_heatup effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Heating progress</span>
+        </span>
+    </div>
+    <div data-bind="visible: !settings.plugins.ws281x_led_status.progress_cooling_enabled()">
+        <span class="fa-lg" title="progress_cooling effect disabled">
+            <span class="fa fa-times" style="color: darkred" ></span>
+            <span>Cooling progress</span>
         </span>
     </div>
     </div>
