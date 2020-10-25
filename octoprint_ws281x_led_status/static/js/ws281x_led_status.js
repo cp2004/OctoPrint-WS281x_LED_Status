@@ -111,41 +111,26 @@ $(function () {
         self.torch_enabled = ko.observable(true);
         self.torch_toggle = ko.observable(true);
 
-        var light_icon = $("#lightIcon");
-        var switch_icon = $("#toggleSwitch");
-        var torch_icon = $("#torchIcon");
+        var torch_on_src = "/plugin/ws281x_led_status/static/svg/flashlight.svg"
+        var torch_off_src = "/plugin/ws281x_led_status/static/svg/flashlight-outline.svg"
 
-        self.lights_on = true;
-        self.torch_on = false;
+        self.lights_on = ko.observable(true);
+        self.torch_on = ko.observable(false);
+
+        self.torch_icon = ko.observable(torch_off_src)
 
         function update_light_status(response) {
             if (response.lights_status) {
-                light_icon
-                    .removeClass("far-custom text-error")
-                    .addClass("fas-custom text-success");
-                switch_icon
-                    .removeClass("fa-toggle-off text-error")
-                    .addClass("fa-toggle-on text-success");
+                self.lights_on(true)
             } else {
-                light_icon
-                    .removeClass("fas-custom text-success")
-                    .addClass("far-custom text-error");
-                switch_icon
-                    .removeClass("fa-toggle-on text-success")
-                    .addClass("fa-toggle-off text-error");
+                self.lights_on(false)
             }
             if (response.torch_status) {
-                self.torch_on = true;
-                torch_icon.attr(
-                    "src",
-                    "plugin/ws281x_led_status/static/svg/flashlight.svg"
-                );
+                self.torch_on(true)
+                self.torch_icon(torch_on_src)
             } else {
-                self.torch_on = false;
-                torch_icon.attr(
-                    "src",
-                    "plugin/ws281x_led_status/static/svg/flashlight-outline.svg"
-                );
+                self.torch_on(false)
+                self.torch_icon(torch_off_src)
             }
         }
 
@@ -158,14 +143,14 @@ $(function () {
 
         self.activate_torch = function () {
             if (self.torch_toggle()) {
-                if (self.torch_on) {
-                    self.torch_on = false;
+                if (self.torch_on()) {
+                    self.torch_on(false)
                     OctoPrint.simpleApiCommand(
                         "ws281x_led_status",
                         "deactivate_torch"
                     ).done(update_light_status);
                 } else {
-                    self.torch_on = true;
+                    self.torch_on(true)
                     OctoPrint.simpleApiCommand(
                         "ws281x_led_status",
                         "activate_torch"
@@ -181,10 +166,7 @@ $(function () {
             }
         };
         self.torch_off = function () {
-            torch_icon.attr(
-                "src",
-                "plugin/ws281x_led_status/static/svg/flashlight-outline.svg"
-            );
+            self.torch_on(false)
         };
 
         self.onBeforeBinding = function () {
@@ -216,11 +198,8 @@ $(function () {
 
     function ws281xLedStatusSettingsViewModel(parameters) {
         var self = this;
-        self.testRunning = ko.observable(false);
 
         var current_input = $("#currentInput_mA");
-        var power_output = $("#power_req");
-        var current_output = $("#current_req");
 
         $("#calc_btn").bind("click", function () {
             calculate_power();
