@@ -21,6 +21,7 @@ STRIP_SETTINGS = [  # ALL LED SETTINGS, for rpi_ws281x.PixelStrip
     "led_brightness",
     "led_channel",
     "strip_type",
+    "reverse",
 ]
 STRIP_TYPES = {  # Adding any more strips requires a request, then testing
     "WS2811_STRIP_GRB": rpi_ws281x.WS2811_STRIP_GRB,
@@ -83,6 +84,7 @@ class EffectRunner:
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.debug")
         self.setup_custom_logger(log_path, debug)
         self.settings = all_settings
+        self.reverse = all_settings["strip"]["reverse"]
         self.max_brightness = all_settings["strip"]["led_brightness"]
         self.lights_on = True
         self.previous_state = (
@@ -120,7 +122,6 @@ class EffectRunner:
 
         # Cleaning handler will remove old logs, defined by 'backupCount'
         # 'D' specifies to roll over each day
-        # TODO Need to tune the number of backups kept
         effect_runner_handler = CleaningTimedRotatingFileHandler(
             path, when="D", backupCount=2
         )
@@ -231,6 +232,7 @@ class EffectRunner:
                 hex_to_rgb(effect_settings["color"]),
                 hex_to_rgb(effect_settings["base"]),
                 self.max_brightness,
+                self.reverse,
             )
         else:
             self.blank_leds()

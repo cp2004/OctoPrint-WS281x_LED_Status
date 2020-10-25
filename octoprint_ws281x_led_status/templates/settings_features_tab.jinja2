@@ -20,6 +20,7 @@
         If you want to change this, please run <code>sudo raspi-config</code> then change your location.
         </p>
     </div>
+    <hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.torch_enabled">Enable torch effect and button
     </label>
@@ -53,12 +54,12 @@
             <span class="add-on">secs</span>
         </div>
     </div>
-    <br>
+    <hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.intercept_m150">Enable intercepting M150 commands
     </label>
-    <p class="help-block">For details on the M150, and how you can use it, <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Configuration-options#m150-intercept--new-in-040">see the wiki entry here.</a></p>
-    <br>
+    <p class="help-block"><i class="fa fa-info-circle text-info"></i> For details on the M150 command, and how you can use it, <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#m150-intercept">see the plugin's documentation.</a></p>
+    <hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.at_command_reaction">Enable reacting to @ Commands
     </label>
@@ -71,6 +72,7 @@
         </ul>
         You may want to add one to a gcode script, either in slicer or OctoPrint for example to turn the LEDs on at the start of a print
     </div>
-    <label class="inline"><input type="checkbox" class="inline" data-bind="checked: settings.plugins.ws281x_led_status.debug_logging">Enable debug logging</label>
-    <p class="help-block">This is very helpful in debugging issues with running effects, if you have a bug to report please enable this.</p>
+    <hr>
+    <label class="inline"><input type="checkbox" class="inline" data-bind="checked: settings.plugins.ws281x_led_status.debug_logging"> Enable debug logging</label>
+    <p class="help-block">This is very helpful in debugging issues with running effects, if you have a bug to report please enable & upload this.</p>
 </form>

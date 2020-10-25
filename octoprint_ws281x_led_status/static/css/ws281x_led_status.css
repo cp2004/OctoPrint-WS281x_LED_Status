@@ -16,3 +16,7 @@
 .themeify.nighttime #settings_plugin_ws281x_led_status .well code {
     color: #333;
 }
+
+#settings_plugin_ws281x_led_status hr {
+    margin: 10px 0;
+}

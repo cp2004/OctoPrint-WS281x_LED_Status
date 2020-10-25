@@ -5,10 +5,12 @@ from __future__ import absolute_import, division, unicode_literals
 import math
 import time
 
-from octoprint_ws281x_led_status.util import blend_two_colors
+from octoprint_ws281x_led_status.util import blend_two_colors, q_poll_sleep
 
 
-def progress(strip, queue, value, progress_color, base_color, max_brightness=255, reverse=False):
+def progress(
+    strip, queue, value, progress_color, base_color, max_brightness=255, reverse=False
+):
     strip.setBrightness(max_brightness)
     num_pixels = strip.numPixels()
     upper_bar = (value / 100) * num_pixels
@@ -24,7 +26,12 @@ def progress(strip, queue, value, progress_color, base_color, max_brightness=255
         strip.setPixelColorRGB(pixel, *tween_color)
         pixels_remaining -= 1
     for i in range(pixels_remaining):
-        pixel = ((pixels_remaining - 1) - i) if reverse else ((num_pixels - pixels_remaining) + i)
+        pixel = (
+            ((pixels_remaining - 1) - i)
+            if reverse
+            else ((num_pixels - pixels_remaining) + i)
+        )
         strip.setPixelColorRGB(pixel, *base_color)
     strip.show()
-    time.sleep(0.1)
+    if not q_poll_sleep(0.1, queue):
+        return

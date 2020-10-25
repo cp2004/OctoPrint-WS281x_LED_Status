@@ -146,6 +146,7 @@ class WS281xLedStatusPlugin(
             "led_brightness": 50,
             "led_channel": 0,
             "strip_type": "WS2811_STRIP_GRB",
+            "reverse": True,
             "startup_enabled": True,
             "startup_effect": "Color Wipe",
             "startup_color": "#00ff00",
@@ -409,7 +410,7 @@ class WS281xLedStatusPlugin(
 
         self.SETTINGS["strip"] = {}
         for setting in STRIP_SETTINGS:
-            if setting == "led_invert":  # Boolean settings
+            if setting == "led_invert" or setting == "reverse":  # Boolean settings
                 self.SETTINGS["strip"][setting] = self._settings.get_boolean([setting])
             elif setting == "strip_type":  # String settings
                 self.SETTINGS["strip"]["strip_type"] = self._settings.get([setting])
