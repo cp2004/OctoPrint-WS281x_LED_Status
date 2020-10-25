@@ -34,7 +34,15 @@ BLOCKING_TEMP_GCODES = [
 ON_AT_COMMAND = "WS_LIGHTSON"
 OFF_AT_COMMAND = "WS_LIGHTSOFF"
 TORCH_AT_COMMAND = "WS_TORCH"
-AT_COMMANDS = [ON_AT_COMMAND, OFF_AT_COMMAND, TORCH_AT_COMMAND]
+TORCH_ON_AT_COMMAND = "WS_TORCH_ON"
+TORCH_OFF_AT_COMMAND = "WS_TORCH_OFF"
+AT_COMMANDS = [
+    ON_AT_COMMAND,
+    OFF_AT_COMMAND,
+    TORCH_AT_COMMAND,
+    TORCH_ON_AT_COMMAND,
+    TORCH_OFF_AT_COMMAND,
+]
 
 STANDARD_EFFECT_NICE_NAMES = {
     "Solid Color": "solid",
@@ -755,9 +763,14 @@ class WS281xLedStatusPlugin(
             self._logger.debug("Recieved gcode @ command for lights off")
             self.lights_on = False
             self.update_effect("off")
-        elif command == TORCH_AT_COMMAND:
-            self._logger.debug("Recieved gcode @ command for torch")
+        elif command == TORCH_AT_COMMAND or command == TORCH_ON_AT_COMMAND:
+            self._logger.debug("Recieved gcode @ command for torch ON")
             self.activate_torch()
+        elif command == TORCH_OFF_AT_COMMAND and self._settings.get_boolean(
+            ["torch_toggle"]
+        ):
+            self._logger.debug("Recieved gcode @ command for torch OFF")
+            self.deactivate_torch()
 
     # Softwareupdate hook
     def get_update_information(self):
