@@ -8,95 +8,94 @@ $(function () {
     function ws281xLEDStatusWizardViewModel(parameters) {
         var self = this;
 
-        function runApiCommand(command) {
-            console.log("command run");
-            console.log(command);
-            var password = $("#PasswordField").val();
+        self.passwordForPi = ko.observable("")
+        self.addUserDone = ko.observable(false)
+        self.enabledSPI = ko.observable(false)
+        self.spiBufferIncreased = ko.observable(false)
+        self.coreFreqSet = ko.observable(false)
+        self.coreFreqMinSet = ko.observable(false)
+
+        self.passwdPopoverRemove = function () {
+            $('#wizardPasswordField').popover('hide')
+        }
+
+        self.runApiCommand = function (command) {
             OctoPrint.simpleApiCommand("ws281x_led_status", command, {
-                password: password,
-            }).done(process_steps);
+                password: self.passwordForPi(),
+            }).done(self.check_config);
         }
-        function process_steps(data) {
-            if (data.errors === "password") {
-                $("#passwordIncorrect").removeClass("hidden").addClass("show");
+
+        self.runAddUser = function () {
+            self.runApiCommand("adduser")
+        }
+        self.runEnableSPI = function () {
+            self.runApiCommand("enable_spi")
+        }
+        self.runIncreaseSPIBuffer = function (){
+            self.runApiCommand("spi_buffer_increase")
+        }
+        self.runSetCoreFreq = function (){
+            self.runApiCommand("set_core_freq")
+        }
+        self.runSetCoreFreqMin = function (){
+            self.runApiCommand("set_core_freq_min")
+        }
+
+        self.check_config = function (response) {
+            if (response.errors === "password") {
+                $('#wizardPasswordField').popover('show')
             } else {
-                $("#passwordIncorrect").removeClass("show").addClass("hidden");
+                $('#wizardPasswordField').popover('hide')
             }
-            if (data.adduser_done) {
-                $("#addUser").addClass("text-success");
-                $("#addUser i")
-                    .removeClass("fa-arrow-right")
-                    .addClass("fa-check");
-                $("#addUserBtn").prop("disabled", true);
+            if (response.adduser_done) {
+                self.addUserDone(true);
             } else {
-                $("#addUserBtn")
-                    .unbind("click")
-                    .bind("click", function () {
-                        runApiCommand("adduser");
-                    });
+                self.addUserDone(false);
             }
-            if (data.spi_enabled) {
-                $("#spiEnable").addClass("text-success");
-                $("#spiEnable i")
-                    .removeClass("fa-arrow-right")
-                    .addClass("fa-check");
-                $("#enableSPIBtn").prop("disabled", true);
+            if (response.spi_enabled) {
+                self.enabledSPI(true);
             } else {
-                $("#enableSPIBtn")
-                    .unbind("click")
-                    .bind("click", function () {
-                        runApiCommand("enable_spi");
-                    });
-                $("#spiBufferIncrease").prop("disabled", true);
+                self.enabledSPI(false);
             }
-            if (data.spi_buffer_increase) {
-                $("#spiBufferIncrease").addClass("text-success");
-                $("#spiBufferIncrease i")
-                    .removeClass("fa-arrow-right")
-                    .addClass("fa-check");
-                $("#spiBufferIncreaseBtn").prop("disabled", true);
+            if (response.spi_buffer_increase) {
+                self.spiBufferIncreased(true);
             } else {
-                $("#spiBufferIncreaseBtn")
-                    .unbind("click")
-                    .bind("click", function () {
-                        runApiCommand("spi_buffer_increase");
-                    });
+                self.spiBufferIncreased(false);
             }
-            if (data.core_freq_set) {
-                $("#coreFreqSet").addClass("text-success");
-                $("#coreFreqSet i")
-                    .removeClass("fa-arrow-right")
-                    .addClass("fa-check");
-                $("#coreFreqBtn").prop("disabled", true);
+            if (response.core_freq_set) {
+                self.coreFreqSet(true);
             } else {
-                $("#coreFreqBtn")
-                    .unbind("click")
-                    .bind("click", function () {
-                        runApiCommand("set_core_freq");
-                    });
+                self.coreFreqSet(false);
             }
-            if (data.core_freq_min_set) {
-                $("#coreFreqMinSet").addClass("text-success");
-                $("#coreFreqMinSet i")
-                    .removeClass("fa-arrow-right")
-                    .addClass("fa-check");
-                $("#coreFreqMinBtn").prop("disabled", true);
+            if (response.core_freq_min_set) {
+                self.coreFreqMinSet(true);
             } else {
-                $("#coreFreqMinBtn")
-                    .unbind("click")
-                    .bind("click", function () {
-                        runApiCommand("set_core_freq_min");
-                    });
+                self.coreFreqMinSet(false);
             }
         }
-        self.name = "ws281xLEDStatusWiz";
         self.onWizardDetails = function (response) {
-            process_steps(response.ws281x_led_status.details);
+            self.check_config(response.ws281x_led_status.details);
         };
         self.onBeforeWizardFinish = function () {
-            return !$("#wizard_plugin_ws281x_led_status")
-                .find("ol li")
-                .not(".text-success").length;
+            /* Trigger Pnotify dialog:
+               if config incomplete, tell them it should be,
+               if config complete, tell them to restart.
+             */
+            if (!self.addUserDone() || !self.enabledSPI() || !self.spiBufferIncreased() || !self.coreFreqSet() || !self.coreFreqMinSet()){
+                new PNotify({
+                    'title': "WS281X LED Status: Incomplete config",
+                    'text': "Your configuration is not complete! please head to the utilities tab in the settings page to fix this!",
+                    'type': "error",
+                    "hide": false
+                });
+            } else {
+                new PNotify({
+                    'title': "Restart needed!",
+                    'text': "WS281x LED Status configuration complete. You will need to restart your Pi for the changes to take effect.",
+                    'type': 'success',
+                    'hide': false
+                })
+            }
         };
     }
     OCTOPRINT_VIEWMODELS.push({

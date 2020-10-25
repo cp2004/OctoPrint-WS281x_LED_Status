@@ -7,7 +7,7 @@
 	</div>
 	<div class="modal-body">
         <div style="min-height: 400px;">
-        <p>This runs a test of all the OS configuration required for this plugin to work. <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/SPI-Setup" target="_blank"><i class="fa fa-info-circle"></i></a></p>
+        <p>This runs a test of all the OS configuration required for this plugin to work. <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/SPI-Setup" target="_blank"><i class="fa fa-lg fa-info-circle"></i></a></p>
         <button class="btn btn-primary" id="ws_os_config_run" data-bind="click: runConfigTest, enable: !testInProgress()"><i class="fas-custom" data-bind="css: { 'fas-custom fa-custom-running': !testInProgress(), 'fa fa-spinner fa-spin': testInProgress() }"></i> Run Tests</button>
         <div id="ws_os_config_out" style="margin-top: 10px;">
             <div class="alert alert-info" data-bind="visible: testInProgress">
