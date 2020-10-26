@@ -206,6 +206,27 @@ $(function () {
                 self.settingsViewModel.settings.plugins.ws281x_led_status.torch_toggle()
             );
         };
+
+        self.onDataUpdaterPluginMessage = function (plugin, data) {
+            if (plugin !== "ws281x_led_status"){
+                return
+            }
+            if (data.type === "lights"){
+                if (data.on){
+                    self.lights_on(true)
+                } else {
+                    self.lights_on(false)
+                }
+            } else if (data.type === "torch"){
+                if (data.on){
+                    self.torch_on(true)
+                    self.torch_icon(torch_on_src)
+                } else {
+                    self.torch_on(false)
+                    self.torch_icon(torch_off_src)
+                }
+            }
+        }
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusNavbarViewModel,

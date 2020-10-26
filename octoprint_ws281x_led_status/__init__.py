@@ -269,7 +269,10 @@ class WS281xLedStatusPlugin(
 
     def on_api_command(self, command, data):
         if command == "toggle_lights":
-            self.toggle_lights()
+            if self.lights_on:
+                self.deactivate_lights()
+            else:
+                self.activate_lights()
             return self.on_api_get()
         elif command == "activate_torch":
             self.activate_torch()
@@ -295,7 +298,11 @@ class WS281xLedStatusPlugin(
         :return: None
         """
         _UI_MSG_TYPE = "os_config_test"
-        self._logger.info("Running OS config test (Log Mode)" if not send_ui else "Running OS config test (UI Mode)")
+        self._logger.info(
+            "Running OS config test (Log Mode)"
+            if not send_ui
+            else "Running OS config test (UI Mode)"
+        )
         tests = {
             "adduser": wizard.is_adduser_done,
             "spi_enabled": wizard.is_spi_enabled,
@@ -340,14 +347,17 @@ class WS281xLedStatusPlugin(
             lights_status=self.get_lights_status(), torch_status=self.get_torch_status()
         )
 
-    def toggle_lights(self):
-        self.lights_on = (
-            False if self.lights_on else True
-        )  # Switch from False -> True or True -> False
-        self.update_effect("on" if self.lights_on else "off")
-        self._logger.debug(
-            "Toggling lights to {}".format("on" if self.lights_on else "off")
-        )
+    def activate_lights(self):
+        self.lights_on = True
+        self.update_effect("on")
+        self._logger.info("Turning lights on")
+        self._send_UI_msg({"type": "lights", "on": True})
+
+    def deactivate_lights(self):
+        self._send_UI_msg({"type": "lights", "on": False})
+        self.lights_on = False
+        self.update_effect("off")
+        self._logger.info("Turning light off")
 
     def activate_torch(self):
         if self.torch_timer and self.torch_timer.is_alive():
@@ -372,6 +382,8 @@ class WS281xLedStatusPlugin(
             self.torch_on = True
             self.update_effect("torch")
 
+        self._send_UI_msg({"type": "torch", "on": True})
+
     def deactivate_torch(self):
         self._logger.debug(
             "Deactivating torch mode, torch on currently: {}".format(self.torch_on)
@@ -379,6 +391,8 @@ class WS281xLedStatusPlugin(
         if self.torch_on:
             self.torch_on = False
             self.update_effect(self.current_state)
+
+        self._send_UI_msg({"type": "torch", "on": False})
 
     def get_lights_status(self):
         return self.lights_on
@@ -760,12 +774,10 @@ class WS281xLedStatusPlugin(
 
         if command == ON_AT_COMMAND:
             self._logger.debug("Recieved gcode @ command for lights on")
-            self.lights_on = True
-            self.update_effect("on")
+            self.activate_lights()
         elif command == OFF_AT_COMMAND:
             self._logger.debug("Recieved gcode @ command for lights off")
-            self.lights_on = False
-            self.update_effect("off")
+            self.deactivate_lights()
         elif command == TORCH_AT_COMMAND or command == TORCH_ON_AT_COMMAND:
             self._logger.debug("Recieved gcode @ command for torch ON")
             self.activate_torch()
