@@ -290,12 +290,12 @@ class WS281xLedStatusPlugin(
     def run_os_config_check(self, send_ui=True):
         """
         Run a check on all of the OS level configuration required to run the plugin
-        Logs output to octoprint.log
+        Logs output to octoprint.log, and optionally to the websocket
         :param send_ui: (bool) whether to send the results to the UI
         :return: None
         """
         _UI_MSG_TYPE = "os_config_test"
-        self._logger.info("Running OS config test (api call)")
+        self._logger.info("Running OS config test (Log Mode)" if not send_ui else "Running OS config test (UI Mode)")
         tests = {
             "adduser": wizard.is_adduser_done,
             "spi_enabled": wizard.is_spi_enabled,
@@ -316,15 +316,19 @@ class WS281xLedStatusPlugin(
                     {"type": _UI_MSG_TYPE, "test": test_key, "status": status}
                 )
             statuses[test_key] = status
-            time.sleep(0.5)
+            if send_ui:
+                # Artificially increase the length of time, to make the UI look nice.
+                # Without this, there is a confusing amount of popping in/out of status etc.
+                time.sleep(0.5)
 
         log_content = "OS config test complete. Results:"
         for test_key, status in statuses.items():
             log_content = log_content + "\n| - " + test_key + ": " + status
 
-        self._send_UI_msg(
-            {"type": _UI_MSG_TYPE, "test": "complete", "status": "complete"}
-        )
+        if send_ui:
+            self._send_UI_msg(
+                {"type": _UI_MSG_TYPE, "test": "complete", "status": "complete"}
+            )
 
         self._logger.info(log_content)
 
