@@ -97,6 +97,7 @@ class WS281xLedStatusPlugin(
     # Target temperature is stored here, for use with temp tracking.
     target_temperature = {"tool": 0, "bed": 0}
     current_heater_heating = None
+    tool_to_target = 0
 
     previous_event_q = (
         []
@@ -381,25 +382,23 @@ class WS281xLedStatusPlugin(
     def get_torch_status(self):
         return self.torch_on
 
-    # My methods
     def determine_pi_version(self):
         """
-        Determines Raspberry Pi version for use in the wizard (and potentially later to warn of config issues)
+        Determines Raspberry Pi version for use in the wizard & config test
         :return: (str) Pi Model, if found, else None
         """
-        with io.open(_PROC_DT_MODEL_PATH, "rt", encoding="utf-8") as f:
-            _proc_dt_model = f.readline().strip(" \t\r\n\0")
-        if _proc_dt_model:
-            model_no = re.search(PI_REGEX, _proc_dt_model).group().strip()
-            self._logger.info("Detected running on a Raspberry Pi {}".format(model_no))
-            return model_no
-        else:
-            self._logger.error("Pi not found, why did you install this!!")
-            self._logger.error("This plugin is about to break...")
+        global _proc_dt_model
+        if not _proc_dt_model:
+            _proc_dt_model = get_proc_dt_model()
+
+        model_no = re.search(PI_REGEX, _proc_dt_model).group().strip()
+        self._logger.info("Detected running on a Raspberry Pi {}".format(model_no))
+        return model_no
 
     def refresh_settings(self):
         """
-        Update self.SETTINGS dict to custom data structure
+        Update self.SETTINGS dict to custom data structure - passed to effect runner & logged.
+        TODO convert stored settings to this format, so this is not needed!
         """
         self.tool_to_target = self._settings.get_int(["progress_heatup_tool_key"])
         if not self.tool_to_target:
@@ -807,6 +806,32 @@ class WS281xLedStatusPlugin(
 __plugin_name__ = "WS281x LED Status"
 __plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
 __plugin_version__ = __version__
+
+
+# Raspberry Pi detection, borrowed from OctoPrint's Pi support plugin
+# https://github.com/OctoPrint/OctoPrint/blob/master/src/octoprint/plugins/pi_support/__init__.py
+def get_proc_dt_model():
+    global _proc_dt_model
+
+    if _proc_dt_model is None:
+        with io.open(_PROC_DT_MODEL_PATH, "rt", encoding="utf-8") as f:
+            _proc_dt_model = f.readline().strip(" \t\r\n\0")
+
+    return _proc_dt_model
+
+
+def __plugin_check__():
+    try:
+        proc_dt_model = get_proc_dt_model()
+        if proc_dt_model is None:
+            return False
+    except Exception:
+        return False
+
+    return "raspberry pi" in proc_dt_model.lower()
+
+
+_proc_dt_model = None
 
 
 def __plugin_load__():
