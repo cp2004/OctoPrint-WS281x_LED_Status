@@ -10,10 +10,15 @@ $(function () {
 
         self.passwordForPi = ko.observable("")
         self.addUserDone = ko.observable(false)
+        self.inProgressAddUser = ko.observable(false)
         self.enabledSPI = ko.observable(false)
+        self.inProgressEnableSPI = ko.observable(false)
         self.spiBufferIncreased = ko.observable(false)
+        self.inProgressSpiBuffer = ko.observable(false)
         self.coreFreqSet = ko.observable(false)
+        self.inProgressCoreFreq = ko.observable(false)
         self.coreFreqMinSet = ko.observable(false)
+        self.inProgressCoreFreqMin = ko.observable(false)
 
         self.passwdPopoverRemove = function () {
             $('#wizardPasswordField').popover('hide')
@@ -26,18 +31,23 @@ $(function () {
         }
 
         self.runAddUser = function () {
+            self.inProgressAddUser(true);
             self.runApiCommand("adduser")
         }
         self.runEnableSPI = function () {
+            self.inProgressEnableSPI(true)
             self.runApiCommand("enable_spi")
         }
         self.runIncreaseSPIBuffer = function (){
+            self.inProgressSpiBuffer(true)
             self.runApiCommand("spi_buffer_increase")
         }
         self.runSetCoreFreq = function (){
+            self.inProgressCoreFreq(true)
             self.runApiCommand("set_core_freq")
         }
         self.runSetCoreFreqMin = function (){
+            self.inProgressCoreFreqMin(true)
             self.runApiCommand("set_core_freq_min")
         }
 
@@ -72,6 +82,13 @@ $(function () {
             } else {
                 self.coreFreqMinSet(false);
             }
+            // Set all request spinners to false
+            self.inProgressAddUser(false)
+            self.inProgressEnableSPI(false)
+            self.inProgressSpiBuffer(false)
+            self.inProgressCoreFreq(false)
+            self.inProgressCoreFreqMin(false)
+
         }
         self.onWizardDetails = function (response) {
             self.check_config(response.ws281x_led_status.details);
