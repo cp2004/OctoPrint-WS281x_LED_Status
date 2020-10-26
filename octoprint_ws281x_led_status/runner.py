@@ -87,6 +87,7 @@ class EffectRunner:
         self.reverse = all_settings["strip"]["reverse"]
         self.max_brightness = all_settings["strip"]["led_brightness"]
         self.lights_on = True
+
         self.previous_state = (
             previous_state if previous_state is not None else "startup"
         )
@@ -115,6 +116,12 @@ class EffectRunner:
             self._logger.info("No strip initialised, exiting the effect process.")
             return
 
+        if debug:
+            self.log_settings()
+        else:
+            self._logger.info(
+                "Debug logging not enabled, if you are reporting issues please enable it under 'Features' in the settings page."
+            )
         self.main_loop()
 
     def setup_custom_logger(self, path, debug):
@@ -133,6 +140,35 @@ class EffectRunner:
         self._logger.addHandler(effect_runner_handler)
         self._logger.setLevel(logging.DEBUG if debug else logging.INFO)
         self._logger.propagate = False
+
+    def log_settings(self):
+        """
+        This has to be here so I can find out what kind of settings people
+        are running when they report issues. Only logged in debug mode.
+        :return: None
+        """
+        line = "Current settings:"
+
+        # Start with strip settings
+        line = line + "\n | * STRIP SETTINGS *"
+        for key, value in self.settings["strip"].items():
+            line = line + "\n | - " + str(key) + ": " + str(value)
+
+        # effect settings
+        line = line + "\n | * EFFECT SETTINGS *"
+        for key, value in self.settings.items():
+            if key in MODES:
+                line = line + "\n | " + str(key)
+                for setting_key, setting_value in self.settings[key].items():
+                    line = (
+                        line + "\n | - " + str(setting_key) + ": " + str(setting_value)
+                    )
+
+        # extras
+        line = line + "\n | * ACTIVE TIMES *"
+        line = line + "\n | - start: " + str(self.settings["active_start"])
+        line = line + "\n | - end: " + str(self.settings["active_stop"])
+        self._logger.debug(line)
 
     def main_loop(self):
         try:
@@ -305,7 +341,7 @@ class EffectRunner:
                 strip_type=STRIP_TYPES[strip_settings["strip_type"]],
             )
             strip.begin()
-            self._logger.info("Strip object successfully initialised")
+            self._logger.info("Strip successfully initialised")
             return strip
         except Exception as e:  # Probably wrong settings...
             self._logger.error("Strip failed to initialize, no effects will be run.")
