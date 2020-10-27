@@ -155,7 +155,7 @@ class WS281xLedStatusPlugin(
             "led_brightness": 50,
             "led_channel": 0,
             "strip_type": "WS2811_STRIP_GRB",
-            "reverse": True,
+            "reverse": False,
             "startup_enabled": True,
             "startup_effect": "Color Wipe",
             "startup_color": "#00ff00",
