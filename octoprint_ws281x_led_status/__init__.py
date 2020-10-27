@@ -250,8 +250,6 @@ class WS281xLedStatusPlugin(
         self._logger.info(
             "You will need to restart your Pi for the changes to take effect"
         )
-        # TODO make this a popup? not very useful here
-        # Requires implementing a plugin message system...
 
     # Simple API plugin
     def get_api_commands(self):
@@ -588,19 +586,17 @@ class WS281xLedStatusPlugin(
         self.update_effect("idle")
 
     def on_event(self, event, payload):
-        try:
-            if event == Events.PRINT_DONE:
-                self.cooling = True
-            elif event == Events.PRINT_STARTED:
-                self.current_progress = 0
-            elif event == Events.PRINT_RESUMED:
-                self.update_effect("progress_print", self.current_progress)
+        if event == Events.PRINT_DONE:
+            self.cooling = True
+        elif event == Events.PRINT_STARTED:
+            self.current_progress = 0
+        elif event == Events.PRINT_RESUMED:
+            self.update_effect("progress_print", self.current_progress)
 
+        if event in self.supported_events:
             self.update_effect(self.supported_events[event])
             # add all events to a backlog, so we know what the last one was.
             self.add_to_backlog(event)
-        except KeyError:  # The event isn't supported
-            pass
 
     def on_print_progress(self, storage="", path="", progress=1):
         if (progress == 100 and self.current_state == "success") or self.heating:
