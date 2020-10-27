@@ -9,7 +9,7 @@
 
 # master, rc and prerelease shall not use the lookup table, only tags
 master
-prerelease
+pre-release
 rc/.*
 
 # neither should disconnected checkouts, e.g. 'git checkout <tag>'
