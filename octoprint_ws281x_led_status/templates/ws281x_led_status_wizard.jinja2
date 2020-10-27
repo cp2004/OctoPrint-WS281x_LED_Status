@@ -32,7 +32,6 @@
             <button style="margin-left: 10px" id="coreFreqBtn" data-bind="enable: !coreFreqSet(), click: runSetCoreFreq" class="btn btn-success"><i class="fa" data-bind="css: {'fa-terminal': !coreFreqSet()  &&!inProgressCoreFreq , 'fa-check': coreFreqSet, 'fa-spinner fa-spin': inProgressCoreFreq } " aria-hidden="true"></i> Run</button></h4>
         <p class="help-block">
             {% if plugin_ws281x_led_status_pi_model != '4' %}
-            Set the core_freq to 250 to <br>
             Sets <code>core_freq=250</code> in <code>/boot/config.txt</code>
             {% else %}
             This step is not required on your Raspberry Pi model, so it is marked as completed.
