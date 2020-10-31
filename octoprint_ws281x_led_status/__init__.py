@@ -24,7 +24,7 @@ from ._version import get_versions
 __version__ = get_versions()["version"]
 del get_versions
 
-PI_REGEX = r"(?<=Raspberry Pi)(.*)(?=Model)"
+PI_REGEX = r"Raspberry Pi (\w*)"
 _PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 BLOCKING_TEMP_GCODES = [
     "M109",
@@ -407,7 +407,15 @@ class WS281xLedStatusPlugin(
         if not _proc_dt_model:
             _proc_dt_model = get_proc_dt_model()
 
-        model_no = re.search(PI_REGEX, _proc_dt_model).group().strip()
+        try:
+            model_no = re.search(PI_REGEX, _proc_dt_model).group(1).strip()
+        except IndexError:
+            self._logger.error(
+                "Pi model string detected as `{}`, unable to be parsed by regex".format(
+                    _proc_dt_model
+                )
+            )
+            raise
         self._logger.info("Detected running on a Raspberry Pi {}".format(model_no))
         return model_no
 
@@ -819,6 +827,8 @@ __plugin_name__ = "WS281x LED Status"
 __plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
 __plugin_version__ = __version__
 
+_proc_dt_model = None
+
 
 # Raspberry Pi detection, borrowed from OctoPrint's Pi support plugin
 # https://github.com/OctoPrint/OctoPrint/blob/master/src/octoprint/plugins/pi_support/__init__.py
@@ -841,9 +851,6 @@ def __plugin_check__():
         return False
 
     return "raspberry pi" in proc_dt_model.lower()
-
-
-_proc_dt_model = None
 
 
 def __plugin_load__():

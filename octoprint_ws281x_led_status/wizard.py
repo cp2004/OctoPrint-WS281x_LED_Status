@@ -98,10 +98,9 @@ def is_spi_buffer_increased(pi_model):
 
 
 def is_core_freq_set(pi_model):
-    if int(pi_model) == 4:  # Pi 4's default is 500, which is compatible with SPI.
-        return (
-            True  # any change to core_freq is ignored on a Pi 4, so let's not bother.
-        )
+    if pi_model == "4":  # Pi 4's default is 500, which is compatible with SPI.
+        return True
+        # any change to core_freq is ignored on a Pi 4, so let's not bother.
     with io.open("/boot/config.txt") as file:
         for line in file:
             if line.startswith("core_freq=250"):
@@ -110,12 +109,9 @@ def is_core_freq_set(pi_model):
 
 
 def is_core_freq_min_set(pi_model):
-    if (
-        int(pi_model) == 4
-    ):  # Pi 4 has a variable clock speed, which messes up SPI timing
-        with io.open(
-            "/boot/config.txt"
-        ) as file:  # This is only required on pi 4, not other models.
+    if pi_model == "4":
+        # Pi 4 has a variable clock speed, which messes up SPI timing
+        with io.open("/boot/config.txt") as file:
             for line in file:
                 if line.startswith("core_freq_min=500"):
                     return True
