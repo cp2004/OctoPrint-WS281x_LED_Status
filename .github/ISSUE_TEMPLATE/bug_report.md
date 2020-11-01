@@ -9,6 +9,7 @@ assignees: ''
 <!-- PLEASE don't delete any of the sections below, you will more than likely be asked for extra information if you do.
 
 **Description of the bug**
+
 <!-- Describe the bug as best as you can. -->
 
 **Steps to reproduce**
@@ -27,10 +28,13 @@ You may be asked to enable debug logging under settings > features to provide ex
 -->
 
 **Version of plugin and OctoPrint**
+
 <!-- Can be found within OctoPrint on the plugin manager page -->
 
 **(If applicable) Browser version & browser error console**
+
 <!-- Only needed if you are reporting an issue with the web interface -->
 
 **Additional context**
+
 <!-- Anything else to add? -->

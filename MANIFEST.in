@@ -1,4 +1,6 @@
 include README.md
-recursive-include octoprint_rgb_led_status/templates *
-recursive-include octoprint_rgb_led_status/translations *
-recursive-include octoprint_rgb_led_status/static *
+include versioneer.py
+include octoprint_ws281x_led_status/_version.py
+recursive-include octoprint_ws281x_led_status/templates *
+recursive-include octoprint_ws281x_led_status/translations *
+recursive-include octoprint_ws281x_led_status/static *

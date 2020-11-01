@@ -1,0 +1,40 @@
+exclude: ^(translations/|.*\.css|.*\.svg|octoprint_ws281x_led_status/static/webfonts)
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: fix-encoding-pragma
+  - repo: https://github.com/OctoPrint/codemods
+    rev: main
+    hooks:
+      - id: codemod_dict_to_literal
+        stages: ["manual"]
+      - id: codemod_set_to_literal
+        stages: ["manual"]
+      - id: codemod_not_in
+        stages: ["manual"]
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.5.4
+    hooks:
+      - id: isort
+  - repo: https://github.com/psf/black
+    rev: stable
+    hooks:
+      - id: black
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.1
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-bugbear
+  - repo: https://github.com/prettier/prettier
+    rev: master
+    hooks:
+      - id: prettier

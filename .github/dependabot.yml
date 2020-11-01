@@ -10,5 +10,5 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "maintenance"
-    labels: 
-    - dependencies
+    labels:
+      - dependencies

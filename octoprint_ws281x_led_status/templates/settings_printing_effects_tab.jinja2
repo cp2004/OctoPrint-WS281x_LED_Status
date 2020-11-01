@@ -1,4 +1,4 @@
-<h5>Printing Effects</h5>
+<h5>Printing Effects <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#printing-event-tracking" target="_blank"><i class="fa fa-lg fa-info-circle text-info" aria-hidden="true"></i></a></h5>
 <form class="form-horizontal">
     <label class="checkbox inline">
     <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.startup_enabled">Enable startup effect
@@ -14,11 +14,11 @@
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.startup_color">
         <label class="inline"> Delay </label>
         <div class="input-append">
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.startup_delay">
+            <input type="number" step="0.1" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.startup_delay">
             <span class="add-on">ms</span>
         </div>
     </div>
-<br>
+<hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.idle_enabled">Enable idle effect
     </label>
@@ -33,12 +33,11 @@
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.idle_color">
         <label class="inline"> Delay </label>
         <div class="input-append">
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.idle_delay">
+            <input type="number" step="0.1" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.idle_delay">
             <span class="add-on">ms</span>
         </div>
-
     </div>
-<br>
+<hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.disconnected_enabled">Enable disconnected effect
     </label>
@@ -53,11 +52,11 @@
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.disconnected_color">
         <label class="inline"> Delay </label>
         <div class="input-append">
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.disconnected_delay">
+            <input type="number" step="0.1" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.disconnected_delay">
             <span class="add-on">ms</span>
         </div>
     </div>
-<br>
+<hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.success_enabled">Enable print success effect
     </label>
@@ -72,7 +71,7 @@
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.success_color">
         <label class="inline"> Delay </label>
         <div class="input-append">
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.success_delay">
+            <input type="number" step="0.1" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.success_delay">
             <span class="add-on">ms</span>
         </div>
     </div>
@@ -84,7 +83,7 @@
         </div>
         <p class="help-block">Set this to 0 and the idle effect will not resume - it will remain 'finished'</p>
     </div>
-<br>
+<hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.failed_enabled">Enable failed effect
     </label>
@@ -99,11 +98,11 @@
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.failed_color">
         <label class="inline"> Delay </label>
         <div class="input-append">
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.failed_delay">
+            <input type="number" step="0.1" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.failed_delay">
             <span class="add-on">ms</span>
         </div>
     </div>
-<br>
+<hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.paused_enabled">Enable paused effect
     </label>
@@ -118,11 +117,11 @@
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.paused_color">
         <label class="inline"> Delay </label>
         <div class="input-append">
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.paused_delay">
+            <input type="number" step="0.1" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.paused_delay">
             <span class="add-on">ms</span>
         </div>
     </div>
-<br>
+<hr>
     <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.printing_enabled">Enable printing effect
     </label>
@@ -137,10 +136,9 @@
         <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.printing_color">
         <label class="inline"> Delay </label>
         <div class="input-append">
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.printing_delay">
+            <input type="number" step="0.1" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.printing_delay">
             <span class="add-on">ms</span>
         </div>
     </div>
     <p class="help-block"><span class="label label-warning">Warning</span> Enabling this effect takes priority over the progress efffect</p>
 </form>
-
