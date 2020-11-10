@@ -48,7 +48,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: 🏗 Set up test dependencies
         run: |
-          pip install octoprint
+          pip install octoprint pytest
           pip install -e .
       - name: 🚀 Run test suite
         run: |
@@ -65,6 +65,7 @@ jobs:
           python-version: 3.7
       - name: 🏗 Set up test dependencies
         run: |
+          pip install octoprint
           pip install -e .
       - name: 🚀 Run test suite
         run: |
@@ -91,7 +92,8 @@ jobs:
       - name: 🚀 Install wheel
         if: matrix.installable == 'wheel'
         run: |
-          pip install dist/OctoPrint_WS281x_LED_Status-*-py2.py3-none-any.whl
+          ls dist
+          pip install dist/dist/OctoPrint_WS281x_LED_Status-*-py3-none-any.whl'
       - name: 🚀 Install source tarball
         if: matrix.installable == 'sdist'
         run: |
