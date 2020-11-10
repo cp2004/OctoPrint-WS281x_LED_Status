@@ -65,7 +65,7 @@ jobs:
           python-version: 3.7
       - name: 🏗 Set up test dependencies
         run: |
-          pip install octoprint
+          pip install octoprint flake8
           pip install -e .
       - name: 🚀 Run test suite
         run: |
