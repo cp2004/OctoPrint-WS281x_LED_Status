@@ -6,7 +6,7 @@ on:
   push:
   pull_request:
     types: [opened, synchronize, reopened]
-   release:
+  release:
     types: [published, prereleased]
     
 jobs:
