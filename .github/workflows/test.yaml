@@ -1,0 +1,100 @@
+# Run unit tests against Python 2.7, 3.6+
+# Based on OctoPrint's CI build file https://github.com/OctoPrint/OctoPrint/blob/master/.github/workflows/build.yml by @foosel
+
+name: Test
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  release:
+    types: [published, prereleased]
+    
+jobs:
+  build:
+    name: 🔨 Build distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: 🏗 Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: 🏗 Install build dependencies
+        run: |
+          python -m pip install wheel --user
+          python -m pip install octoprint
+      - name: 🔨 Build a binary wheel and a source tarball
+        run: |
+          python setup.py sdist bdist_wheel
+      - name: ⬆ Upload build result
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
+
+  test-unit:
+    name: 🧪 Unit tests
+    strategy:
+      matrix:
+        python: ["2.7", "3.7", "3.8", "3.9"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 🏗 Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: 🏗 Set up test dependencies
+        run: |
+          pip install octoprint pytest
+          pip install -e .
+      - name: 🚀 Run test suite
+        run: |
+          pytest
+   
+  test-flake8:
+    name: 🧪 Flake8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 🏗 Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: 🏗 Set up test dependencies
+        run: |
+          pip install octoprint
+          pip install -e .
+      - name: 🚀 Run test suite
+        run: |
+          flake8 octoprint_ws281x_led_status tests setup.py
+
+  test-install:
+    name: 🧪 Installation tests
+    needs: build
+    strategy:
+      matrix:
+        python: ["2.7", "3.7", "3.8"]
+        installable: ["wheel", "sdist"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇ Download build result
+        uses: actions/download-artifact@v1
+        with:
+          name: dist
+          path: dist
+      - name: 🏗 Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: 🚀 Install wheel
+        if: matrix.installable == 'wheel'
+        run: |
+          ls dist
+          pip install dist/OctoPrint_WS281x_LED_Status-*-py3-none-any.whl
+      - name: 🚀 Install source tarball
+        if: matrix.installable == 'sdist'
+        run: |
+          pip install dist/OctoPrint_WS281x_LED_Status-*.tar.gz
