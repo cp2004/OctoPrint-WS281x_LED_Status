@@ -80,21 +80,14 @@ jobs:
         installable: ["wheel", "sdist"]
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇ Download build result
-        uses: actions/download-artifact@v1
-        with:
-          name: dist
-          path: dist
+      - uses: actions/checkout@v2
       - name: 🏗 Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
-      - name: 🚀 Install wheel
-        if: matrix.installable == 'wheel'
+      - name: 🚀 Install OctoPrint
         run: |
-          ls dist
-          pip install dist/OctoPrint_WS281x_LED_Status-*-py3-none-any.whl
-      - name: 🚀 Install source tarball
-        if: matrix.installable == 'sdist'
+          pip install octoprint
+      - name: 🚀 Test install of plugin
         run: |
-          pip install dist/OctoPrint_WS281x_LED_Status-*.tar.gz
+          pip install .
