@@ -93,7 +93,7 @@ jobs:
         if: matrix.installable == 'wheel'
         run: |
           ls dist
-          pip install dist/dist/OctoPrint_WS281x_LED_Status-*-py3-none-any.whl
+          pip install dist/OctoPrint_WS281x_LED_Status-*-py3-none-any.whl
       - name: 🚀 Install source tarball
         if: matrix.installable == 'sdist'
         run: |
