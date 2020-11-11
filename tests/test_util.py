@@ -3,6 +3,8 @@ from __future__ import absolute_import, division, unicode_literals
 
 import unittest
 
+from octoprint.util import to_bytes
+
 from . import util
 
 
@@ -26,7 +28,7 @@ class WS281xUtilTestCase(unittest.TestCase):
 
         tests = {
             (25, 100): 62,
-            (46, 81): 64,
+            (46, 81): 63,
             (22, 79): 50,
             (83, 98): 90,
             (28, 85): 56,
@@ -74,7 +76,7 @@ class WS281xUtilTestCase(unittest.TestCase):
             "",
             ("", None),
             password="raspberry",
-            called_once_with=bytes("raspberry\n", "utf-8"),
+            called_once_with=to_bytes("raspberry\n", "utf-8"),
         )
 
     def check_sys_command(

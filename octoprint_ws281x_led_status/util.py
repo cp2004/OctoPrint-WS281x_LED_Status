@@ -26,7 +26,7 @@ def blend_two_colors(colour1, colour2, percent_of_c1=None):
 
 
 def average(a, b):
-    return round((a + b) / 2)
+    return int((a + b) / 2)
 
 
 def milli_sleep(m_secs):
