@@ -8,7 +8,7 @@ import time
 import rpi_ws281x
 from rpi_ws281x import PixelStrip
 
-from octoprint_ws281x_led_status.effects import basic, progress
+from octoprint_ws281x_led_status.effects import progress, standard
 from octoprint_ws281x_led_status.util import hex_to_rgb
 
 KILL_MSG = "KILL"
@@ -41,18 +41,18 @@ STRIP_TYPES = {  # Adding any more strips requires a request, then testing
     "SK6812_STRIP_BGRW": rpi_ws281x.SK6812_STRIP_BGRW,
 }
 EFFECTS = {
-    "solid": basic.solid_color,
-    "wipe": basic.color_wipe,
-    "wipe2": basic.color_wipe_2,
-    "pulse": basic.simple_pulse,
-    "rainbow": basic.rainbow,
-    "cycle": basic.rainbow_cycle,
-    "bounce": basic.bounce,
-    "bounce_solo": basic.solo_bounce,
-    "random": basic.random_single,
-    "blink": basic.blink,
-    "cross": basic.crossover,
-    "balls": basic.bouncy_balls,
+    "solid": standard.solid_color,
+    "wipe": standard.color_wipe,
+    "wipe2": standard.color_wipe_2,
+    "pulse": standard.simple_pulse,
+    "rainbow": standard.rainbow,
+    "cycle": standard.rainbow_cycle,
+    "bounce": standard.bounce,
+    "bounce_solo": standard.solo_bounce,
+    "random": standard.random_single,
+    "blink": standard.blink,
+    "cross": standard.crossover,
+    "balls": standard.bouncy_balls,
     "progress_print": progress.progress,
     "progress_heatup": progress.progress,
     "progress_cooling": progress.progress,
