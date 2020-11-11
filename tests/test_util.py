@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, unicode_literals
 
-import subprocess
 import unittest
-
-import mock
 
 from . import util
 
@@ -51,7 +48,6 @@ class WS281xUtilTestCase(unittest.TestCase):
         }
 
         for test_case, test_result in tests.items():
-            result = wheel(test_case)
             self.assertTupleEqual(wheel(test_case), test_result)
 
     def test_basic_system_command(self):

@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import math
-import time
 
 from octoprint_ws281x_led_status.util import blend_two_colors, q_poll_sleep
 

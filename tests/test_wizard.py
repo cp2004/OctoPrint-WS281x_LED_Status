@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import subprocess
 import unittest
 
 import mock
-from flask import Flask, jsonify
 
 from .util import setup_mock_popen
 

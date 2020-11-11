@@ -5,8 +5,6 @@ import unittest
 
 import mock
 
-from octoprint_ws281x_led_status import WS281xLedStatusPlugin
-
 OPEN_SIGNATURE = "io.open"
 DT_MODEL = "Raspberry Pi Model F Rev 1.1"
 
