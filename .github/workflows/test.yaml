@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened]
   release:
     types: [published, prereleased]
-    
+
 jobs:
   build:
     name: 🔨 Build distribution
@@ -53,7 +53,7 @@ jobs:
       - name: 🚀 Run test suite
         run: |
           pytest
-   
+
   test-flake8:
     name: 🧪 Flake8
     runs-on: ubuntu-latest
@@ -71,7 +71,7 @@ jobs:
         run: |
           flake8 octoprint_ws281x_led_status tests setup.py
 
-  test-install:
+  test-install-old:
     name: 🧪 Installation tests
     needs: build
     strategy:
@@ -90,3 +90,30 @@ jobs:
       - name: 🚀 Test install of plugin
         run: |
           pip install .
+
+  test-install:
+    name: 🧪 Installation tests
+    needs: build
+    strategy:
+      matrix:
+        python: [ "2.7", "3.7", "3.8" ]
+        installable: [ "wheel", "sdist" ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇ Download build result
+        uses: actions/download-artifact@v1
+        with:
+          name: dist
+          path: dist
+      - name: 🏗 Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: 🚀 Install wheel
+        if: matrix.installable == 'wheel'
+        run: |
+          pip install dist/OctoPrint_WS281x_LED-Status-*-py2.py3-none-any.whl
+      - name: 🚀 Install source tarball
+        if: matrix.installable == 'sdist'
+        run: |
+          pip install dist/OctoPrint-WS281x*.tar.gz
