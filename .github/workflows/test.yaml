@@ -72,7 +72,7 @@ jobs:
         run: |
           flake8 octoprint_ws281x_led_status tests setup.py
 
-  test-install-old:
+  test-install:
     name: 🧪 Installation tests
     needs: build
     strategy:
