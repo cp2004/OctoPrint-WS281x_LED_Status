@@ -6,8 +6,6 @@ import threading
 # noinspection PyPackageRequirements
 from flask import jsonify
 
-from octoprint_ws281x_led_status import wizard
-
 # Define API commands
 CMD_LIGHTS_ON = "lights_on"
 CMD_LIGHTS_OFF = "lights_off"
@@ -55,7 +53,9 @@ class PluginApi:
             self.start_os_config_test()
         elif command.startswith("wiz"):
             # Pass to wizard command handler
-            return wizard.run_wizard_command(command, data, self.plugin.PI_MODEL)
+            return self.plugin.wizard.on_api_command(
+                command, data, self.plugin.PI_MODEL
+            )
 
         return self.on_api_get()
 

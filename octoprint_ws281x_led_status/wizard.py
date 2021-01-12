@@ -7,7 +7,7 @@ import logging
 # noinspection PyPackageRequirements
 from flask import jsonify
 
-from octoprint_ws281x_led_status import api, util
+from octoprint_ws281x_led_status import api
 from octoprint_ws281x_led_status.util import run_system_command
 
 
