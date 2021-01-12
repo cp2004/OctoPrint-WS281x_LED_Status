@@ -11,7 +11,7 @@ import octoprint.plugin
 from flask import jsonify
 from octoprint.events import Events
 
-from octoprint_ws281x_led_status import wizard, constants
+from octoprint_ws281x_led_status import api, constants, wizard
 from octoprint_ws281x_led_status.runner import EffectRunner
 
 from ._version import get_versions
@@ -32,6 +32,9 @@ class WS281xLedStatusPlugin(
     octoprint.plugin.EventHandlerPlugin,
     octoprint.plugin.RestartNeedingPlugin,
 ):
+    # Submodules
+    api = None  # type: api.PluginApi
+
     current_effect_process = None  # multiprocessing Process object
     current_state = (
         "startup"  # Used to put the old effect back on settings change/light switch
@@ -61,6 +64,10 @@ class WS281xLedStatusPlugin(
 
     torch_timer = None  # Timer for torch function
     return_timer = None  # Timer object when we want to return to idle.
+
+    # Called when injections are complete
+    def initialize(self):
+        self.api = api.PluginApi(self)
 
     # Asset plugin
     def get_assets(self):
@@ -206,40 +213,13 @@ class WS281xLedStatusPlugin(
 
     # Simple API plugin
     def get_api_commands(self):
-        return {
-            "toggle_lights": [],
-            "activate_torch": [],
-            "deactivate_torch": [],
-            "adduser": ["password"],
-            "enable_spi": ["password"],
-            "spi_buffer_increase": ["password"],
-            "set_core_freq": ["password"],
-            "set_core_freq_min": ["password"],
-            "test_os_config": [],
-        }
+        return self.api.get_api_commands()
 
     def on_api_command(self, command, data):
-        if command == "toggle_lights":
-            if self.lights_on:
-                self.deactivate_lights()
-            else:
-                self.activate_lights()
-            return self.on_api_get()
-        elif command == "activate_torch":
-            self.activate_torch()
-            return self.on_api_get()
-        elif command == "deactivate_torch":
-            self.deactivate_torch()
-            return self.on_api_get()
-        elif command == "test_os_config":
-            thread = threading.Thread(
-                target=self.run_os_config_check, name="WS281x OS Config Test"
-            )
-            thread.daemon = True
-            thread.start()
-            return
+        return self.api.on_api_command(command, data)
 
-        return wizard.run_wizard_command(command, data, self.PI_MODEL)
+    def on_api_get(self, request):
+        return self.api.on_api_get(request=request)
 
     def run_os_config_check(self, send_ui=True):
         """
@@ -735,7 +715,10 @@ class WS281xLedStatusPlugin(
         elif command == constants.OFF_AT_COMMAND:
             self._logger.debug("Recieved gcode @ command for lights off")
             self.deactivate_lights()
-        elif command == constants.TORCH_AT_COMMAND or command == constants.TORCH_ON_AT_COMMAND:
+        elif (
+            command == constants.TORCH_AT_COMMAND
+            or command == constants.TORCH_ON_AT_COMMAND
+        ):
             self._logger.debug("Recieved gcode @ command for torch ON")
             self.activate_torch()
         elif command == constants.TORCH_OFF_AT_COMMAND and self._settings.get_boolean(
