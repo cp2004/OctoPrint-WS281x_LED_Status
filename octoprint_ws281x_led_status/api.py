@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 import threading
 
+# noinspection PyPackageRequirements
 from flask import jsonify
 
 from octoprint_ws281x_led_status import wizard

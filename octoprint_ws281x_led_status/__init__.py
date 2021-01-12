@@ -7,8 +7,13 @@ import re
 import threading
 import time
 
+# noinspection PyPackageRequirements
 import octoprint.plugin
+
+# noinspection PyPackageRequirements
 from flask import jsonify
+
+# noinspection PyPackageRequirements
 from octoprint.events import Events
 
 from octoprint_ws281x_led_status import api, constants, wizard
@@ -34,6 +39,7 @@ class WS281xLedStatusPlugin(
 ):
     # Submodules
     api = None  # type: api.PluginApi
+    wizard = None  # type: wizard.PluginWizard
 
     current_effect_process = None  # multiprocessing Process object
     current_state = (
@@ -68,6 +74,7 @@ class WS281xLedStatusPlugin(
     # Called when injections are complete
     def initialize(self):
         self.api = api.PluginApi(self)
+        self.wizard = wizard.PluginWizard(self)
 
     # Asset plugin
     def get_assets(self):
@@ -184,7 +191,7 @@ class WS281xLedStatusPlugin(
         return {
             "standard_names": constants.STANDARD_EFFECT_NICE_NAMES,
             "pi_model": self.PI_MODEL,
-            "strip_types": STRIP_TYPES,
+            "strip_types": constants.STRIP_TYPES,
             "timezone": self.get_timezone(),
             "version": self._plugin_version,
         }
@@ -193,15 +200,21 @@ class WS281xLedStatusPlugin(
     def get_timezone():
         return time.tzname
 
-    # Wizard plugin bits
+    # Wizard plugin
     def is_wizard_required(self):
-        for item in self.get_wizard_details().values():
-            if not item:
+        for cmd in [
+            api.WIZ_ADDUSER,
+            api.WIZ_ENABLE_SPI,
+            api.WIZ_INCREASE_BUFFER,
+            api.WIZ_SET_CORE_FREQ,
+            api.WIZ_SET_FREQ_MIN,
+        ]:
+            if not self.wizard.validate(cmd):
                 return True
         return False
 
     def get_wizard_details(self):
-        return wizard.get_wizard_info(self.PI_MODEL)
+        return self.wizard.on_api_get()
 
     def get_wizard_version(self):
         return 1
@@ -235,11 +248,11 @@ class WS281xLedStatusPlugin(
             else "Running OS config test (UI Mode)"
         )
         tests = {
-            "adduser": wizard.is_adduser_done,
-            "spi_enabled": wizard.is_spi_enabled,
-            "spi_buffer_increase": wizard.is_spi_buffer_increased,
-            "set_core_freq": wizard.is_core_freq_set,
-            "set_core_freq_min": wizard.is_core_freq_min_set,
+            "adduser": self.wizard.is_adduser_done,
+            "spi_enabled": self.wizard.is_spi_enabled,
+            "spi_buffer_increase": self.wizard.is_spi_buffer_increased,
+            "set_core_freq": self.wizard.is_core_freq_set,
+            "set_core_freq_min": self.wizard.is_core_freq_min_set,
         }
         statuses = {}
 
@@ -248,7 +261,7 @@ class WS281xLedStatusPlugin(
                 self._send_UI_msg(
                     {"type": _UI_MSG_TYPE, "test": test_key, "status": "in_progress"}
                 )
-            status = "passed" if tests[test_key](self.PI_MODEL) else "failed"
+            status = "passed" if tests[test_key]() else "failed"
             if send_ui:
                 self._send_UI_msg(
                     {"type": _UI_MSG_TYPE, "test": test_key, "status": status}
@@ -272,11 +285,6 @@ class WS281xLedStatusPlugin(
 
     def _send_UI_msg(self, data):
         self._plugin_manager.send_plugin_message("ws281x_led_status", data)
-
-    def on_api_get(self, request=None):
-        return jsonify(
-            lights_status=self.get_lights_status(), torch_status=self.get_torch_status()
-        )
 
     def activate_lights(self):
         self.lights_on = True
