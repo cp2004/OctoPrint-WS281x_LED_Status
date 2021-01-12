@@ -5,71 +5,10 @@ import logging
 import re
 import time
 
-import rpi_ws281x
 from rpi_ws281x import PixelStrip
 
-from octoprint_ws281x_led_status.effects import progress, standard
+from octoprint_ws281x_led_status import constants
 from octoprint_ws281x_led_status.util import hex_to_rgb
-
-KILL_MSG = "KILL"
-STRIP_SETTINGS = [  # ALL LED SETTINGS, for rpi_ws281x.PixelStrip
-    "led_count",
-    "led_pin",
-    "led_freq_hz",
-    "led_dma",
-    "led_invert",
-    "led_brightness",
-    "led_channel",
-    "strip_type",
-    "reverse",
-]
-STRIP_TYPES = {  # Adding any more strips requires a request, then testing
-    "WS2811_STRIP_GRB": rpi_ws281x.WS2811_STRIP_GRB,
-    "WS2812_STRIP": rpi_ws281x.WS2812_STRIP,
-    "WS2811_STRIP_RGB": rpi_ws281x.WS2811_STRIP_RGB,
-    "WS2811_STRIP_RBG": rpi_ws281x.WS2811_STRIP_RBG,
-    "WS2811_STRIP_GBR": rpi_ws281x.WS2811_STRIP_GBR,
-    "WS2811_STRIP_BGR": rpi_ws281x.WS2811_STRIP_BGR,
-    "WS2811_STRIP_BRG": rpi_ws281x.WS2811_STRIP_BRG,
-    "SK6812_STRIP": rpi_ws281x.SK6812_STRIP,
-    "SK6812W_STRIP": rpi_ws281x.SK6812W_STRIP,
-    "SK6812_STRIP_RGBW": rpi_ws281x.SK6812_STRIP_RGBW,
-    "SK6812_STRIP_RBGW": rpi_ws281x.SK6812_STRIP_RBGW,
-    "SK6812_STRIP_GRBW": rpi_ws281x.SK6812_STRIP_GRBW,
-    "SK6812_STRIP_GBRW": rpi_ws281x.SK6812_STRIP_GBRW,
-    "SK6812_STRIP_BRGW": rpi_ws281x.SK6812_STRIP_BRGW,
-    "SK6812_STRIP_BGRW": rpi_ws281x.SK6812_STRIP_BGRW,
-}
-EFFECTS = {
-    "solid": standard.solid_color,
-    "wipe": standard.color_wipe,
-    "wipe2": standard.color_wipe_2,
-    "pulse": standard.simple_pulse,
-    "rainbow": standard.rainbow,
-    "cycle": standard.rainbow_cycle,
-    "bounce": standard.bounce,
-    "bounce_solo": standard.solo_bounce,
-    "random": standard.random_single,
-    "blink": standard.blink,
-    "cross": standard.crossover,
-    "balls": standard.bouncy_balls,
-    "progress_print": progress.progress,
-    "progress_heatup": progress.progress,
-    "progress_cooling": progress.progress,
-}
-MODES = [
-    "startup",
-    "idle",
-    "disconnected",
-    "progress_print",
-    "progress_heatup",
-    "progress_cooling",
-    "failed",
-    "success",
-    "paused",
-    "printing",
-    "torch",
-]
 
 # Example command: M150 R10 G200 B300
 # more -> https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#m150-intercept
@@ -157,7 +96,7 @@ class EffectRunner:
         # effect settings
         line = line + "\n | * EFFECT SETTINGS *"
         for key, value in self.settings.items():
-            if key in MODES:
+            if key in constants.MODES:
                 line = line + "\n | " + str(key)
                 for setting_key, setting_value in self.settings[key].items():
                     line = (
@@ -178,7 +117,7 @@ class EffectRunner:
                     msg = self.queue.get()  # The ONLY place the queue should be 'got'
                 if msg:
                     parsed = self.parse_q_msg(msg)  # Effects are run from parse_q_msg
-                    if parsed == KILL_MSG:
+                    if parsed == constants.KILL_MSG:
                         return
                     elif parsed:
                         msg = parsed  # So that previous state can return after 'lights on'
@@ -191,7 +130,7 @@ class EffectRunner:
     def parse_q_msg(self, msg):
         if not msg:
             self.startup_effect()  # Will probably never happen, but just in case
-        if msg == KILL_MSG:
+        if msg == constants.KILL_MSG:
             self.blank_leds()
             self._logger.info("Kill message recieved, Bye!")
             return msg
@@ -246,7 +185,7 @@ class EffectRunner:
                 brightness = min(int(match.group("brightness")), 255)
 
         if self.check_times() and self.lights_on:  # Respect lights on/off
-            EFFECTS["solid"](
+            constants.EFFECTS["solid"](
                 self.strip, self.queue, (red, green, blue), max_brightness=brightness
             )
         else:
@@ -261,7 +200,7 @@ class EffectRunner:
     def progress_effect(self, mode, value):
         if self.check_times() and self.lights_on:
             effect_settings = self.settings[mode]
-            EFFECTS[mode](
+            constants.EFFECTS[mode](
                 self.strip,
                 self.queue,
                 int(value),
@@ -276,7 +215,7 @@ class EffectRunner:
     def standard_effect(self, mode):
         if self.check_times() and self.lights_on:
             effect_settings = self.settings[mode]
-            EFFECTS[effect_settings["effect"]](
+            constants.EFFECTS[effect_settings["effect"]](
                 self.strip,
                 self.queue,
                 hex_to_rgb(effect_settings["color"]),
@@ -288,7 +227,7 @@ class EffectRunner:
 
     def blank_leds(self):
         """Set LEDs to off, wait 0.1secs to prevent CPU burn"""
-        EFFECTS["solid"](
+        constants.EFFECTS["solid"](
             self.strip,
             self.queue,
             [0, 0, 0],
@@ -338,7 +277,7 @@ class EffectRunner:
                 invert=strip_settings["led_invert"],
                 brightness=strip_settings["led_brightness"],
                 channel=strip_settings["led_channel"],
-                strip_type=STRIP_TYPES[strip_settings["strip_type"]],
+                strip_type=constants.STRIP_TYPES[strip_settings["strip_type"]],
             )
             strip.begin()
             self._logger.info("Strip successfully initialised")

@@ -11,53 +11,13 @@ import octoprint.plugin
 from flask import jsonify
 from octoprint.events import Events
 
-from octoprint_ws281x_led_status import wizard
-from octoprint_ws281x_led_status.runner import (
-    MODES,
-    STRIP_SETTINGS,
-    STRIP_TYPES,
-    EffectRunner,
-)
+from octoprint_ws281x_led_status import wizard, constants
+from octoprint_ws281x_led_status.runner import EffectRunner
 
 from ._version import get_versions
 
 __version__ = get_versions()["version"]
 del get_versions
-
-PI_REGEX = r"Raspberry Pi (\w*)"
-_PROC_DT_MODEL_PATH = "/proc/device-tree/model"
-BLOCKING_TEMP_GCODES = [
-    "M109",
-    "M190",
-]  # TODO make configurable? No one has complained about it yet...
-
-ON_AT_COMMAND = "WS_LIGHTSON"
-OFF_AT_COMMAND = "WS_LIGHTSOFF"
-TORCH_AT_COMMAND = "WS_TORCH"
-TORCH_ON_AT_COMMAND = "WS_TORCH_ON"
-TORCH_OFF_AT_COMMAND = "WS_TORCH_OFF"
-AT_COMMANDS = [
-    ON_AT_COMMAND,
-    OFF_AT_COMMAND,
-    TORCH_AT_COMMAND,
-    TORCH_ON_AT_COMMAND,
-    TORCH_OFF_AT_COMMAND,
-]
-
-STANDARD_EFFECT_NICE_NAMES = {
-    "Solid Color": "solid",
-    "Color Wipe": "wipe",
-    "Color Wipe 2": "wipe2",
-    "Pulse": "pulse",
-    "Bounce": "bounce",
-    "Bounce Solo": "bounce_solo",
-    "Rainbow": "rainbow",
-    "Rainbow Cycle": "cycle",
-    "Random": "random",
-    "Blink": "blink",
-    "Crossover": "cross",
-    "Bouncy Balls": "balls",
-}
 
 
 class WS281xLedStatusPlugin(
@@ -72,13 +32,6 @@ class WS281xLedStatusPlugin(
     octoprint.plugin.EventHandlerPlugin,
     octoprint.plugin.RestartNeedingPlugin,
 ):
-    supported_events = {
-        Events.CONNECTED: "idle",
-        Events.DISCONNECTED: "disconnected",
-        Events.PRINT_FAILED: "failed",
-        Events.PRINT_DONE: "success",
-        Events.PRINT_PAUSED: "paused",
-    }
     current_effect_process = None  # multiprocessing Process object
     current_state = (
         "startup"  # Used to put the old effect back on settings change/light switch
@@ -222,7 +175,7 @@ class WS281xLedStatusPlugin(
 
     def get_template_vars(self):
         return {
-            "standard_names": STANDARD_EFFECT_NICE_NAMES,
+            "standard_names": constants.STANDARD_EFFECT_NICE_NAMES,
             "pi_model": self.PI_MODEL,
             "strip_types": STRIP_TYPES,
             "timezone": self.get_timezone(),
@@ -408,7 +361,7 @@ class WS281xLedStatusPlugin(
             _proc_dt_model = get_proc_dt_model()
 
         try:
-            model_no = re.search(PI_REGEX, _proc_dt_model).group(1).strip()
+            model_no = re.search(constants.PI_REGEX, _proc_dt_model).group(1).strip()
         except IndexError:
             self._logger.error(
                 "Pi model string detected as `{}`, unable to be parsed by regex".format(
@@ -452,7 +405,7 @@ class WS281xLedStatusPlugin(
             else:  # Integer settings
                 self.SETTINGS["strip"][setting] = self._settings.get_int([setting])
 
-        for mode in MODES:
+        for mode in constants.MODES:
             mode_settings = {
                 "enabled": self._settings.get_boolean(["{}_enabled".format(mode)]),
                 "color": self._settings.get(["{}_color".format(mode)]),
@@ -463,7 +416,7 @@ class WS281xLedStatusPlugin(
                 )
             else:
                 effect_nice_name = self._settings.get(["{}_effect".format(mode)])
-                effect_name = STANDARD_EFFECT_NICE_NAMES[effect_nice_name]
+                effect_name = constants.STANDARD_EFFECT_NICE_NAMES[effect_nice_name]
                 mode_settings["effect"] = effect_name
                 mode_settings["delay"] = round(
                     float(self._settings.get(["{}_delay".format(mode)])), 1
@@ -601,8 +554,8 @@ class WS281xLedStatusPlugin(
         elif event == Events.PRINT_RESUMED:
             self.update_effect("progress_print", self.current_progress)
 
-        if event in self.supported_events:
-            self.update_effect(self.supported_events[event])
+        if event in constants.SUPPORTED_EVENTS:
+            self.update_effect(constants.SUPPORTED_EVENTS[event])
             # add all events to a backlog, so we know what the last one was.
             self.add_to_backlog(event)
 
@@ -660,7 +613,7 @@ class WS281xLedStatusPlugin(
         *args,
         **kwargs
     ):
-        if gcode in BLOCKING_TEMP_GCODES:
+        if gcode in constants.BLOCKING_TEMP_GCODES:
             bed_or_tool = {"M109": "tool", "M190": "bed"}
             # Everything is tracked, regardless of settings. Makes it easier to track the state, and then just back out
             # of showing the effect in self.update_effect() rather than getting complex here.
@@ -771,21 +724,21 @@ class WS281xLedStatusPlugin(
     def process_at_command(
         self, comm, phase, command, parameters, tags=None, *args, **kwargs
     ):
-        if command not in AT_COMMANDS or not self._settings.get(
+        if command not in constants.AT_COMMANDS or not self._settings.get(
             ["at_command_reaction"]
         ):
             return
 
-        if command == ON_AT_COMMAND:
+        if command == constants.ON_AT_COMMAND:
             self._logger.debug("Recieved gcode @ command for lights on")
             self.activate_lights()
-        elif command == OFF_AT_COMMAND:
+        elif command == constants.OFF_AT_COMMAND:
             self._logger.debug("Recieved gcode @ command for lights off")
             self.deactivate_lights()
-        elif command == TORCH_AT_COMMAND or command == TORCH_ON_AT_COMMAND:
+        elif command == constants.TORCH_AT_COMMAND or command == constants.TORCH_ON_AT_COMMAND:
             self._logger.debug("Recieved gcode @ command for torch ON")
             self.activate_torch()
-        elif command == TORCH_OFF_AT_COMMAND and self._settings.get_boolean(
+        elif command == constants.TORCH_OFF_AT_COMMAND and self._settings.get_boolean(
             ["torch_toggle"]
         ):
             self._logger.debug("Recieved gcode @ command for torch OFF")
@@ -836,7 +789,7 @@ def get_proc_dt_model():
     global _proc_dt_model
 
     if _proc_dt_model is None:
-        with io.open(_PROC_DT_MODEL_PATH, "rt", encoding="utf-8") as f:
+        with io.open(constants.PROC_DT_MODEL_PATH, "rt", encoding="utf-8") as f:
             _proc_dt_model = f.readline().strip(" \t\r\n\0")
 
     return _proc_dt_model
