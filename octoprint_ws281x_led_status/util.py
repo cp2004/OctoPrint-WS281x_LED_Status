@@ -2,7 +2,7 @@
 from __future__ import absolute_import, division
 
 import subprocess
-from time import sleep
+from time import sleep, tzname
 
 
 def hex_to_rgb(h):
@@ -93,3 +93,7 @@ def run_system_command(command, password=None):
         return stdout.decode("utf-8"), "password"
     else:
         return stdout.decode("utf-8"), None
+
+
+def get_timezone():
+    return tzname

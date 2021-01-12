@@ -16,7 +16,7 @@ from flask import jsonify
 # noinspection PyPackageRequirements
 from octoprint.events import Events
 
-from octoprint_ws281x_led_status import api, constants, wizard
+from octoprint_ws281x_led_status import api, constants, util, wizard
 from octoprint_ws281x_led_status.runner import EffectRunner
 
 from ._version import get_versions
@@ -192,13 +192,9 @@ class WS281xLedStatusPlugin(
             "standard_names": constants.STANDARD_EFFECT_NICE_NAMES,
             "pi_model": self.PI_MODEL,
             "strip_types": constants.STRIP_TYPES,
-            "timezone": self.get_timezone(),
+            "timezone": util.get_timezone(),
             "version": self._plugin_version,
         }
-
-    @staticmethod
-    def get_timezone():
-        return time.tzname
 
     # Wizard plugin
     def is_wizard_required(self):
