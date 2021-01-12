@@ -7,13 +7,13 @@ from flask import jsonify
 
 from octoprint_ws281x_led_status import wizard
 
-
 # Define API commands
 CMD_LIGHTS_ON = "lights_on"
 CMD_LIGHTS_OFF = "lights_off"
 CMD_TORCH_ON = "torch_on"
 CMD_TORCH_OFF = "torch_off"
 CMD_TEST_OS = "test_os_config"
+WIZ_ADDUSER = "wiz_adduser"
 WIZ_ENABLE_SPI = "wiz_enable_spi"
 WIZ_INCREASE_BUFFER = "wiz_increase_buffer"
 WIZ_SET_CORE_FREQ = "wiz_set_core_freq"
@@ -34,6 +34,7 @@ class PluginApi:
             CMD_TORCH_ON: [],
             CMD_TORCH_OFF: [],
             CMD_TEST_OS: [],
+            WIZ_ADDUSER: ["password"],
             WIZ_ENABLE_SPI: ["password"],
             WIZ_INCREASE_BUFFER: ["password"],
             WIZ_SET_CORE_FREQ: ["password"],
@@ -51,7 +52,7 @@ class PluginApi:
             self.plugin.deactivate_torch()
         elif command == CMD_TEST_OS:
             self.start_os_config_test()
-        elif command.startswith('wiz'):
+        elif command.startswith("wiz"):
             # Pass to wizard command handler
             return wizard.run_wizard_command(command, data, self.plugin.PI_MODEL)
 
@@ -59,8 +60,8 @@ class PluginApi:
 
     def on_api_get(self, **kwargs):
         response = {
-            'lights_on': self.plugin.get_lights_status(),
-            'torch_on': self.plugin.get_torch_status()
+            "lights_on": self.plugin.get_lights_status(),
+            "torch_on": self.plugin.get_torch_status(),
         }
         return jsonify(response)
 
