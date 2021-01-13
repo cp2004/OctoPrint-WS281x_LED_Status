@@ -89,7 +89,6 @@ class WS281xLedStatusPlugin(
         )
         cfg_test_thread.daemon = True
         cfg_test_thread.start()
-        self.refresh_settings()
 
     def on_after_startup(self):
         self.start_effect_process()
@@ -104,7 +103,6 @@ class WS281xLedStatusPlugin(
     # Settings plugin
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
-        self.refresh_settings()
         self.restart_strip()
 
     def get_settings_defaults(self):
