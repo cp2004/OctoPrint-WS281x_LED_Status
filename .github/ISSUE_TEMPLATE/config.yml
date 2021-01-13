@@ -1,5 +1,1 @@
 blank_issues_enabled: false
-contact_links:
-  - name: Get Help
-    url: https://github.com/cp2004/OctoPrint-WS281x_LED_Status/discussions
-    about: Please use the discussions tab of the repository for support
