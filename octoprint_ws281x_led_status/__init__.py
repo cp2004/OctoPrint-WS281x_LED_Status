@@ -111,6 +111,12 @@ class WS281xLedStatusPlugin(
     def get_settings_defaults(self):
         return settings.defaults
 
+    def get_settings_version(self):
+        return settings.VERSION
+
+    def on_settings_migrate(self, target, current):
+        settings.migrate_settings(target, current, self._settings)
+
     # Template plugin
     def get_template_configs(self):
         return [
