@@ -14,9 +14,13 @@ assignees: ''
 
 <!-- Clear description of what you want -->
 
-**Describe alternatives you've considered**
+**Why should this be implemented?**
 
-<!-- Clear description of other solutions you may have thought of -->
+<!-- 
+    Now it is your time to convince me that this is something worth
+    my time to implement. Providing strong reasons here boosts the 
+    chances of the request being accepted and implemented by me.
+-->
 
 **Additional context**
 
