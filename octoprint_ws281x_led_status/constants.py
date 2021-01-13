@@ -4,8 +4,7 @@ from __future__ import absolute_import, division, unicode_literals
 import rpi_ws281x
 from octoprint.events import Events
 
-from octoprint_ws281x_led_status.effects import standard, progress
-
+from octoprint_ws281x_led_status.effects import progress, standard
 
 PI_REGEX = r"Raspberry Pi (\w*)"
 PROC_DT_MODEL_PATH = "/proc/device-tree/model"
@@ -44,12 +43,12 @@ STANDARD_EFFECT_NICE_NAMES = {
 }
 
 SUPPORTED_EVENTS = {
-        Events.CONNECTED: "idle",
-        Events.DISCONNECTED: "disconnected",
-        Events.PRINT_FAILED: "failed",
-        Events.PRINT_DONE: "success",
-        Events.PRINT_PAUSED: "paused",
-    }
+    Events.CONNECTED: "idle",
+    Events.DISCONNECTED: "disconnected",
+    Events.PRINT_FAILED: "failed",
+    Events.PRINT_DONE: "success",
+    Events.PRINT_PAUSED: "paused",
+}
 
 KILL_MSG = "KILL"
 STRIP_SETTINGS = [  # ALL LED SETTINGS, for rpi_ws281x.PixelStrip
@@ -110,3 +109,11 @@ MODES = [
     "printing",
     "torch",
 ]
+
+# Example command: M150 R10 G200 B300
+# more => https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#m150-intercept
+# TODO this could be improved massively
+M150_REGEX = (
+    r"(^|[^A-Za-z])[Rr](?P<red>\d{1,3})|(^|[^A-Za-z])[GgUu](?P<green>\d{1,3})|(^|[^A-Za-z])"
+    r"[Bb](?P<blue>\d{1,3})|(^|[^A-Za-z])[Pp](?P<brightness>\d{1,3})|(^|[^A-Za-z])[Ww](?P<white>\d{1,3})"
+)
