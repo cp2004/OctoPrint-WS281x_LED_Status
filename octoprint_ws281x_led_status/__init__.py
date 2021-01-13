@@ -44,7 +44,6 @@ class WS281xLedStatusPlugin(
     )
     effect_queue = multiprocessing.Queue()  # pass name of effects here
 
-    SETTINGS = {}  # Filled in on startup
     PI_MODEL = None  # Filled in on startup
 
     # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
@@ -235,7 +234,7 @@ class WS281xLedStatusPlugin(
         if self.torch_timer and self.torch_timer.is_alive():
             self.torch_timer.cancel()
 
-        if self._settings.get_boolean(["torch_toggle"]):
+        if self._settings.get_boolean(["effects", "torch", "toggle"]):
             # Torch mode is blocking until it is turned off
             self._logger.debug("Torch toggling on, forever")
             self.torch_on = True
@@ -243,11 +242,12 @@ class WS281xLedStatusPlugin(
         else:
             self._logger.debug(
                 "Torch Timer started for {} secs".format(
-                    self._settings.get_int(["torch_timer"])
+                    self._settings.get_int(["effects", "torch", "timer"])
                 )
             )
             self.torch_timer = threading.Timer(
-                int(self._settings.get_int(["torch_timer"])), self.deactivate_torch
+                int(self._settings.get_int(["effects", "torch", "timer"])),
+                self.deactivate_torch,
             )
             self.torch_timer.daemon = True
             self.torch_timer.start()
@@ -293,59 +293,6 @@ class WS281xLedStatusPlugin(
         self._logger.info("Detected running on a Raspberry Pi {}".format(model_no))
         return model_no
 
-    def refresh_settings(self):
-        """
-        Update self.SETTINGS dict to custom data structure - passed to effect runner & logged.
-        TODO convert stored settings to this format, so this is not needed!
-        """
-        self.tool_to_target = self._settings.get_int(["progress_heatup_tool_key"])
-        if not self.tool_to_target:
-            self.tool_to_target = 0
-
-        self.SETTINGS["active_start"] = (
-            self._settings.get(["active_hours_start"])
-            if self._settings.get(["active_hours_enabled"])
-            else None
-        )
-        self.SETTINGS["active_stop"] = (
-            self._settings.get(["active_hours_stop"])
-            if self._settings.get(["active_hours_enabled"])
-            else None
-        )
-
-        self.SETTINGS["strip"] = {}
-        for setting in constants.STRIP_SETTINGS:
-            if setting == "led_invert" or setting == "reverse":  # Boolean settings
-                self.SETTINGS["strip"][setting] = self._settings.get_boolean([setting])
-            elif setting == "strip_type":  # String settings
-                self.SETTINGS["strip"]["strip_type"] = self._settings.get([setting])
-            elif setting == "led_brightness":  # Percentage
-                self.SETTINGS["strip"]["led_brightness"] = min(
-                    int(round((self._settings.get_int([setting]) / 100) * 255)), 255
-                )
-            else:  # Integer settings
-                self.SETTINGS["strip"][setting] = self._settings.get_int([setting])
-
-        for mode in constants.MODES:
-            mode_settings = {
-                "enabled": self._settings.get_boolean(["{}_enabled".format(mode)]),
-                "color": self._settings.get(["{}_color".format(mode)]),
-            }
-            if "progress" in mode:  # Unsure if this works?
-                mode_settings["base"] = self._settings.get(
-                    ["{}_color_base".format(mode)]
-                )
-            else:
-                effect_nice_name = self._settings.get(["{}_effect".format(mode)])
-                effect_name = constants.STANDARD_EFFECT_NICE_NAMES[effect_nice_name]
-                mode_settings["effect"] = effect_name
-                mode_settings["delay"] = round(
-                    float(self._settings.get(["{}_delay".format(mode)])), 1
-                )
-            self.SETTINGS[mode] = mode_settings
-
-        self._logger.info("Settings refreshed")
-
     def restart_strip(self):
         """
         Shortcut to restart the LED runner process.
@@ -368,13 +315,17 @@ class WS281xLedStatusPlugin(
         self.current_effect_process = multiprocessing.Process(
             target=EffectRunner,
             name="WS281x LED Status Effect Process",
-            args=(
-                self._settings.get_plugin_logfile_path(postfix="debug"),
-                self._settings.get_boolean(["debug_logging"]),
-                self.effect_queue,
-                self.SETTINGS,
-                self.current_state,
-            ),
+            kwargs={
+                "debug": self._settings.get_boolean(["debug_logging"]),
+                "queue": self.effect_queue,
+                "strip_settings": self._settings.get(["strip"], merged=True),
+                "effect_settings": self._settings.get(["effects"], merged=True),
+                "active_times_settings": self._settings.get(
+                    ["active_times"], merged=True
+                ),
+                "previous_state": self.current_state,
+                "log_path": self._settings.get_plugin_logfile_path(postfix="debug"),
+            },
         )
         self.current_effect_process.daemon = True
         self.current_effect_process.start()
@@ -407,7 +358,7 @@ class WS281xLedStatusPlugin(
             self.return_timer.cancel()
 
         if (
-            not self._settings.get_boolean(["torch_toggle"])
+            not self._settings.get_boolean(["effects", "torch", "toggle"])
             and mode_name != "torch"
             and self.torch_on
         ):
@@ -431,13 +382,14 @@ class WS281xLedStatusPlugin(
                 self._logger.warning("No values supplied with M150, ignoring")
             return
 
-        if not self.SETTINGS[mode_name][
-            "enabled"
-        ]:  # If the effect is not enabled, we won't run it. Simple...
+        if not self._settings.get(["effects", mode_name, "enabled"]):
+            # If the effect is not enabled, we won't run it. Simple...
             return
 
         if "success" in mode_name:
-            return_idle_time = self._settings.get_int(["success_return_idle"])
+            return_idle_time = self._settings.get_int(
+                ["effects", "success", "return_to_idle"]
+            )
             if return_idle_time > 0:
                 self.return_timer = threading.Timer(
                     return_idle_time, self.return_to_idle
@@ -483,7 +435,7 @@ class WS281xLedStatusPlugin(
     def on_print_progress(self, storage="", path="", progress=1):
         if (progress == 100 and self.current_state == "success") or self.heating:
             return
-        if self._settings.get_boolean(["printing_enabled"]):
+        if self._settings.get_boolean(["effects", "printing", "enabled"]):
             self.update_effect("printing")
         self.update_effect("progress_print", progress)
         self.current_progress = progress
@@ -558,7 +510,9 @@ class WS281xLedStatusPlugin(
     ):
         try:
             tool_temp_target = parsed_temperatures[
-                "T{}".format(self._settings.get_int(["progress_heatup_tool_key"]))
+                "T{}".format(
+                    self._settings.get_int(["effects", "progress_heatup", "tool_key"])
+                )
             ][1]
         except KeyError:
             tool_temp_target = self.target_temperature["tool"]
@@ -622,11 +576,15 @@ class WS281xLedStatusPlugin(
                 return
 
             current = parsed_temperatures[
-                words_to_tool[self._settings.get(["progress_cooling_bed_or_tool"])]
+                words_to_tool[
+                    self._settings.get(["effects", "progress_cooling", "bed_or_tool"])
+                ]
             ][0]
             self._logger.debug("State: cooling, temp recv: {}".format(current))
 
-            if current < self._settings.get_int(["progress_cooling_threshold"]):
+            if current < self._settings.get_int(
+                ["effects", "progress_cooling", "threshold"]
+            ):
                 self.cooling = False
                 self.process_previous_event_q()  # should hopefully put back the old effect (maybe progress)
                 return
@@ -635,7 +593,9 @@ class WS281xLedStatusPlugin(
                 self.calculate_heatup_progress(
                     current,
                     self.target_temperature[
-                        self._settings.get(["progress_cooling_bed_or_tool"])
+                        self._settings.get(
+                            ["effects", "progress_cooling", "bed_or_tool"]
+                        )
                     ],
                 ),
             )
@@ -663,7 +623,7 @@ class WS281xLedStatusPlugin(
             self._logger.debug("Recieved gcode @ command for torch ON")
             self.activate_torch()
         elif command == constants.TORCH_OFF_AT_COMMAND and self._settings.get_boolean(
-            ["torch_toggle"]
+            ["effects", "torch", "toggle"]
         ):
             self._logger.debug("Recieved gcode @ command for torch OFF")
             self.deactivate_torch()

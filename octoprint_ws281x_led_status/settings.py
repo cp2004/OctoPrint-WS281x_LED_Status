@@ -150,7 +150,7 @@ def migrate_none_to_one(settings):
                 "effect": settings.get(["success_effect"]),
                 "color": settings.get(["success_color"]),
                 "delay": settings.get(["success_delay"]),
-                "return_to_idle": settings.get(["success_return_to_idle"]),
+                "return_to_idle": settings.get(["success_return_idle"]),
             },
             "paused": {
                 "enabled": settings.get_boolean(["paused_enabled"]),
@@ -183,6 +183,7 @@ def migrate_none_to_one(settings):
                 "color": settings.get(["progress_heatup_color"]),
                 "tool_enabled": settings.get_boolean(["progress_heatup_tool_enabled"]),
                 "bed_enabled": settings.get_boolean(["progress_heatup_bed_enabled"]),
+                "tool_key": settings.get_int(["progress_heatup_tool_key"]),
             },
             "progress_cooling": {
                 "enabled": settings.get_boolean(["progress_cooling_enabled"]),

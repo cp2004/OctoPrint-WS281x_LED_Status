@@ -19,34 +19,33 @@ M150_REGEX = (
 
 
 class EffectRunner:
-    def __init__(self, log_path, debug, queue, all_settings, previous_state):
+    def __init__(
+        self,
+        debug,
+        queue,
+        strip_settings,
+        effect_settings,
+        active_times_settings,
+        previous_state,
+        log_path,
+    ):
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.debug")
         self.setup_custom_logger(log_path, debug)
-        self.settings = all_settings
-        self.reverse = all_settings["strip"]["reverse"]
-        self.max_brightness = all_settings["strip"]["led_brightness"]
+        self.strip_settings = strip_settings
+        self.effect_settings = effect_settings
+        self.active_times_settings = active_times_settings
+        self.reverse = strip_settings["reverse"]
+        self.max_brightness = strip_settings["led_brightness"]
         self.lights_on = True
 
         self.previous_state = (
             previous_state if previous_state is not None else "startup"
         )
+        start = self.active_times_settings["start"].split(":")
+        end = self.active_times_settings["stop"].split(":")
+        self.start_time = (int(start[0]) * 60) + int(start[1])
+        self.end_time = (int(end[0]) * 60) + int(end[1])
 
-        if not self.settings["active_start"] or not self.settings["active_stop"]:
-            self.start_time = None
-            self.end_time = None
-        else:
-            start = (
-                self.settings["active_start"].split(":")
-                if self.settings["active_start"]
-                else None
-            )
-            end = (
-                self.settings["active_stop"].split(":")
-                if self.settings["active_stop"]
-                else None
-            )
-            self.start_time = (int(start[0]) * 60) + int(start[1])
-            self.end_time = (int(end[0]) * 60) + int(end[1])
         self.active_times_state = True
 
         self.queue = queue
@@ -90,23 +89,23 @@ class EffectRunner:
 
         # Start with strip settings
         line = line + "\n | * STRIP SETTINGS *"
-        for key, value in self.settings["strip"].items():
+        for key, value in self.strip_settings.items():
             line = line + "\n | - " + str(key) + ": " + str(value)
 
         # effect settings
         line = line + "\n | * EFFECT SETTINGS *"
-        for key, value in self.settings.items():
+        for key, value in self.strip_settings.items():
             if key in constants.MODES:
                 line = line + "\n | " + str(key)
-                for setting_key, setting_value in self.settings[key].items():
+                for setting_key, setting_value in value.items():
                     line = (
                         line + "\n | - " + str(setting_key) + ": " + str(setting_value)
                     )
 
         # extras
         line = line + "\n | * ACTIVE TIMES *"
-        line = line + "\n | - start: " + str(self.settings["active_start"])
-        line = line + "\n | - end: " + str(self.settings["active_stop"])
+        line = line + "\n | - start: " + str(self.active_times_settings["start"])
+        line = line + "\n | - end: " + str(self.active_times_settings["active_stop"])
         self._logger.debug(line)
 
     def main_loop(self):
@@ -199,7 +198,7 @@ class EffectRunner:
 
     def progress_effect(self, mode, value):
         if self.check_times() and self.lights_on:
-            effect_settings = self.settings[mode]
+            effect_settings = self.effect_settings[mode]
             constants.EFFECTS[mode](
                 self.strip,
                 self.queue,
@@ -214,7 +213,7 @@ class EffectRunner:
 
     def standard_effect(self, mode):
         if self.check_times() and self.lights_on:
-            effect_settings = self.settings[mode]
+            effect_settings = self.effect_settings[mode]
             constants.EFFECTS[effect_settings["effect"]](
                 self.strip,
                 self.queue,
@@ -267,17 +266,16 @@ class EffectRunner:
         :returns rpi_ws281x.PixelStrip
         """
         self._logger.info("Initialising LED strip")
-        strip_settings = self.settings["strip"]
         try:
             strip = PixelStrip(
-                num=strip_settings["led_count"],
-                pin=strip_settings["led_pin"],
-                freq_hz=strip_settings["led_freq_hz"],
-                dma=strip_settings["led_dma"],
-                invert=strip_settings["led_invert"],
-                brightness=strip_settings["led_brightness"],
-                channel=strip_settings["led_channel"],
-                strip_type=constants.STRIP_TYPES[strip_settings["strip_type"]],
+                num=self.strip_settings["led_count"],
+                pin=self.strip_settings["led_pin"],
+                freq_hz=self.strip_settings["led_freq_hz"],
+                dma=self.strip_settings["led_dma"],
+                invert=self.strip_settings["led_invert"],
+                brightness=self.strip_settings["led_brightness"],
+                channel=self.strip_settings["led_channel"],
+                strip_type=constants.STRIP_TYPES[self.strip_settings["strip_type"]],
             )
             strip.begin()
             self._logger.info("Strip successfully initialised")

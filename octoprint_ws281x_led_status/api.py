@@ -22,8 +22,6 @@ WIZ_SET_FREQ_MIN = "wiz_set_core_freq_min"
 class PluginApi:
     def __init__(self, plugin):
         self.plugin = plugin
-        # noinspection PyProtectedMember
-        self._settings = plugin._settings
 
     @staticmethod
     def get_api_commands():
