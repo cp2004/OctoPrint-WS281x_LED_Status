@@ -174,12 +174,12 @@ def migrate_none_to_one(settings):
             },
             "progress_print": {
                 "enabled": settings.get_boolean(["progress_print_enabled"]),
-                "base": settings.get(["progress_print_base"]),
+                "base": settings.get(["progress_print_color_base"]),
                 "color": settings.get(["progress_print_color"]),
             },
             "progress_heatup": {
                 "enabled": settings.get_boolean(["progress_heatup_enabled"]),
-                "base": settings.get(["progress_heatup_base"]),
+                "base": settings.get(["progress_heatup_color_base"]),
                 "color": settings.get(["progress_heatup_color"]),
                 "tool_enabled": settings.get_boolean(["progress_heatup_tool_enabled"]),
                 "bed_enabled": settings.get_boolean(["progress_heatup_bed_enabled"]),
@@ -187,7 +187,7 @@ def migrate_none_to_one(settings):
             },
             "progress_cooling": {
                 "enabled": settings.get_boolean(["progress_cooling_enabled"]),
-                "base": settings.get(["progress_cooling_base"]),
+                "base": settings.get(["progress_cooling_color_base"]),
                 "color": settings.get(["progress_cooling_color"]),
                 "bed_or_tool": settings.get(["progress_cooling_bed_or_tool"]),
                 "threshold": settings.get_int(["progress_cooling_threshold"]),
