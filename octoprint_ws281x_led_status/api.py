@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, unicode_literals
 
-import threading
-
 # noinspection PyPackageRequirements
 from flask import jsonify
+
+from octoprint_ws281x_led_status import util
 
 # Define API commands
 CMD_LIGHTS_ON = "lights_on"
@@ -59,15 +59,13 @@ class PluginApi:
 
     def on_api_get(self, **kwargs):
         response = {
-            "lights_on": self.plugin.get_lights_status(),
-            "torch_on": self.plugin.get_torch_status(),
+            "lights_on": self.plugin.lights_on,
+            "torch_on": self.plugin.torch_on,
         }
         return jsonify(response)
 
     def start_os_config_test(self):
-        thread = threading.Thread(
-            target=self.plugin.run_os_config_check, name="WS281x OS Config Test"
+        util.start_daemon_thread(
+            target=self.plugin.run_os_config_check,
+            name="WS281x LED Status OS Config Test",
         )
-        thread.daemon = True
-        thread.start()
-        return

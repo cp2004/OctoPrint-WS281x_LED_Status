@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division
 
 import subprocess
+import threading
 from time import sleep, tzname
 
 
@@ -97,3 +98,26 @@ def run_system_command(command, password=None):
 
 def get_timezone():
     return tzname
+
+
+def start_daemon_thread(target, args=(), kwargs=None, name="WS281x LED Status thread"):
+    if kwargs is None:
+        kwargs = {}
+    t = threading.Thread(
+        target=target,
+        args=args,
+        kwargs=kwargs,
+        name=name,
+    )
+    t.daemon = True
+    t.start()
+    return t
+
+
+def start_daemon_timer(target, interval, args=(), kwargs=None):
+    if kwargs is None:
+        kwargs = {}
+    t = threading.Timer(interval=interval, function=target, args=args, kwargs=kwargs)
+    t.daemon = True
+    t.start()
+    return t

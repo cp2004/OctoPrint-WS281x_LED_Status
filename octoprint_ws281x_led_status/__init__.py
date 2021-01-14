@@ -2,9 +2,9 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import io
+import logging
 import multiprocessing
 import re
-import threading
 import time
 
 # noinspection PyPackageRequirements
@@ -20,6 +20,9 @@ from ._version import get_versions
 
 __version__ = get_versions()["version"]
 del get_versions
+
+
+PI_MODEL = None
 
 
 class WS281xLedStatusPlugin(
@@ -38,30 +41,25 @@ class WS281xLedStatusPlugin(
     api = None  # type: api.PluginApi
     wizard = None  # type: wizard.PluginWizard
 
-    current_effect_process = None  # multiprocessing Process object
-    current_state = (
-        "startup"  # Used to put the old effect back on settings change/light switch
-    )
-    effect_queue = multiprocessing.Queue()  # pass name of effects here
-
-    PI_MODEL = None  # Filled in on startup
+    current_effect_process = None  # type: multiprocessing.Process
+    current_state = "startup"  # type: str
+    effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
 
     # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
-    heating = False
-    cooling = False
+    heating = False  # type: bool
+    cooling = False  # type: bool
 
-    current_progress = 0
+    current_progress = 0  # type: int
 
     # Target temperature is stored here, for use with temp tracking.
-    target_temperature = {"tool": 0, "bed": 0}
-    current_heater_heating = None
-    tool_to_target = 0
+    target_temperature = {"tool": 0, "bed": 0}  # type: dict
+    current_heater_heating = None  # type: str
+    tool_to_target = 0  # type: int
 
-    previous_event_q = (
-        []
-    )  # Add effects to this list, if you want them to run after things like progress, torch, etc.
+    previous_event_q = []  # type: list
+    # Add effects to this list, if you want them to run after things like progress, torch, etc.
 
-    lights_on = True  # Lights should be on by default, makes sense.
+    lights_on = True  # Lights should be on by default, makes sense.  TODO #65
     torch_on = False  # Torch is off by default, because who would want that?
 
     torch_timer = None  # Timer for torch function
@@ -69,8 +67,9 @@ class WS281xLedStatusPlugin(
 
     # Called when injections are complete
     def initialize(self):
+        global PI_MODEL
         self.api = api.PluginApi(self)
-        self.wizard = wizard.PluginWizard(self)
+        self.wizard = wizard.PluginWizard(self, PI_MODEL)
 
     # Asset plugin
     def get_assets(self):
@@ -81,14 +80,11 @@ class WS281xLedStatusPlugin(
 
     # Startup plugin
     def on_startup(self, host, port):
-        self.PI_MODEL = self.determine_pi_version()
-        cfg_test_thread = threading.Thread(
+        util.start_daemon_thread(
             target=self.run_os_config_check,
             kwargs={"send_ui": False},
-            name="WS281X LED Status OS config test",
+            name="WS281x LED Status OS config test",
         )
-        cfg_test_thread.daemon = True
-        cfg_test_thread.start()
 
     def on_after_startup(self):
         self.start_effect_process()
@@ -122,9 +118,10 @@ class WS281xLedStatusPlugin(
         ]
 
     def get_template_vars(self):
+        global PI_MODEL
         return {
             "standard_names": constants.STANDARD_EFFECT_NICE_NAMES,
-            "pi_model": self.PI_MODEL,
+            "pi_model": PI_MODEL,
             "strip_types": constants.STRIP_TYPES,
             "timezone": util.get_timezone(),
             "version": self._plugin_version,
@@ -164,141 +161,13 @@ class WS281xLedStatusPlugin(
     def on_api_get(self, request):
         return self.api.on_api_get(request=request)
 
-    def run_os_config_check(self, send_ui=True):
-        """
-        Run a check on all of the OS level configuration required to run the plugin
-        Logs output to octoprint.log, and optionally to the websocket
-        :param send_ui: (bool) whether to send the results to the UI
-        :return: None
-        """
-        _UI_MSG_TYPE = "os_config_test"
-        self._logger.info(
-            "Running OS config test (Log Mode)"
-            if not send_ui
-            else "Running OS config test (UI Mode)"
+    # Websocket communication
+    def _send_UI_msg(self, msg_type, payload):
+        self._plugin_manager.send_plugin_message(
+            "ws281x_led_status", {"type": msg_type, "payload": payload}
         )
-        tests = {
-            "adduser": self.wizard.is_adduser_done,
-            "spi_enabled": self.wizard.is_spi_enabled,
-            "spi_buffer_increase": self.wizard.is_spi_buffer_increased,
-            "set_core_freq": self.wizard.is_core_freq_set,
-            "set_core_freq_min": self.wizard.is_core_freq_min_set,
-        }
-        statuses = {}
 
-        for test_key, test_func in tests.items():
-            if send_ui:
-                self._send_UI_msg(
-                    {"type": _UI_MSG_TYPE, "test": test_key, "status": "in_progress"}
-                )
-            status = "passed" if test_func() else "failed"
-            if send_ui:
-                self._send_UI_msg(
-                    {"type": _UI_MSG_TYPE, "test": test_key, "status": status}
-                )
-            statuses[test_key] = status
-            if send_ui:
-                # Artificially increase the length of time, to make the UI look nice.
-                # Without this, there is a confusing amount of popping in/out of status etc.
-                time.sleep(0.5)
-
-        log_content = "OS config test complete. Results:"
-        for test_key, status in statuses.items():
-            log_content = log_content + "\n| - " + test_key + ": " + status
-
-        if send_ui:
-            self._send_UI_msg(
-                {"type": _UI_MSG_TYPE, "test": "complete", "status": "complete"}
-            )
-
-        self._logger.info(log_content)
-
-    def _send_UI_msg(self, data):
-        self._plugin_manager.send_plugin_message("ws281x_led_status", data)
-
-    def activate_lights(self):
-        self.lights_on = True
-        self.update_effect("on")
-        self._logger.info("Turning lights on")
-        self._send_UI_msg({"type": "lights", "on": True})
-
-    def deactivate_lights(self):
-        self._send_UI_msg({"type": "lights", "on": False})
-        self.lights_on = False
-        self.update_effect("off")
-        self._logger.info("Turning light off")
-
-    def activate_torch(self):
-        if self.torch_timer and self.torch_timer.is_alive():
-            self.torch_timer.cancel()
-
-        if self._settings.get_boolean(["effects", "torch", "toggle"]):
-            # Torch mode is blocking until it is turned off
-            self._logger.debug("Torch toggling on, forever")
-            self.torch_on = True
-            self.update_effect("torch")
-        else:
-            self._logger.debug(
-                "Torch Timer started for {} secs".format(
-                    self._settings.get_int(["effects", "torch", "timer"])
-                )
-            )
-            self.torch_timer = threading.Timer(
-                int(self._settings.get_int(["effects", "torch", "timer"])),
-                self.deactivate_torch,
-            )
-            self.torch_timer.daemon = True
-            self.torch_timer.start()
-            self.torch_on = True
-            self.update_effect("torch")
-
-        self._send_UI_msg({"type": "torch", "on": True})
-
-    def deactivate_torch(self):
-        self._logger.debug(
-            "Deactivating torch mode, torch on currently: {}".format(self.torch_on)
-        )
-        if self.torch_on:
-            self.torch_on = False
-            self.update_effect(self.current_state)
-
-        self._send_UI_msg({"type": "torch", "on": False})
-
-    def get_lights_status(self):
-        return self.lights_on
-
-    def get_torch_status(self):
-        return self.torch_on
-
-    def determine_pi_version(self):
-        """
-        Determines Raspberry Pi version for use in the wizard & config test
-        :return: (str) Pi Model, if found, else None
-        """
-        global _proc_dt_model
-        if not _proc_dt_model:
-            _proc_dt_model = get_proc_dt_model()
-
-        try:
-            model_no = re.search(constants.PI_REGEX, _proc_dt_model).group(1).strip()
-        except IndexError:
-            self._logger.error(
-                "Pi model string detected as `{}`, unable to be parsed by regex".format(
-                    _proc_dt_model
-                )
-            )
-            raise
-        self._logger.info("Detected running on a Raspberry Pi {}".format(model_no))
-        return model_no
-
-    def restart_strip(self):
-        """
-        Shortcut to restart the LED runner process.
-        :return: None
-        """
-        self.stop_effect_process()
-        self.start_effect_process()
-
+    # Effect runner process
     def start_effect_process(self):
         """
         Begin the LED runner process, with the user's settings, and some other config
@@ -327,7 +196,7 @@ class WS281xLedStatusPlugin(
         )
         self.current_effect_process.daemon = True
         self.current_effect_process.start()
-        self._logger.info("Ws281x LED Status runner started")
+        self._logger.info("WS281x LED Status runner started")
         if self.lights_on:
             self.update_effect("on")
         else:
@@ -345,12 +214,108 @@ class WS281xLedStatusPlugin(
             self.current_effect_process.join()
         self._logger.info("WS281x LED Status runner stopped")
 
+    def restart_strip(self):
+        """
+        Shortcut to restart the LED runner process.
+        :return: None
+        """
+        self.stop_effect_process()
+        self.start_effect_process()
+
+    def run_os_config_check(self, send_ui=True):
+        """
+        Run a check on all of the OS level configuration required to run the plugin
+        Logs output to octoprint.log, and optionally to the websocket
+        :param send_ui: (bool) whether to send the results to the UI
+        :return: None
+        """
+        _UI_MSG_TYPE = "os_config_test"
+        self._logger.info(
+            "Running OS config test ({} mode)".format("UI" if send_ui else "Log")
+        )
+        tests = {
+            "adduser": self.wizard.is_adduser_done,
+            "spi_enabled": self.wizard.is_spi_enabled,
+            "spi_buffer_increase": self.wizard.is_spi_buffer_increased,
+            "set_core_freq": self.wizard.is_core_freq_set,
+            "set_core_freq_min": self.wizard.is_core_freq_min_set,
+        }
+        statuses = {}
+
+        for test_key, test_func in tests.items():
+            if send_ui:
+                self._send_UI_msg(
+                    _UI_MSG_TYPE, {"test": test_key, "status": "in_progress"}
+                )
+            status = "passed" if test_func() else "failed"
+            if send_ui:
+                self._send_UI_msg(_UI_MSG_TYPE, {"test": test_key, "status": status})
+            statuses[test_key] = status
+            if send_ui:
+                # Artificially increase the length of time, to make the UI look nice.
+                # Without this, there is a confusing amount of popping in/out of status etc.
+                time.sleep(0.5)
+
+        log_content = "OS config test complete. Results:"
+        for test_key, status in statuses.items():
+            log_content = log_content + "\n| - " + test_key + ": " + status
+
+        if send_ui:
+            self._send_UI_msg(_UI_MSG_TYPE, {"test": "complete", "status": "complete"})
+
+        self._logger.info(log_content)
+
+    def activate_lights(self):
+        self._logger.info("Turning lights on")
+        self.lights_on = True
+        self.update_effect("on")
+        self._send_UI_msg("lights", {"on": True})
+
+    def deactivate_lights(self):
+        self._send_UI_msg("lights", {"on": False})
+        self.lights_on = False
+        self.update_effect("off")
+        self._logger.info("Turning light off")
+
+    def activate_torch(self):
+        if self.torch_timer and self.torch_timer.is_alive():
+            self.torch_timer.cancel()
+
+        toggle = self._settings.get_boolean(["effects", "torch", "toggle"])
+        torch_time = self._settings.get_int(["effects", "torch", "timer"])
+
+        if toggle:
+            self._logger.debug("Torch toggling on")
+            self.torch_on = True
+            self.update_effect("torch")
+        else:
+            self._logger.debug("Torch timer started for {} secs".format(torch_time))
+            self.torch_timer = util.start_daemon_timer(
+                torch_time,
+                self.deactivate_torch,
+            )
+            self.torch_on = True
+            self.update_effect("torch")
+
+        self._send_UI_msg("torch", {"on": True})
+
+    def deactivate_torch(self):
+        self._logger.debug(
+            "Deactivating torch mode, torch on currently: {}".format(self.torch_on)
+        )
+        if self.torch_on:
+            self.torch_on = False
+            self.update_effect(self.current_state)
+
+        self._send_UI_msg("torch", {"on": False})
+
     def update_effect(self, mode_name, value=None, m150=None):
         """
         Change the effect displayed, use effects.EFFECTS for the correct names!
         If progress effect, value must be specified
         :param mode_name: string of mode name
         :param value: percentage of how far through it is. None
+        :param m150: If the effect is an M150 effect, the full command should be passed here
         """
         if self.return_timer is not None and self.return_timer.is_alive():
             self.return_timer.cancel()
@@ -389,11 +354,9 @@ class WS281xLedStatusPlugin(
                 ["effects", "success", "return_to_idle"]
             )
             if return_idle_time > 0:
-                self.return_timer = threading.Timer(
-                    return_idle_time, self.return_to_idle
+                self.return_timer = util.start_daemon_timer(
+                    self.update_effect, return_idle_time, args=("idle",)
                 )
-                self.return_timer.daemon = True
-                self.return_timer.start()
 
         if "progress" in mode_name:
             if value is None:
@@ -413,9 +376,6 @@ class WS281xLedStatusPlugin(
             self.effect_queue.put(mode_name)
             if mode_name != "torch":
                 self.current_state = mode_name
-
-    def return_to_idle(self):
-        self.update_effect("idle")
 
     def on_event(self, event, payload):
         if event == Events.PRINT_DONE:
@@ -677,6 +637,30 @@ def get_proc_dt_model():
     return _proc_dt_model
 
 
+def determine_pi_version():
+    """
+    Determines Raspberry Pi version for use in the wizard & config test
+    :return: (str) Pi Model, if found, else None
+    """
+    logger = logging.getLogger("octoprint.plugins.ws281x_led_status")
+    global _proc_dt_model
+    if not _proc_dt_model:
+        _proc_dt_model = get_proc_dt_model()
+
+    try:
+        model_no = re.search(constants.PI_REGEX, _proc_dt_model).group(1).strip()
+    except IndexError:
+        logger.error(
+            "Pi model string detected as `{}`, unable to be parsed by regex".format(
+                _proc_dt_model
+            )
+        )
+        raise
+    logger.info("Detected running on a Raspberry Pi {}".format(model_no))
+    global PI_MODEL
+    PI_MODEL = model_no
+
+
 def __plugin_check__():
     try:
         proc_dt_model = get_proc_dt_model()
@@ -689,6 +673,9 @@ def __plugin_check__():
 
 
 def __plugin_load__():
+    # Attempt to parse the Pi version, if so set PI_MODEL
+    determine_pi_version()
+
     global __plugin_implementation__
     __plugin_implementation__ = WS281xLedStatusPlugin()
 

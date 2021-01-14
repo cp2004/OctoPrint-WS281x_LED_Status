@@ -12,11 +12,11 @@ from octoprint_ws281x_led_status.util import run_system_command
 
 
 class PluginWizard:
-    def __init__(self, plugin):
+    def __init__(self, plugin, pi_model):
         self.plugin = plugin
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.wizard")
 
-        self.pi_model = None
+        self.pi_model = pi_model
 
     def on_api_command(self, cmd, data):
         # Wizard specific API
