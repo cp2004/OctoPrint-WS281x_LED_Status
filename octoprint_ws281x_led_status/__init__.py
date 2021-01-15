@@ -291,8 +291,8 @@ class WS281xLedStatusPlugin(
         else:
             self._logger.debug("Torch timer started for {} secs".format(torch_time))
             self.torch_timer = util.start_daemon_timer(
-                torch_time,
-                self.deactivate_torch,
+                interval=torch_time,
+                target=self.deactivate_torch,
             )
             self.torch_on = True
             self.update_effect("torch")
@@ -355,7 +355,7 @@ class WS281xLedStatusPlugin(
             )
             if return_idle_time > 0:
                 self.return_timer = util.start_daemon_timer(
-                    self.update_effect, return_idle_time, args=("idle",)
+                    return_idle_time, self.update_effect, args=("idle",)
                 )
 
         if "progress" in mode_name:

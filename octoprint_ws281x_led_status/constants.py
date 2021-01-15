@@ -26,7 +26,7 @@ AT_COMMANDS = [
     TORCH_ON_AT_COMMAND,
     TORCH_OFF_AT_COMMAND,
 ]
-
+# TODO get rid of this
 STANDARD_EFFECT_NICE_NAMES = {
     "Solid Color": "solid",
     "Color Wipe": "wipe",
@@ -80,21 +80,21 @@ STRIP_TYPES = {
     "SK6812_STRIP_BGRW": rpi_ws281x.SK6812_STRIP_BGRW,
 }
 EFFECTS = {
-    "solid": standard.solid_color,
-    "wipe": standard.color_wipe,
-    "wipe2": standard.color_wipe_2,
-    "pulse": standard.simple_pulse,
-    "rainbow": standard.rainbow,
-    "cycle": standard.rainbow_cycle,
-    "bounce": standard.bounce,
-    "bounce_solo": standard.solo_bounce,
-    "random": standard.random_single,
-    "blink": standard.blink,
-    "cross": standard.crossover,
-    "balls": standard.bouncy_balls,
-    "progress_print": progress.progress,
+    "Solid Color": standard.solid_color,
+    "Color Wipe": standard.color_wipe,
+    "Color Wipe 2": standard.color_wipe_2,
+    "Pulse": standard.simple_pulse,
+    "Bounce": standard.rainbow,
+    "Bounce Solo": standard.rainbow_cycle,
+    "Rainbow": standard.bounce,
+    "Rainbow Cycle": standard.solo_bounce,
+    "Random": standard.random_single,
+    "Blink": standard.blink,
+    "Crossover": standard.crossover,
+    "Bouncy Balls": standard.bouncy_balls,
     "progress_heatup": progress.progress,
     "progress_cooling": progress.progress,
+    "progress_print": progress.progress,
 }
 MODES = [
     "startup",

@@ -66,27 +66,28 @@ class EffectRunner:
                 if not self.queue.empty():
                     msg = self.queue.get()  # The ONLY place the queue should be 'got'
                 if msg:
-                    parsed = self.parse_q_msg(msg)  # Effects are run from parse_q_msg
-                    if parsed == constants.KILL_MSG:
+                    if msg == constants.KILL_MSG:
                         self.blank_leds()
                         self._logger.info("Kill message recieved, Bye!")
                         # Exit the process
                         return
-                    msg = parsed  # So that previous state can return after 'lights on'
+                    self.parse_q_msg(msg)  # Effects are run from parse_q_msg
+                    msg = self.previous_state
         except KeyboardInterrupt:
             self.blank_leds()
             return
         except Exception as e:
             self._logger.error("Unhandled exception in effect runner process")
-            self._logger.error(e)
+            self._logger.error(repr(e))
+            raise
 
     def parse_q_msg(self, msg):
         if msg == "on":
-            self.turn_lights_off()
-            return self.previous_state
-        elif msg == "off":
             self.turn_lights_on()
-            return self.previous_state
+            return
+        elif msg == "off":
+            self.turn_lights_off()
+            return
         elif "progress" in msg:
             self.progress_msg(msg)
         elif "M150" in msg:
@@ -134,7 +135,7 @@ class EffectRunner:
                 brightness = min(int(match.group("brightness")), 255)
 
         if self.check_times() and self.lights_on:  # Respect lights on/off
-            constants.EFFECTS["solid"](
+            constants.EFFECTS["Solid Color"](
                 self.strip, self.queue, (red, green, blue), max_brightness=brightness
             )
         else:
@@ -156,7 +157,8 @@ class EffectRunner:
             self.blank_leds()
 
     def standard_effect(self, mode):
-        self._logger.debug("Changing effect to {}".format(mode))
+        if self.previous_state != mode:
+            self._logger.debug("Changing effect to {}".format(mode))
         if self.check_times() and self.lights_on:
             effect_settings = self.effect_settings[mode]
             constants.EFFECTS[effect_settings["effect"]](
@@ -171,7 +173,7 @@ class EffectRunner:
 
     def blank_leds(self):
         """Set LEDs to off, wait 0.1secs to prevent CPU burn"""
-        constants.EFFECTS["solid"](
+        constants.EFFECTS["Solid Color"](
             self.strip,
             self.queue,
             [0, 0, 0],
@@ -209,20 +211,20 @@ class EffectRunner:
         self._logger.info("Initialising LED strip")
         try:
             strip = PixelStrip(
-                num=self.strip_settings["led_count"],
-                pin=self.strip_settings["led_pin"],
-                freq_hz=self.strip_settings["led_freq_hz"],
-                dma=self.strip_settings["led_dma"],
-                invert=self.strip_settings["led_invert"],
-                brightness=self.strip_settings["led_brightness"],
-                channel=self.strip_settings["led_channel"],
-                strip_type=constants.STRIP_TYPES[self.strip_settings["strip_type"]],
+                num=int(self.strip_settings["count"]),
+                pin=int(self.strip_settings["pin"]),
+                freq_hz=int(self.strip_settings["freq_hz"]),
+                dma=int(self.strip_settings["dma"]),
+                invert=bool(self.strip_settings["invert"]),
+                brightness=int(self.strip_settings["brightness"]),
+                channel=int(self.strip_settings["channel"]),
+                strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
             )
             strip.begin()
             self._logger.info("Strip successfully initialised")
             return strip
         except Exception as e:  # Probably wrong settings...
-            self._logger.error(e)
+            self._logger.error(repr(e))
             self._logger.error("Strip failed to initialize, no effects will be run.")
             raise StripFailedError("Error intitializing strip")
 
@@ -256,7 +258,7 @@ class EffectRunner:
 
         # effect settings
         line = line + "\n | * EFFECT SETTINGS *"
-        for key, value in self.strip_settings.items():
+        for key, value in self.effect_settings.items():
             if key in constants.MODES:
                 line = line + "\n | " + str(key)
                 for setting_key, setting_value in value.items():
@@ -266,6 +268,7 @@ class EffectRunner:
 
         # extras
         line = line + "\n | * ACTIVE TIMES *"
+        line = line + "\n | - enabled: " + str(self.active_times_settings["enabled"])
         line = line + "\n | - start: " + str(self.active_times_settings["start"])
         line = line + "\n | - end: " + str(self.active_times_settings["end"])
         self._logger.debug(line)

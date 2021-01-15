@@ -31,6 +31,8 @@ def average(a, b):
 
 
 def milli_sleep(m_secs):
+    if not isinstance(m_secs, float):
+        m_secs = float(m_secs)
     sleep(m_secs / 1000)
 
 
@@ -41,6 +43,8 @@ def q_poll_sleep(secs, queue):
     :param queue: multiprocessing.queue() object
     :return: bool: False if we should not proceed, true if we can
     """
+    if not isinstance(secs, float):
+        secs = float(secs)
     if not queue.empty():
         return False
     else:
@@ -55,6 +59,8 @@ def q_poll_milli_sleep(m_secs, queue):
     :param queue: multiprocessing.queue() object
     :return: bool: False if we should not proceed, true if we can
     """
+    if not isinstance(m_secs, int):
+        m_secs = int(m_secs)
     return q_poll_sleep(m_secs / 1000, queue)
 
 
