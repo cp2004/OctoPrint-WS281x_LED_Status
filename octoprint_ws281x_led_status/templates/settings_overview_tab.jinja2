@@ -2,55 +2,55 @@
     <div>
 
     <h4>Enabled effects</h4>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.idle_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.idle.enabled()">
         <span class="fa-lg" title="Idle effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Idle (connected)</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.disconnected_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.disconnected.enabled()">
         <span class="fa-lg" title="Disconnected effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Disconnected</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.success_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.enabled()">
         <span class="fa-lg" title="success effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Successful print</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.failed_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.failed.enabled()">
         <span class="fa-lg" title="failed effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Failed print</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.paused_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.paused.enabled()">
         <span class="fa-lg" title="paused effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Paused</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.printing_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.printing.enabled()">
         <span class="fa-lg" title="printing effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Printing</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.progress_print_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_print.enabled()">
         <span class="fa-lg" title="progress_print effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Print progress</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.progress_heatup_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.enabled()">
         <span class="fa-lg" title="progress_heatup effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Heating progress</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.enabled()">
         <span class="fa-lg" title="progress_cooling effect enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Cooling progress</span>
@@ -60,55 +60,55 @@
     <br>
     <div>
     <h4>Disabled effects</h4>
-        <div data-bind="visible: !settings.plugins.ws281x_led_status.idle_enabled()">
+        <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.idle.enabled()">
         <span class="fa-lg" title="Idle effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Idle (connected)</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.disconnected_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.disconnected.enabled()">
         <span class="fa-lg" title="Disconnected effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Disconnected</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.success_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.success.enabled()">
         <span class="fa-lg" title="success effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Successful print</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.failed_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.failed.enabled()">
         <span class="fa-lg" title="failed effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Failed print</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.paused_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.paused.enabled()">
         <span class="fa-lg" title="paused effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Paused</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.printing_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.printing.enabled()">
         <span class="fa-lg" title="printing effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Printing</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.progress_print_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_print.enabled()">
         <span class="fa-lg" title="progress_print effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Print progress</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.progress_heatup_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.enabled()">
         <span class="fa-lg" title="progress_heatup effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Heating progress</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.progress_cooling_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.enabled()">
         <span class="fa-lg" title="progress_cooling effect disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Cooling progress</span>
@@ -118,31 +118,31 @@
 </div>
 <div class="span4">
     <h4>Enabled Features</h4>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.active_hours_enabled()">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.active_times.enabled()">
         <span class="fa-lg">
             <span class="fa fa-clock-o" style="color: limegreen"></span>
-            <span>Active times: <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_start"></span> - <span data-bind="text: settings.plugins.ws281x_led_status.active_hours_stop"></span></span>
+            <span>Active times: <span data-bind="text: settingsViewModel.settings.plugins.ws281x_led_status.active_times.start"></span> - <span data-bind="text: settingsViewModel.settings.plugins.ws281x_led_status.active_hours_stop"></span></span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.torch_enabled">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled">
         <span class="fa-lg" title="Torch mode enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Torch button</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.intercept_m150">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.intercept_m150">
         <span class="fa-lg" title="M150 intercept enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>M150 Intercept</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.at_command_reaction">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.at_command_reaction">
         <span class="fa-lg" title="At command intercept enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>@ Command Reaction</span>
         </span>
     </div>
-    <div data-bind="visible: settings.plugins.ws281x_led_status.debug_logging">
+    <div data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.debug_logging">
         <span class="fa-lg" title="Debug logging enabled">
             <span class="fa fa-check" style="color: limegreen" ></span>
             <span>Debug logging</span>
@@ -150,31 +150,31 @@
     </div>
     <br>
     <h4>Disabled Features</h4>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.active_hours_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.active_times.enabled()">
     <span class="fa-lg">
         <span class="fa fa-clock-o" style="color: darkred"></span>
         <span>Active times</span>
     </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.torch_enabled()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled()">
         <span class="fa-lg" title="Torch mode disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Torch button</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.intercept_m150()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.intercept_m150()">
         <span class="fa-lg" title="M150 intercept disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>M150 Intercept</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.at_command_reaction()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.at_command_reaction()">
         <span class="fa-lg" title="At command intercept disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>@ Command Reaction</span>
         </span>
     </div>
-    <div data-bind="visible: !settings.plugins.ws281x_led_status.debug_logging()">
+    <div data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.debug_logging()">
         <span class="fa-lg" title="Debug logging disabled">
             <span class="fa fa-times" style="color: darkred" ></span>
             <span>Debug logging</span>

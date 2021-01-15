@@ -8,54 +8,54 @@ $(function () {
     function ws281xLEDStatusWizardViewModel(parameters) {
         var self = this;
 
-        self.passwordForPi = ko.observable("")
-        self.addUserDone = ko.observable(false)
-        self.inProgressAddUser = ko.observable(false)
-        self.enabledSPI = ko.observable(false)
-        self.inProgressEnableSPI = ko.observable(false)
-        self.spiBufferIncreased = ko.observable(false)
-        self.inProgressSpiBuffer = ko.observable(false)
-        self.coreFreqSet = ko.observable(false)
-        self.inProgressCoreFreq = ko.observable(false)
-        self.coreFreqMinSet = ko.observable(false)
-        self.inProgressCoreFreqMin = ko.observable(false)
+        self.passwordForPi = ko.observable("");
+        self.addUserDone = ko.observable(false);
+        self.inProgressAddUser = ko.observable(false);
+        self.enabledSPI = ko.observable(false);
+        self.inProgressEnableSPI = ko.observable(false);
+        self.spiBufferIncreased = ko.observable(false);
+        self.inProgressSpiBuffer = ko.observable(false);
+        self.coreFreqSet = ko.observable(false);
+        self.inProgressCoreFreq = ko.observable(false);
+        self.coreFreqMinSet = ko.observable(false);
+        self.inProgressCoreFreqMin = ko.observable(false);
 
         self.passwdPopoverRemove = function () {
-            $('#wizardPasswordField').popover('hide')
-        }
+            $("#wizardPasswordField").popover("hide");
+        };
 
         self.runApiCommand = function (command) {
             OctoPrint.simpleApiCommand("ws281x_led_status", command, {
                 password: self.passwordForPi(),
             }).done(self.check_config);
-        }
+        };
 
         self.runAddUser = function () {
             self.inProgressAddUser(true);
-            self.runApiCommand("adduser")
-        }
+            self.runApiCommand("adduser");
+        };
         self.runEnableSPI = function () {
-            self.inProgressEnableSPI(true)
-            self.runApiCommand("enable_spi")
-        }
-        self.runIncreaseSPIBuffer = function (){
-            self.inProgressSpiBuffer(true)
-            self.runApiCommand("spi_buffer_increase")
-        }
-        self.runSetCoreFreq = function (){
-            self.inProgressCoreFreq(true)
-            self.runApiCommand("set_core_freq")
-        }
-        self.runSetCoreFreqMin = function (){
-            self.inProgressCoreFreqMin(true)
-            self.runApiCommand("set_core_freq_min")
-        }
+            self.inProgressEnableSPI(true);
+            self.runApiCommand("enable_spi");
+        };
+        self.runIncreaseSPIBuffer = function () {
+            self.inProgressSpiBuffer(true);
+            self.runApiCommand("spi_buffer_increase");
+        };
+        self.runSetCoreFreq = function () {
+            self.inProgressCoreFreq(true);
+            self.runApiCommand("set_core_freq");
+        };
+        self.runSetCoreFreqMin = function () {
+            self.inProgressCoreFreqMin(true);
+            self.runApiCommand("set_core_freq_min");
+        };
 
         self.check_config = function (response) {
             if (response.errors === "password") {
-                $('#wizardPasswordField').popover('show')
+                $("#wizardPasswordField").popover("show");
             } else {
-                $('#wizardPasswordField').popover('hide')
+                $("#wizardPasswordField").popover("hide");
             }
             if (response.adduser_done) {
                 self.addUserDone(true);
@@ -83,13 +83,12 @@ $(function () {
                 self.coreFreqMinSet(false);
             }
             // Set all request spinners to false
-            self.inProgressAddUser(false)
-            self.inProgressEnableSPI(false)
-            self.inProgressSpiBuffer(false)
-            self.inProgressCoreFreq(false)
-            self.inProgressCoreFreqMin(false)
-
-        }
+            self.inProgressAddUser(false);
+            self.inProgressEnableSPI(false);
+            self.inProgressSpiBuffer(false);
+            self.inProgressCoreFreq(false);
+            self.inProgressCoreFreqMin(false);
+        };
         self.onWizardDetails = function (response) {
             self.check_config(response.ws281x_led_status.details);
         };
@@ -98,20 +97,28 @@ $(function () {
                if config incomplete, tell them it should be,
                if config complete, tell them to restart.
              */
-            if (!self.addUserDone() || !self.enabledSPI() || !self.spiBufferIncreased() || !self.coreFreqSet() || !self.coreFreqMinSet()){
+            if (
+                !self.addUserDone() ||
+                !self.enabledSPI() ||
+                !self.spiBufferIncreased() ||
+                !self.coreFreqSet() ||
+                !self.coreFreqMinSet()
+            ) {
                 new PNotify({
-                    'title': "WS281X LED Status: Incomplete config",
-                    'text': "Your configuration is not complete! please head to the utilities tab in the settings page to fix this!",
-                    'type': "error",
-                    "hide": false
+                    title: "WS281X LED Status: Incomplete config",
+                    text:
+                        "Your configuration is not complete! please head to the utilities tab in the settings page to fix this!",
+                    type: "error",
+                    hide: false,
                 });
             } else {
                 new PNotify({
-                    'title': "Restart needed!",
-                    'text': "WS281x LED Status configuration complete. You will need to restart your Pi for the changes to take effect.",
-                    'type': 'success',
-                    'hide': false
-                })
+                    title: "Restart needed!",
+                    text:
+                        "WS281x LED Status configuration complete. You will need to restart your Pi for the changes to take effect.",
+                    type: "success",
+                    hide: false,
+                });
             }
         };
     }
@@ -128,26 +135,28 @@ $(function () {
         self.torch_enabled = ko.observable(true);
         self.torch_toggle = ko.observable(true);
 
-        var torch_on_src = "/plugin/ws281x_led_status/static/svg/flashlight.svg"
-        var torch_off_src = "/plugin/ws281x_led_status/static/svg/flashlight-outline.svg"
+        var torch_on_src =
+            "/plugin/ws281x_led_status/static/svg/flashlight.svg";
+        var torch_off_src =
+            "/plugin/ws281x_led_status/static/svg/flashlight-outline.svg";
 
         self.lights_on = ko.observable(true);
         self.torch_on = ko.observable(false);
 
-        self.torch_icon = ko.observable(torch_off_src)
+        self.torch_icon = ko.observable(torch_off_src);
 
         function update_light_status(response) {
             if (response.lights_status) {
-                self.lights_on(true)
+                self.lights_on(true);
             } else {
-                self.lights_on(false)
+                self.lights_on(false);
             }
             if (response.torch_status) {
-                self.torch_on(true)
-                self.torch_icon(torch_on_src)
+                self.torch_on(true);
+                self.torch_icon(torch_on_src);
             } else {
-                self.torch_on(false)
-                self.torch_icon(torch_off_src)
+                self.torch_on(false);
+                self.torch_icon(torch_off_src);
             }
         }
 
@@ -161,13 +170,13 @@ $(function () {
         self.activate_torch = function () {
             if (self.torch_toggle()) {
                 if (self.torch_on()) {
-                    self.torch_on(false)
+                    self.torch_on(false);
                     OctoPrint.simpleApiCommand(
                         "ws281x_led_status",
                         "deactivate_torch"
                     ).done(update_light_status);
                 } else {
-                    self.torch_on(true)
+                    self.torch_on(true);
                     OctoPrint.simpleApiCommand(
                         "ws281x_led_status",
                         "activate_torch"
@@ -183,7 +192,7 @@ $(function () {
             }
         };
         self.torch_off = function () {
-            self.torch_on(false)
+            self.torch_on(false);
         };
 
         self.onBeforeBinding = function () {
@@ -191,42 +200,42 @@ $(function () {
                 update_light_status
             );
             self.torch_enabled(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.torch_enabled()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled()
             );
             self.torch_toggle(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.torch_toggle()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle()
             );
         };
 
         self.onSettingsBeforeSave = function () {
             self.torch_enabled(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.torch_enabled()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled()
             );
             self.torch_toggle(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.torch_toggle()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle()
             );
         };
 
         self.onDataUpdaterPluginMessage = function (plugin, data) {
-            if (plugin !== "ws281x_led_status"){
-                return
+            if (plugin !== "ws281x_led_status") {
+                return;
             }
-            if (data.type === "lights"){
-                if (data.on){
-                    self.lights_on(true)
+            if (data.type === "lights") {
+                if (data.on) {
+                    self.lights_on(true);
                 } else {
-                    self.lights_on(false)
+                    self.lights_on(false);
                 }
-            } else if (data.type === "torch"){
-                if (data.on){
-                    self.torch_on(true)
-                    self.torch_icon(torch_on_src)
+            } else if (data.type === "torch") {
+                if (data.on) {
+                    self.torch_on(true);
+                    self.torch_icon(torch_on_src);
                 } else {
-                    self.torch_on(false)
-                    self.torch_icon(torch_off_src)
+                    self.torch_on(false);
+                    self.torch_icon(torch_off_src);
                 }
             }
-        }
+        };
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusNavbarViewModel,
@@ -236,6 +245,8 @@ $(function () {
 
     function ws281xLedStatusSettingsViewModel(parameters) {
         var self = this;
+
+        self.settingsViewModel = parameters[0];
 
         var current_input = $("#currentInput_mA");
 
@@ -279,18 +290,19 @@ $(function () {
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusSettingsViewModel,
         dependencies: ["settingsViewModel"],
+        elements: "#settings_plugin_ws281x_led_status",
     });
 
-    function ws281x_led_status_config_test_VM(parametera){
+    function ws281x_led_status_config_test_VM(parametera) {
         var self = this;
         /* Configuration testing */
 
         self.testInProgress = ko.observable(false);
-        self.currentTest = ko.observable("")
-        self.testSuccess = ko.observable(false)
-        self.testFailures = ko.observable(false)
+        self.currentTest = ko.observable("");
+        self.testSuccess = ko.observable(false);
+        self.testFailures = ko.observable(false);
 
-        self.passwordForPi = ko.observable("")
+        self.passwordForPi = ko.observable("");
 
         self.addUserStatus = ko.observable("");
         self.spiEnabledStatus = ko.observable("");
@@ -315,95 +327,109 @@ $(function () {
             OctoPrint.simpleApiCommand("ws281x_led_status", "test_os_config");
         };
 
-        self.onDataUpdaterPluginMessage = function(plugin, data){
-            if (plugin !== "ws281x_led_status"){
+        self.onDataUpdaterPluginMessage = function (plugin, data) {
+            if (plugin !== "ws281x_led_status") {
                 return;
             }
-            if (data.type === "os_config_test"){
+            if (data.type === "os_config_test") {
                 // Received data for the config test
                 if (data.status === "in_progress") {
                     if (data.test === "adduser") {
-                        self.currentTest("User pi in gpio group")
+                        self.currentTest("User pi in gpio group");
                     } else if (data.test === "spi_enabled") {
-                        self.currentTest("SPI enabled")
+                        self.currentTest("SPI enabled");
                     } else if (data.test === "spi_buffer_increase") {
-                        self.currentTest("SPI Buffer size increased")
+                        self.currentTest("SPI Buffer size increased");
                     } else if (data.test === "set_core_freq") {
-                        self.currentTest("core_freq set in /boot/config.txt")
+                        self.currentTest("core_freq set in /boot/config.txt");
                     } else if (data.test === "set_core_freq_min") {
-                        self.currentTest("core_freq_min set in /boot/config.txt")
+                        self.currentTest(
+                            "core_freq_min set in /boot/config.txt"
+                        );
                     }
                 } else {
-                    if (data.test === "adduser"){
-                        self.addUserStatus(data.status)
+                    if (data.test === "adduser") {
+                        self.addUserStatus(data.status);
                     } else if (data.test === "spi_enabled") {
-                        self.spiEnabledStatus(data.status)
+                        self.spiEnabledStatus(data.status);
                     } else if (data.test === "spi_buffer_increase") {
-                        self.spiBufferStatus(data.status)
+                        self.spiBufferStatus(data.status);
                     } else if (data.test === "set_core_freq") {
-                        self.coreFreqStatus(data.status)
+                        self.coreFreqStatus(data.status);
                     } else if (data.test === "set_core_freq_min") {
-                        self.coreFreqMinStatus(data.status)
-                    } else if (data.test === "complete"){
-                        if (!self.testFailures()){
+                        self.coreFreqMinStatus(data.status);
+                    } else if (data.test === "complete") {
+                        if (!self.testFailures()) {
                             self.testSuccess(true);
                         }
-                        self.testInProgress(false)
+                        self.testInProgress(false);
                     }
                 }
                 // if any tests fail, this will tell the user to do something & show password
                 if (data.status === "failed") {
-                    self.testFailures(true)
+                    self.testFailures(true);
                 }
             }
-        }
+        };
 
         self.fixAddUser = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "adduser", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
-        }
+            OctoPrint.simpleApiCommand("ws281x_led_status", "adduser", {
+                password: self.passwordForPi(),
+            }).done(self.processApiCmdResponse);
+        };
         self.fixEnableSpi = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "enable_spi", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
-        }
+            OctoPrint.simpleApiCommand("ws281x_led_status", "enable_spi", {
+                password: self.passwordForPi(),
+            }).done(self.processApiCmdResponse);
+        };
         self.fixIncreaseSpiBuffer = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "spi_buffer_increase", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
-        }
+            OctoPrint.simpleApiCommand(
+                "ws281x_led_status",
+                "spi_buffer_increase",
+                { password: self.passwordForPi() }
+            ).done(self.processApiCmdResponse);
+        };
         self.fixCoreFreq = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "set_core_freq", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
-        }
+            OctoPrint.simpleApiCommand("ws281x_led_status", "set_core_freq", {
+                password: self.passwordForPi(),
+            }).done(self.processApiCmdResponse);
+        };
         self.fixCoreFreqMin = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "set_core_freq_min", {password: self.passwordForPi()}).done(self.processApiCmdResponse)
-        }
+            OctoPrint.simpleApiCommand(
+                "ws281x_led_status",
+                "set_core_freq_min",
+                { password: self.passwordForPi() }
+            ).done(self.processApiCmdResponse);
+        };
 
         self.processApiCmdResponse = function (response) {
-
             if (response.errors === "password") {
-                $('#cfgTestPasswordField').popover('show')
+                $("#cfgTestPasswordField").popover("show");
             }
             if (response.adduser_done) {
-                self.addUserStatus("passed")
+                self.addUserStatus("passed");
             }
             if (response.spi_enabled) {
-                self.spiEnabledStatus("passed")
+                self.spiEnabledStatus("passed");
             }
             if (response.spi_buffer_increase) {
-                self.spiBufferStatus("passed")
+                self.spiBufferStatus("passed");
             }
             if (response.core_freq_set) {
-                self.coreFreqStatus("passed")
+                self.coreFreqStatus("passed");
             }
             if (response.core_freq_min_set) {
-                self.coreFreqMinStatus("passed")
+                self.coreFreqMinStatus("passed");
             }
-        }
+        };
         self.passwdPopoverRemove = function () {
-            $('#cfgTestPasswordField').popover('hide')
+            $("#cfgTestPasswordField").popover("hide");
             return true;
-        }
+        };
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281x_led_status_config_test_VM,
         dependencies: [],
         elements: ["#generic_plugin_ws281x_led_status"],
     });
-
 });

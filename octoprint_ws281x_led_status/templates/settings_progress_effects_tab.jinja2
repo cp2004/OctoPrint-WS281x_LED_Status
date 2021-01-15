@@ -1,63 +1,63 @@
 <h5>Progress effects <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#progress-tracking" target="_blank"><i class="fa fa-lg fa-info-circle text-info" aria-hidden="true"></i></a></h5>
 <form class="form-horizontal">
     <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.reverse">
+        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.strip.reverse">
         Reverse progress bar direction
     </label>
     <hr>
     <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.progress_print_enabled">Enable printing progress effect
+        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_print.enabled">Enable printing progress effect
     </label>
-    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_print_enabled">
+    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_print.enabled">
         <label class="inline"> Progress bar color </label>
-        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_print_color">
+        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_print.color">
         <label class="inline"> Base color </label>
-        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_print_color_base">
+        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_print.base">
     </div>
     <hr>
     <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.progress_heatup_enabled">Enable heating progress effect
+        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.enabled">Enable heating progress effect
     </label>
     <br>
-    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_heatup_enabled">
-        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.progress_heatup_bed_enabled">
+    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.enabled">
+        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.bed_enabled">
         <label class="inline" style="padding-right: 10px"> Track bed heating </label>
-        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.progress_heatup_tool_enabled">
+        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.tool_enabled">
         <label class="inline" style="padding-right: 10px"> Track tool heating </label>
-        <label class="inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_heatup_tool_enabled"> Index of Tool to track: </label>
+        <label class="inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.tool_enabled"> Index of Tool to track: </label>
         <div class="input-prepend">
             <span class="add-on">T</span>
-            <input type="number" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_heatup_tool_key, visible: settings.plugins.ws281x_led_status.progress_heatup_tool_enabled">
+            <input type="number" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.tool_key, visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.tool_enabled">
         </div>
     </div>
-    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_heatup_enabled">
+    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.enabled">
         <label class="inline"> Progress bar color </label>
-        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_heatup_color">
+        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.color">
         <label class="inline"> Base color </label>
-        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_heatup_color_base">
+        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_heatup.base">
     </div>
     <hr>
     <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settings.plugins.ws281x_led_status.progress_cooling_enabled">Enable cooling progress effect
+        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.enabled">Enable cooling progress effect
     </label>
 
-    <div class="form-inline" data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled">
+    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.enabled">
         <label class="inline" for>Track cooling on bed or tool:</label>
-        <select class="input-large" data-bind="value: settings.plugins.ws281x_led_status.bed_or_tool">
+        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.bed_or_tool">
             <option value="tool">Track Tool</option>
             <option value="bed">Track Bed</option>
         </select>
     </div>
-    <div class="form-inline" style="margin-top: 5px;" data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled">
+    <div class="form-inline" style="margin-top: 5px;" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.enabled">
         <label class="inline"> Progress bar color </label>
-        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_color">
+        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.color">
         <label class="inline"> Base color </label>
-        <input type="color" class="input-small" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_color_base">
+        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.base">
     </div>
-    <div class="form-inline" style="margin-top: 5px;" data-bind="visible: settings.plugins.ws281x_led_status.progress_cooling_enabled">
+    <div class="form-inline" style="margin-top: 5px;" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.enabled">
         <label class="inline" for="ws_temp_threshold">Cooling temperature threshold</label>
         <div class="input-append">
-            <input id="ws_temp_threshold" class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.progress_cooling_threshold">
+            <input id="ws_temp_threshold" class="input-medium" type="number" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_cooling.threshold">
             <span class="add-on">C</span>
         </div>
         <p class="help-block">When the temperature drops below this value, cooling tracking will stop. Note that if this is <strong><em class="text-warning">below</em></strong> room temperature, cooling tracking will <strong class="text-error">never stop.</strong></p>
@@ -66,7 +66,7 @@
     <div class="form-inline">
         <label class="inline" for="ws_temp_start">Set base temperature</label>
         <div class="input-append">
-            <input id="ws_temp_start" min="0" class="input-medium" type="number" data-bind="value: settings.plugins.ws281x_led_status.progress_temp_start">
+            <input id="ws_temp_start" min="0" class="input-medium" type="number" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.progress_temp_start">
             <span class="add-on">C</span>
         </div>
         <p class="help-block">Heating/cooling progress bar will make '0' the temperature specified. Suggested value is just below room temperature, so that the progress bar starts closer to the end of the strip.</p>

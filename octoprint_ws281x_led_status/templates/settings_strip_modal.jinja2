@@ -9,7 +9,7 @@
             <div class="control-group">
                 <label class="control-label">{{ _('Strip Type') }}</label>
                 <div class="controls">
-                    <select class="input-block-level" id="stripType" data-bind="value: settings.plugins.ws281x_led_status.strip_type">
+                    <select class="input-block-level" id="stripType" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.type">
                         {% for type in plugin_ws281x_led_status_strip_types %}
                             <option value="{{ type }}">{{ type }}</option>
                         {% endfor %}
@@ -20,30 +20,30 @@
                 <label class="control-label">{{ _('Max brightness') }}</label>
                 <div class="controls">
                     <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_brightness">
+                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.brightness">
                         <span class="add-on">%</span>
                     </div>
-                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_brightness">
+                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.brightness">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('Number of LEDs') }}</label>
                 <div class="controls">
-                    <input type="number" id="ws281x_num_leds" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_count">
+                    <input type="number" id="ws281x_num_leds" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.count">
                 </div>
 
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('GPIO pin') }}</label>
                 <div class="controls">
-                    <input type="number" min="10" max="10" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_pin">
+                    <input type="number" min="10" max="10" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.pin">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('Frequency') }}</label>
                 <div class="controls">
                     <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_freq_hz">
+                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.freq_hz">
                         <span class="add-on">hz</span>
                     </div>
                 </div>
@@ -51,19 +51,19 @@
             <div class="control-group">
                 <label class="control-label">{{ _('DMA channel') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_dma">
+                    <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.dma">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('Invert pin output') }}</label>
                 <div class="controls">
-                    <input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.ws281x_led_status.led_invert">
+                    <input type="checkbox" class="input-medium" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.strip.invert">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('PWM channel ') }}</label>
                 <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settings.plugins.ws281x_led_status.led_channel">
+                    <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.channel">
                 </div>
             </div>
         </form>

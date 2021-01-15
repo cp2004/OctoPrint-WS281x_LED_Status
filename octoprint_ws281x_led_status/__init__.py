@@ -113,7 +113,7 @@ class WS281xLedStatusPlugin(
     # Template plugin
     def get_template_configs(self):
         return [
-            {"type": "settings", "custom_bindings": False},
+            {"type": "settings", "custom_bindings": True},
             {"type": "generic", "custom_bindings": True},
         ]
 

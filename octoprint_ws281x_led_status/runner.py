@@ -32,9 +32,9 @@ class EffectRunner:
         self.effect_settings = effect_settings
         self.active_times_settings = active_times_settings
         self.reverse = strip_settings["reverse"]
-        self.max_brightness = strip_settings["led_brightness"]
+        self.max_brightness = strip_settings["brightness"]
         start = self.active_times_settings["start"].split(":")
-        end = self.active_times_settings["stop"].split(":")
+        end = self.active_times_settings["end"].split(":")
         self.start_time = (int(start[0]) * 60) + int(start[1])
         self.end_time = (int(end[0]) * 60) + int(end[1])
 
@@ -267,7 +267,7 @@ class EffectRunner:
         # extras
         line = line + "\n | * ACTIVE TIMES *"
         line = line + "\n | - start: " + str(self.active_times_settings["start"])
-        line = line + "\n | - end: " + str(self.active_times_settings["active_stop"])
+        line = line + "\n | - end: " + str(self.active_times_settings["end"])
         self._logger.debug(line)
 
 
