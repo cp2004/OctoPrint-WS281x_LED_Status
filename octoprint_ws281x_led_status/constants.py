@@ -12,7 +12,7 @@ PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 BLOCKING_TEMP_GCODES = [
     "M109",
     "M190",
-]  # TODO make configurable? No one has complained about it yet...
+]
 
 ON_AT_COMMAND = "WS_LIGHTSON"
 OFF_AT_COMMAND = "WS_LIGHTSOFF"
@@ -26,21 +26,6 @@ AT_COMMANDS = [
     TORCH_ON_AT_COMMAND,
     TORCH_OFF_AT_COMMAND,
 ]
-# TODO get rid of this
-STANDARD_EFFECT_NICE_NAMES = {
-    "Solid Color": "solid",
-    "Color Wipe": "wipe",
-    "Color Wipe 2": "wipe2",
-    "Pulse": "pulse",
-    "Bounce": "bounce",
-    "Bounce Solo": "bounce_solo",
-    "Rainbow": "rainbow",
-    "Rainbow Cycle": "cycle",
-    "Random": "random",
-    "Blink": "blink",
-    "Crossover": "cross",
-    "Bouncy Balls": "balls",
-}
 
 SUPPORTED_EVENTS = {
     Events.CONNECTED: "idle",
@@ -51,17 +36,7 @@ SUPPORTED_EVENTS = {
 }
 
 KILL_MSG = "KILL"
-STRIP_SETTINGS = [  # ALL LED SETTINGS, for rpi_ws281x.PixelStrip
-    "led_count",
-    "led_pin",
-    "led_freq_hz",
-    "led_dma",
-    "led_invert",
-    "led_brightness",
-    "led_channel",
-    "strip_type",
-    "reverse",
-]
+
 STRIP_TYPES = {
     "WS2811_STRIP_GRB": rpi_ws281x.WS2811_STRIP_GRB,
     "WS2812_STRIP": rpi_ws281x.WS2812_STRIP,

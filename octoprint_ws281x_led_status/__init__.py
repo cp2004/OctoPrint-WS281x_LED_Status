@@ -120,7 +120,7 @@ class WS281xLedStatusPlugin(
     def get_template_vars(self):
         global PI_MODEL
         return {
-            "standard_names": constants.STANDARD_EFFECT_NICE_NAMES,
+            "standard_names": constants.EFFECTS.keys(),
             "pi_model": PI_MODEL,
             "strip_types": constants.STRIP_TYPES,
             "timezone": util.get_timezone(),
