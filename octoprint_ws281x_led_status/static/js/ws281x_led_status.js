@@ -32,23 +32,23 @@ $(function () {
 
         self.runAddUser = function () {
             self.inProgressAddUser(true);
-            self.runApiCommand("adduser");
+            self.runApiCommand("wiz_adduser");
         };
         self.runEnableSPI = function () {
             self.inProgressEnableSPI(true);
-            self.runApiCommand("enable_spi");
+            self.runApiCommand("wiz_enable_spi");
         };
         self.runIncreaseSPIBuffer = function () {
             self.inProgressSpiBuffer(true);
-            self.runApiCommand("spi_buffer_increase");
+            self.runApiCommand("wiz_increase_buffer");
         };
         self.runSetCoreFreq = function () {
             self.inProgressCoreFreq(true);
-            self.runApiCommand("set_core_freq");
+            self.runApiCommand("wiz_set_core_freq");
         };
         self.runSetCoreFreqMin = function () {
             self.inProgressCoreFreqMin(true);
-            self.runApiCommand("set_core_freq_min");
+            self.runApiCommand("wiz_set_core_freq_min");
         };
 
         self.check_config = function (response) {
@@ -146,12 +146,12 @@ $(function () {
         self.torch_icon = ko.observable(torch_off_src);
 
         function update_light_status(response) {
-            if (response.lights_status) {
+            if (response.lights_on) {
                 self.lights_on(true);
             } else {
                 self.lights_on(false);
             }
-            if (response.torch_status) {
+            if (response.torch_on) {
                 self.torch_on(true);
                 self.torch_icon(torch_on_src);
             } else {
@@ -163,36 +163,22 @@ $(function () {
         self.toggle_lights = function () {
             OctoPrint.simpleApiCommand(
                 "ws281x_led_status",
-                "toggle_lights"
+                self.lights_on() ? "lights_off" : "lights_on"
             ).done(update_light_status);
         };
 
-        self.activate_torch = function () {
+        self.toggle_torch = function () {
             if (self.torch_toggle()) {
-                if (self.torch_on()) {
-                    self.torch_on(false);
-                    OctoPrint.simpleApiCommand(
-                        "ws281x_led_status",
-                        "deactivate_torch"
-                    ).done(update_light_status);
-                } else {
-                    self.torch_on(true);
-                    OctoPrint.simpleApiCommand(
-                        "ws281x_led_status",
-                        "activate_torch"
-                    ).done(update_light_status);
-                }
-            } else {
-                var torch_time = self.settingsViewModel.settings.plugins.ws281x_led_status.torch_timer();
                 OctoPrint.simpleApiCommand(
                     "ws281x_led_status",
-                    "activate_torch"
+                    self.torch_on() ? "torch_off" : "torch_on"
+                );
+            } else {
+                OctoPrint.simpleApiCommand(
+                    "ws281x_led_status",
+                    "torch_on"
                 ).done(update_light_status);
-                setTimeout(self.torch_off, parseInt(torch_time, 10) * 1000);
             }
-        };
-        self.torch_off = function () {
-            self.torch_on(false);
         };
 
         self.onBeforeBinding = function () {
@@ -227,7 +213,7 @@ $(function () {
                     self.lights_on(false);
                 }
             } else if (data.type === "torch") {
-                if (data.on) {
+                if (data.payload.on) {
                     self.torch_on(true);
                     self.torch_icon(torch_on_src);
                 } else {
@@ -333,32 +319,32 @@ $(function () {
             }
             if (data.type === "os_config_test") {
                 // Received data for the config test
-                if (data.status === "in_progress") {
-                    if (data.test === "adduser") {
+                if (data.payload.status === "in_progress") {
+                    if (data.payload.test === "adduser") {
                         self.currentTest("User pi in gpio group");
-                    } else if (data.test === "spi_enabled") {
+                    } else if (data.payload.test === "spi_enabled") {
                         self.currentTest("SPI enabled");
-                    } else if (data.test === "spi_buffer_increase") {
+                    } else if (data.payload.test === "spi_buffer_increase") {
                         self.currentTest("SPI Buffer size increased");
-                    } else if (data.test === "set_core_freq") {
+                    } else if (data.payload.test === "set_core_freq") {
                         self.currentTest("core_freq set in /boot/config.txt");
-                    } else if (data.test === "set_core_freq_min") {
+                    } else if (data.payload.test === "set_core_freq_min") {
                         self.currentTest(
                             "core_freq_min set in /boot/config.txt"
                         );
                     }
                 } else {
-                    if (data.test === "adduser") {
-                        self.addUserStatus(data.status);
-                    } else if (data.test === "spi_enabled") {
-                        self.spiEnabledStatus(data.status);
-                    } else if (data.test === "spi_buffer_increase") {
-                        self.spiBufferStatus(data.status);
-                    } else if (data.test === "set_core_freq") {
-                        self.coreFreqStatus(data.status);
-                    } else if (data.test === "set_core_freq_min") {
-                        self.coreFreqMinStatus(data.status);
-                    } else if (data.test === "complete") {
+                    if (data.payload.test === "adduser") {
+                        self.addUserStatus(data.payload.status);
+                    } else if (data.payload.test === "spi_enabled") {
+                        self.spiEnabledStatus(data.payload.status);
+                    } else if (data.payload.test === "spi_buffer_increase") {
+                        self.spiBufferStatus(data.payload.status);
+                    } else if (data.payload.test === "set_core_freq") {
+                        self.coreFreqStatus(data.payload.status);
+                    } else if (data.payload.test === "set_core_freq_min") {
+                        self.coreFreqMinStatus(data.payload.status);
+                    } else if (data.payload.test === "complete") {
                         if (!self.testFailures()) {
                             self.testSuccess(true);
                         }
@@ -366,7 +352,7 @@ $(function () {
                     }
                 }
                 // if any tests fail, this will tell the user to do something & show password
-                if (data.status === "failed") {
+                if (data.payload.status === "failed") {
                     self.testFailures(true);
                 }
             }

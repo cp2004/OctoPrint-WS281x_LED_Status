@@ -51,9 +51,7 @@ class PluginApi:
             self.start_os_config_test()
         elif command.startswith("wiz"):
             # Pass to wizard command handler
-            return self.plugin.wizard.on_api_command(
-                command, data, self.plugin.PI_MODEL
-            )
+            return self.plugin.wizard.on_api_command(command, data)
 
         return self.on_api_get()
 

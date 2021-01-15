@@ -35,15 +35,13 @@ class PluginWizard:
 
     def on_api_get(self, **kwargs):
         # Wizard specific API
-        return jsonify(
-            {
-                "adduser_done": self.validate(api.WIZ_ADDUSER),
-                "spi_enabled": self.validate(api.WIZ_ENABLE_SPI),
-                "spi_buffer_increase": self.validate(api.WIZ_INCREASE_BUFFER),
-                "core_freq_set": self.validate(api.WIZ_SET_CORE_FREQ),
-                "core_freq_min_set": self.validate(api.WIZ_SET_FREQ_MIN),
-            }
-        )
+        return {
+            "adduser_done": self.validate(api.WIZ_ADDUSER),
+            "spi_enabled": self.validate(api.WIZ_ENABLE_SPI),
+            "spi_buffer_increase": self.validate(api.WIZ_INCREASE_BUFFER),
+            "core_freq_set": self.validate(api.WIZ_SET_CORE_FREQ),
+            "core_freq_min_set": self.validate(api.WIZ_SET_FREQ_MIN),
+        }
 
     def validate(self, cmd):
         validators = {
@@ -100,33 +98,33 @@ class PluginWizard:
     def run_wizard_command(self, cmd, data):
         command_to_system = {
             # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
-            "adduser": ["sudo", "-S", "adduser", "pi", "gpio"],
-            "enable_spi": [
+            api.WIZ_ADDUSER: ["sudo", "-S", "adduser", "pi", "gpio"],
+            api.WIZ_ENABLE_SPI: [
                 "sudo",
                 "-S",
                 "bash",
                 "-c",
                 "echo 'dtparam=spi=on' >> /boot/config.txt",
             ],
-            "set_core_freq": [
+            api.WIZ_SET_CORE_FREQ: [
                 "sudo",
                 "-S",
                 "bash",
                 "-c",
                 "echo 'core_freq=250' >> /boot/config.txt"
                 if self.pi_model != "4"
-                else None,
+                else "",
             ],
-            "set_core_freq_min": [
+            api.WIZ_SET_FREQ_MIN: [
                 "sudo",
                 "-S",
                 "bash",
                 "-c",
                 "echo 'core_freq_min=500' >> /boot/config.txt"
                 if self.pi_model == "4"
-                else None,
+                else "",
             ],
-            "spi_buffer_increase": [
+            api.WIZ_INCREASE_BUFFER: [
                 "sudo",
                 "-S",
                 "sed",
