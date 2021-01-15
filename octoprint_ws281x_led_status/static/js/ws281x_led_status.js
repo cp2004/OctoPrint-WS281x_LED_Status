@@ -4,6 +4,9 @@
  * Author: Charlie Powell
  * License: AGPLv3
  */
+
+const ko = window.ko;
+
 $(function () {
     function ws281xLEDStatusWizardViewModel(parameters) {
         var self = this;
