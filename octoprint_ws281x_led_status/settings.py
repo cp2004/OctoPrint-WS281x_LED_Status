@@ -38,7 +38,7 @@ defaults = {
         "failed": {
             "enabled": True,
             "effect": "Pulse",
-            "color": "ff0000",
+            "color": "#ff0000",
             "delay": 10,
         },
         "success": {
