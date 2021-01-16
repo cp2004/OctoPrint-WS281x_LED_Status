@@ -127,3 +127,7 @@ def start_daemon_timer(target, interval, args=(), kwargs=None):
     t.daemon = True
     t.start()
     return t
+
+
+def int_0_255(value):
+    return max(min(int(value), 255), 0)

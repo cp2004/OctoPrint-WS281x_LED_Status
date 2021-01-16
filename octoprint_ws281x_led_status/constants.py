@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, unicode_literals
 
+import re
+
 import rpi_ws281x
+
+# noinspection PyPackageRequirements
 from octoprint.events import Events
 
 from octoprint_ws281x_led_status.effects import progress, standard
@@ -87,8 +91,8 @@ MODES = [
 
 # Example command: M150 R10 G200 B300
 # more => https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#m150-intercept
-# TODO this could be improved massively
-M150_REGEX = (
-    r"(^|[^A-Za-z])[Rr](?P<red>\d{1,3})|(^|[^A-Za-z])[GgUu](?P<green>\d{1,3})|(^|[^A-Za-z])"
-    r"[Bb](?P<blue>\d{1,3})|(^|[^A-Za-z])[Pp](?P<brightness>\d{1,3})|(^|[^A-Za-z])[Ww](?P<white>\d{1,3})"
-)
+regex_r_param = re.compile(r"(^|[^A-Za-z])[Rr](?P<value>\d{1,3})")
+regex_g_param = re.compile(r"(^|[^A-Za-z])[GgUu](?P<value>\d{1,3})")
+regex_b_param = re.compile(r"(^|[^A-Za-z])[Bb](?P<value>\d{1,3})")
+regex_w_param = re.compile(r"(^|[^A-Za-z])[Ww](?P<value>\d{1,3})")
+regex_p_param = re.compile(r"(^|[^A-Za-z])[Pp](?P<value>\d{1,3})")

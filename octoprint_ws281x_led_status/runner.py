@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import logging
-import re
 import time
 
 # noinspection PyPackageRequirements
@@ -10,7 +9,7 @@ from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
 from rpi_ws281x import PixelStrip
 
 from octoprint_ws281x_led_status import constants
-from octoprint_ws281x_led_status.util import hex_to_rgb
+from octoprint_ws281x_led_status.util import hex_to_rgb, int_0_255
 
 
 class EffectRunner:
@@ -40,6 +39,7 @@ class EffectRunner:
 
         self.lights_on = True
         self.previous_state = previous_state
+        self.previous_m150 = {}  # type: dict
         self.active_times_state = True
 
         self.queue = queue
@@ -92,6 +92,7 @@ class EffectRunner:
             self.progress_msg(msg)
         elif "M150" in msg:
             self.parse_m150(msg)
+            return
         else:
             self.standard_effect(msg)
 
@@ -117,26 +118,44 @@ class EffectRunner:
 
         msg = msg.upper()
 
-        matches = re.finditer(constants.M150_REGEX, msg)
-        for match in matches:
-            if match.group("red"):
-                red = min(int(match.group("red")), 255)
-            elif match.group("green"):
-                green = min(int(match.group("green")), 255)
-            elif match.group("blue"):
-                blue = min(int(match.group("blue")), 255)
-            elif match.group("white"):
-                # See issue #33 for details of why this was changed. R/G/B params take priority over white, rather than
-                # the other way (w max priority). For compatibility with https://github.com/horfee/OctoPrint-M150control
-                if not ("R" in msg or "G" in msg or "U" in msg or "B" in msg):
-                    red = green = blue = min(int(match.group("white")), 255)
-
-            elif match.group("brightness"):
-                brightness = min(int(match.group("brightness")), 255)
+        if msg != "M150":
+            # Found a NEW M150, parse it and remove params
+            r = constants.regex_r_param.search(msg)
+            if r:
+                red = int_0_255(r.group("value"))
+            g = constants.regex_g_param.search(msg)
+            if g:
+                green = int_0_255(g.group("value"))
+            b = constants.regex_b_param.search(msg)
+            if b:
+                blue = int_0_255(b.group("value"))
+            p = constants.regex_p_param.search(msg)
+            if p:
+                brightness = int_0_255(p.group("value"))
+            if not r and not g and not b:
+                # R/G/B params take priority over white, see #33 for details
+                w = constants.regex_w_param.search(msg)
+                if w:
+                    red = green = blue = int_0_255(w.group("value"))
+            # Save parsed to class
+            self.previous_m150 = {
+                "r": red,
+                "b": blue,
+                "g": green,
+                "brightness": brightness,
+            }
+            self.previous_state = "M150"
 
         if self.check_times() and self.lights_on:  # Respect lights on/off
             constants.EFFECTS["Solid Color"](
-                self.strip, self.queue, (red, green, blue), max_brightness=brightness
+                self.strip,
+                self.queue,
+                (
+                    self.previous_m150["r"],
+                    self.previous_m150["g"],
+                    self.previous_m150["b"],
+                ),
+                max_brightness=self.previous_m150["brightness"],
             )
         else:
             self.blank_leds()
