@@ -42,8 +42,11 @@ class WS281xLedStatusPlugin(
     wizard = None  # type: wizard.PluginWizard
 
     current_effect_process = None  # type: multiprocessing.Process
-    current_state = "startup"  # type: str
     effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
+
+    previous_state = ""
+    current_state = "startup"
+    next_state = ""
 
     # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
     heating = False  # type: bool
@@ -222,6 +225,7 @@ class WS281xLedStatusPlugin(
         self.stop_effect_process()
         self.start_effect_process()
 
+    # OS Config test
     def run_os_config_check(self, send_ui=True):
         """
         Run a check on all of the OS level configuration required to run the plugin
@@ -265,6 +269,7 @@ class WS281xLedStatusPlugin(
 
         self._logger.info(log_content)
 
+    # Lights and torch on/off handling
     def activate_lights(self):
         self._logger.info("Turning lights on")
         self.lights_on = True
@@ -284,6 +289,8 @@ class WS281xLedStatusPlugin(
         toggle = self._settings.get_boolean(["effects", "torch", "toggle"])
         torch_time = self._settings.get_int(["effects", "torch", "timer"])
 
+        self.next_state = self.current_state
+
         if toggle:
             self._logger.debug("Torch toggling on")
             self.torch_on = True
@@ -300,125 +307,97 @@ class WS281xLedStatusPlugin(
         self._send_UI_msg("torch", {"on": True})
 
     def deactivate_torch(self):
-        self._logger.debug(
-            "Deactivating torch mode, torch on currently: {}".format(self.torch_on)
-        )
+        self._logger.debug("Deactivating torch mode")
         if self.torch_on:
             self.torch_on = False
-            self.update_effect(self.current_state)
+            # Return whatever state we have suppressed
+            self.update_effect(self.next_state)
 
         self._send_UI_msg("torch", {"on": False})
 
-    def update_effect(self, mode_name, value=None, m150=None):
+    def update_effect(self, mode_name):
         """
         Change the effect displayed, use effects.EFFECTS for the correct names!
         If progress effect, value must be specified
-        :param mode_name: string of mode name
-        :param value: percentage of how far through it is. None
-        :param m150: If the effect is an M150 effect, the full command should be passed here
+        :param mode_name: (str) effect to be run
         """
+        # Cancel return to idle timer if active
         if self.return_timer is not None and self.return_timer.is_alive():
             self.return_timer.cancel()
 
-        if (
-            not self._settings.get_boolean(["effects", "torch", "toggle"])
-            and mode_name != "torch"
-            and self.torch_on
-        ):
-            self.torch_on = False
-        else:
-            if mode_name != "torch" and self.torch_on:
-                # Catch all other effects while torch is on - except M150
-                if mode_name != "M150":
-                    if "progress" in mode_name:
-                        self.current_state = "{} {}".format(mode_name, value)
-                    else:
-                        self.current_state = mode_name
+        # If torch is on, state is saved until torch is finished
+        if self.torch_on and mode_name != "torch":
+            self.next_state = mode_name
+            return
 
+        # If mode is on or off, this doesn't affect state - send straight away
         if mode_name in ["on", "off"]:
             self.effect_queue.put(mode_name)
             return
-        elif mode_name == "M150":
-            if m150:
-                self.effect_queue.put(m150)
-            else:
-                self._logger.warning("No values supplied with M150, ignoring")
+
+        # If the mode is an M150 command, then send the whole command.
+        elif mode_name.startswith("M150"):
+            self.effect_queue.put(mode_name)
+            self.set_state(mode_name)
+
+        # Check the effect is enabled
+        if not self._settings.get(["effects", mode_name.split(" ")[0], "enabled"]):
             return
 
-        if not self._settings.get(["effects", mode_name, "enabled"]):
-            # If the effect is not enabled, we won't run it. Simple...
-            return
-
-        if "success" in mode_name:
-            return_idle_time = self._settings.get_int(
+        # Start return to idle timer if necessary
+        if mode_name == "success":
+            return_to_idle = self._settings.get_int(
                 ["effects", "success", "return_to_idle"]
             )
-            if return_idle_time > 0:
+            if return_to_idle > 0:
                 self.return_timer = util.start_daemon_timer(
-                    return_idle_time, self.update_effect, args=("idle",)
+                    return_to_idle, self.update_effect, args=("idle",)
                 )
 
-        if "progress" in mode_name:
-            if value is None:
-                self._logger.warning(
-                    "No value supplied with progress style effect, ignoring"
-                )
-                return
-            self._logger.debug(
-                "Updating progress effect {}, value {}".format(mode_name, value)
-            )
-            # Do the thing
-            self.effect_queue.put("{} {}".format(mode_name, value))
-            self.current_state = "{} {}".format(mode_name, value)
-        else:
-            self._logger.debug("Updating standard effect {}".format(mode_name))
-            # Do the thing
-            self.effect_queue.put(mode_name)
-            if mode_name != "torch":
-                self.current_state = mode_name
+        # Finally, start updating the effect
+        self._logger.debug("Updating effect to {}".format(mode_name))
+        self.effect_queue.put(mode_name)
+        if mode_name != "torch":
+            self.set_state(mode_name)
+
+    def set_state(self, new_state):
+        self.previous_state = self.current_state
+        self.current_state = new_state
 
     def on_event(self, event, payload):
         if event == Events.PRINT_DONE:
             self.cooling = True
         elif event == Events.PRINT_STARTED:
+            self.cooling = False
             self.current_progress = 0
         elif event == Events.PRINT_RESUMED:
-            self.update_effect("progress_print", self.current_progress)
+            self.update_effect("progress_print {}".format(self.current_progress))
 
-        if event in constants.SUPPORTED_EVENTS:
+        if event in constants.SUPPORTED_EVENTS.keys():
             self.update_effect(constants.SUPPORTED_EVENTS[event])
             # add all events to a backlog, so we know what the last one was.
-            self.add_to_backlog(event)
+            self.previous_event_q.append(event)
 
     def on_print_progress(self, storage="", path="", progress=1):
         if (progress == 100 and self.current_state == "success") or self.heating:
             return
         if self._settings.get_boolean(["effects", "printing", "enabled"]):
             self.update_effect("printing")
-        self.update_effect("progress_print", progress)
+        self.update_effect("progress_print {}".format(progress))
         self.current_progress = progress
 
     def calculate_heatup_progress(self, current, target):
-        if target <= 0:
-            self._logger.warning(
-                "Tried to calculate heating progress but target was zero"
-            )
-            self._logger.warning(
-                "If you come across this please let me know on the issue tracker! - "
-                "https://github.com/cp2004/OctoPrint-WS281x_LED_Status"
-            )
-            return 0
-
         # Allows for setting a baseline, so heating display doesn't start halfway down the strip.
         current = max(current - self._settings.get_int(["progress_temp_start"]), 0)
         target = max(target - self._settings.get_int(["progress_temp_start"]), 0)
 
         try:
-            value = round((current / target) * 100)
+            return round((current / target) * 100)
         except ZeroDivisionError:
-            value = 0
-
-        return value
+            self._logger.warning(
+                "Tried to calculate heating progress but target was zero"
+            )
+            return 0
 
     def process_previous_event_q(self):
         """
@@ -428,9 +407,6 @@ class WS281xLedStatusPlugin(
         if len(self.previous_event_q):
             self.on_event(self.previous_event_q[-1], payload={})
         self.previous_event_q = []
-
-    def add_to_backlog(self, event):
-        self.previous_event_q.append(event)
 
     def process_gcode_q(
         self,
@@ -444,121 +420,111 @@ class WS281xLedStatusPlugin(
         *args,
         **kwargs
     ):
-        if gcode in constants.BLOCKING_TEMP_GCODES:
-            bed_or_tool = {"M109": "tool", "M190": "bed"}
-            # Everything is tracked, regardless of settings. Makes it easier to track the state, and then just back out
-            # of showing the effect in self.update_effect() rather than getting complex here.
+        if gcode in constants.BLOCKING_TEMP_GCODES.keys():
+            # New M109 or M190, start tracking heating
             self.heating = True
-            self.current_heater_heating = bed_or_tool[gcode]
+            self.current_heater_heating = constants.BLOCKING_TEMP_GCODES[gcode]
         else:
-            if (
-                self.heating
-            ):  # State is switching to non-heating, so we should process the backlog.
+            if self.heating:
+                # Currently heating, process event backlog
                 self.heating = False
                 self.process_previous_event_q()
+                # If printing, go back to print progress immediately
                 if self._printer.is_printing():
                     self.on_print_progress(progress=self.current_progress)
 
         if gcode == "M150" and self._settings.get_boolean(["intercept_m150"]):
-            self.update_effect("M150", m150=cmd)
+            # Update effect to M150 and suppress it
+            self.update_effect(cmd)
             return (None,)
 
-    def temperatures_received(
-        self, comm_instance, parsed_temperatures, *args, **kwargs
-    ):
+    def temperatures_received(self, _comm, parsed_temps, *args, **kwargs):
+        tool_key = self._settings.get(["effects", "progress_heatup", "tool_key"])
+
+        # Find the tool target temperature
         try:
-            tool_temp_target = parsed_temperatures[
-                "T{}".format(
-                    self._settings.get_int(["effects", "progress_heatup", "tool_key"])
-                )
-            ][1]
+            tool_target = parsed_temps["T{}".format(tool_key)][1]
         except KeyError:
-            tool_temp_target = self.target_temperature["tool"]
+            # Tool number was invalid, stick to whatever saved previously
+            tool_target = self.target_temperature["tool"]
 
-        if (
-            not tool_temp_target
-        ):  # When heating, firmware reports more frequently but *without* target
-            # It comes through to the handler as 'None', so we must check for this
-            tool_temp_target = self.target_temperature["tool"]
+        if tool_target is None or tool_target <= 0:
+            tool_target = self.target_temperature["tool"]
 
+        # Find the bed target temperature
         try:
-            bed_temp_target = parsed_temperatures["B"][1]
+            bed_target = parsed_temps["B"][1]
         except KeyError:
-            bed_temp_target = self.target_temperature["tool"]
+            # Bed doesn't exist? Probably won't need bed temp
+            bed_target = self.target_temperature["tool"]
 
-        if not bed_temp_target:
-            # Similarly to tool temp, sometimes comes through as NoneType
-            bed_temp_target = self.target_temperature["bed"]
+        if bed_target is None or bed_target <= 0:
+            bed_target = self.target_temperature["bed"]
 
-        self.target_temperature = {
-            "tool": tool_temp_target
-            if tool_temp_target > 0
-            else self.target_temperature["tool"],
-            "bed": bed_temp_target
-            if bed_temp_target > 0
-            else self.target_temperature["bed"],
-        }
-        words_to_tool = {  # maps 'progress_cooling_bed_or_tool' to the parsed temp
-            "tool": "T{}".format(self.tool_to_target),
-            "bed": "B",
-        }
+        # Save these for later, so that they can be used on the next round
+        self.target_temperature["tool"] = tool_target
+        self.target_temperature["bed"] = bed_target
+
         if self.heating:
+            if self.current_heater_heating == "tool":
+                heater = "T{}".format(
+                    self._settings.get(["effects", "progress_heatup", "tool_key"])
+                )
+            else:
+                heater = "B"
             try:
-                current_temp = parsed_temperatures[
-                    words_to_tool[self.current_heater_heating]
-                ][0]
+                current_temp = parsed_temps[heater][0]
             except KeyError:
                 self._logger.error(
-                    "Heater {} not found, can't show progress. Check configuration".format(
-                        self.current_heater_heating
-                    )
+                    "Heater {} not found, can't show progress".format(heater)
                 )
                 self.heating = False
                 self.process_previous_event_q()
-                return
+                return parsed_temps
 
-            self._logger.debug("State: heating, temp recv: {}".format(current_temp))
-            if self.target_temperature[self.current_heater_heating] > 0:
-                self.update_effect(
-                    "progress_heatup",
+            self.update_effect(
+                "progress_heatup {}".format(
                     self.calculate_heatup_progress(
                         current_temp,
                         self.target_temperature[self.current_heater_heating],
-                    ),
+                    )
                 )
+            )
 
         elif self.cooling:
-            if self._printer.is_printing() or self._printer.is_paused():
-                # User has likely started a new print - stop cooling effect??
-                self.cooling = False
-                return
+            if (
+                self._settings.get(["effects", "progress_cooling", "bed_or_tool"])
+                == "tool"
+            ):
+                heater = "T{}".format(
+                    self._settings.get(["effects", "progress_heatup", "tool_key"])
+                )
+            else:
+                heater = "B"
 
-            current = parsed_temperatures[
-                words_to_tool[
-                    self._settings.get(["effects", "progress_cooling", "bed_or_tool"])
-                ]
-            ][0]
-            self._logger.debug("State: cooling, temp recv: {}".format(current))
+            current = parsed_temps[heater][0]
 
             if current < self._settings.get_int(
                 ["effects", "progress_cooling", "threshold"]
             ):
                 self.cooling = False
-                self.process_previous_event_q()  # should hopefully put back the old effect (maybe progress)
-                return
+                self.process_previous_event_q()
+                return parsed_temps
+
             self.update_effect(
-                "progress_cooling",
-                self.calculate_heatup_progress(
-                    current,
-                    self.target_temperature[
-                        self._settings.get(
-                            ["effects", "progress_cooling", "bed_or_tool"]
-                        )
-                    ],
-                ),
+                "progress_cooling {}".format(
+                    self.calculate_heatup_progress(
+                        current,
+                        self.target_temperature[
+                            self._settings.get(
+                                ["effects", "progress_cooling", "bed_or_tool"]
+                            )
+                        ],
+                    )
+                )
             )
 
-        return parsed_temperatures
+        return parsed_temps
 
     def process_at_command(
         self, comm, phase, command, parameters, tags=None, *args, **kwargs
@@ -586,7 +552,7 @@ class WS281xLedStatusPlugin(
             self._logger.debug("Recieved gcode @ command for torch OFF")
             self.deactivate_torch()
 
-    # Softwareupdate hook
+    # Software update hook
     def get_update_information(self):
         # Define the configuration for your plugin to use with the Software Update
         # Plugin here. See https://docs.octoprint.org/en/master/bundledplugins/softwareupdate.html

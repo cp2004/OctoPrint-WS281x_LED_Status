@@ -13,10 +13,10 @@ from octoprint_ws281x_led_status.effects import progress, standard
 PI_REGEX = r"Raspberry Pi (\w*)"
 PROC_DT_MODEL_PATH = "/proc/device-tree/model"
 
-BLOCKING_TEMP_GCODES = [
-    "M109",
-    "M190",
-]
+BLOCKING_TEMP_GCODES = {
+    "M109": "tool",
+    "M190": "bed",
+}
 
 ON_AT_COMMAND = "WS_LIGHTSON"
 OFF_AT_COMMAND = "WS_LIGHTSOFF"
