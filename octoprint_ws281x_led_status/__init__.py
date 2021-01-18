@@ -611,7 +611,7 @@ def determine_pi_version():
         model_no = re.search(constants.PI_REGEX, _proc_dt_model).group(1).strip()
     except IndexError:
         logger.error(
-            "Pi model string detected as `{}`, unable to be parsed by regex".format(
+            "Pi model string detected as `{}`, unable to be parsed".format(
                 _proc_dt_model
             )
         )
@@ -622,19 +622,30 @@ def determine_pi_version():
 
 
 def __plugin_check__():
+    logger = logging.getLogger("octoprint.plugins.ws281x_led_status")
     try:
         proc_dt_model = get_proc_dt_model()
         if proc_dt_model is None:
-            return False
-    except Exception:
+            logger.warning("No Raspberry Pi detected, will not load plugin")
+    except Exception as e:
+        logger.warning("No Raspberry Pi detected, will not load plugin")
+        logger.warning("Exception suppressed: {}".format(repr(e)))
         return False
 
     return "raspberry pi" in proc_dt_model.lower()
 
 
 def __plugin_load__():
-    # Attempt to parse the Pi version, if so set PI_MODEL
-    determine_pi_version()
+    logger = logging.getLogger("octoprint.plugins.ws281x_led_status")
+
+    # Attempt to parse the Pi version, if so set PI_MODEL global
+    try:
+        determine_pi_version()
+    except Exception as e:
+        logger.error("Error detecting Pi model, plugin could not be loaded")
+        logger.error("Please report this on WS281x LED Status's issue tracker!")
+        logger.error(repr(e))
+        return
 
     global __plugin_implementation__
     __plugin_implementation__ = WS281xLedStatusPlugin()
