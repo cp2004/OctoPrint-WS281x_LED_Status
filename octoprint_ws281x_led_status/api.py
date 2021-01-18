@@ -12,6 +12,7 @@ CMD_LIGHTS_OFF = "lights_off"
 CMD_TORCH_ON = "torch_on"
 CMD_TORCH_OFF = "torch_off"
 CMD_TEST_OS = "test_os_config"
+CMD_TEST_LED = "test_led"
 WIZ_ADDUSER = "wiz_adduser"
 WIZ_ENABLE_SPI = "wiz_enable_spi"
 WIZ_INCREASE_BUFFER = "wiz_increase_buffer"
@@ -31,6 +32,7 @@ class PluginApi:
             CMD_TORCH_ON: [],
             CMD_TORCH_OFF: [],
             CMD_TEST_OS: [],
+            CMD_TEST_LED: ["red", "green", "blue"],
             WIZ_ADDUSER: ["password"],
             WIZ_ENABLE_SPI: ["password"],
             WIZ_INCREASE_BUFFER: ["password"],
@@ -49,6 +51,8 @@ class PluginApi:
             self.plugin.deactivate_torch()
         elif command == CMD_TEST_OS:
             self.start_os_config_test()
+        elif command == CMD_TEST_LED:
+            self.test_led(data)
         elif command.startswith("wiz"):
             # Pass to wizard command handler
             return self.plugin.wizard.on_api_command(command, data)
@@ -66,4 +70,13 @@ class PluginApi:
         util.start_daemon_thread(
             target=self.plugin.run_os_config_check,
             name="WS281x LED Status OS Config Test",
+        )
+
+    def test_led(self, data):
+        # We mock an M150 command here, because it is the easiest way
+        # Calling update_effect skips the checking of M150 intercepting or the printer
+        self.plugin.update_effect(
+            "M150 R{} G{} B{}".format(
+                data.get("red"), data.get("green"), data.get("blue")
+            )
         )

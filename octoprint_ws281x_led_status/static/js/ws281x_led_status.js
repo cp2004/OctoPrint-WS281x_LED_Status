@@ -237,44 +237,31 @@ $(function () {
 
         self.settingsViewModel = parameters[0];
 
-        var current_input = $("#currentInput_mA");
+        self.current_input = ko.observable(40);
+        self.power_req = ko.observable("--W");
+        self.power_req_12v = ko.observable("--W");
+        self.current_req = ko.observable("--A");
 
-        $("#calc_btn").bind("click", function () {
-            calculate_power();
-        });
-
-        function calculate_power() {
-            var current_ma = parseInt(current_input.val(), 10);
-            var num_pixels = parseInt($("#ws281x_num_leds").val(), 10);
+        self.calculate_power = function () {
+            var current_ma = parseInt(self.current_input(), 10);
+            var num_pixels = parseInt(
+                self.settingsViewModel.settings.plugins.ws281x_led_status.strip.count(),
+                10
+            );
 
             var current = (num_pixels * current_ma) / 1000;
-            var power = current * 5;
-            update_vals(power, current);
-        }
-        function update_vals(power, current) {
-            $("#power_req").text(power + "W");
-            $("#current_req").text(current + "A");
-        }
+            self.power_req(current * 5);
+            self.power_req_12v(current * 12);
+            self.current_req(current);
+        };
 
-        /* LED Test buttons - TODO swap to SimpleAPI calls - see #39 */
-
-        $("#led-test-red").bind("click", function () {
-            send_m150(255, 0, 0);
-        });
-        $("#led-test-green").bind("click", function () {
-            send_m150(0, 255, 0);
-        });
-        $("#led-test-blue").bind("click", function () {
-            send_m150(0, 0, 255);
-        });
-        $("#led-test-white").bind("click", function () {
-            send_m150(255, 255, 255);
-        });
-
-        function send_m150(r, g, b) {
-            var command = "M150 R" + r + " G" + g + " B" + b;
-            OctoPrint.control.sendGcode(command);
-        }
+        self.sendTestCommand = function (red, green, blue) {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "test_led", {
+                red: red,
+                green: green,
+                blue: blue,
+            });
+        };
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusSettingsViewModel,
@@ -282,7 +269,7 @@ $(function () {
         elements: "#settings_plugin_ws281x_led_status",
     });
 
-    function ws281x_led_status_config_test_VM(parametera) {
+    function ws281x_led_status_config_test_VM(parameters) {
         var self = this;
         /* Configuration testing */
 

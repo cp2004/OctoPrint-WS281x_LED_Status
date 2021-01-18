@@ -4,16 +4,11 @@
 <p>Provided so you can test the individual colours of your LED Strip.</p>
 <p>Can help to diagnose both hardware problems (Such as specific LEDs are broken), and help to select the correct strip type.</p>
 <p>Sets LEDs to solid colour until the next event happens.</p>
-<button class="btn btn-danger" id="led-test-red" data-bind="enable: settingsViewModel.settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test red</button>
-<button class="btn btn-success" id="led-test-green" data-bind="enable: settingsViewModel.settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test green</button>
-<button class="btn btn-primary" id="led-test-blue" data-bind="enable: settingsViewModel.settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test blue</button>
-<button class="btn" id="led-test-white" data-bind="enable: settingsViewModel.settings.plugins.ws281x_led_status.intercept_m150()"><i class="far-custom fa-custom-lightbulb"></i> Test white</button>
+<button class="btn btn-danger" id="led-test-red" data-bind="click: function(){ sendTestCommand(255, 0, 0) }"><i class="far-custom fa-custom-lightbulb"></i> Test red</button>
+<button class="btn btn-success" id="led-test-green" data-bind="click: function(){ sendTestCommand(0, 255, 0) }"><i class="far-custom fa-custom-lightbulb"></i> Test green</button>
+<button class="btn btn-primary" id="led-test-blue" data-bind="click: function(){ sendTestCommand(0, 0, 255)}"><i class="far-custom fa-custom-lightbulb"></i> Test blue</button>
+<button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand(255, 255, 255) }"><i class="far-custom fa-custom-lightbulb"></i> Test white</button>
 <br>
-<div class="alert alert-block" style="margin-top: 7px;" data-bind="visible: !settingsViewModel.settings.plugins.ws281x_led_status.intercept_m150()">
-    <p><strong>Note:</strong> Using these buttons requires M150 intercept to be enabled in the 'Features' page.
-        Remember to press save first, so the setting is sent back to the server!
-    </p>
-</div>
 <hr>
 <h5>OS Config Test</h5>
 <p>Checks that the OS level configuration for SPI is correct, as per the initial setup wizard.</p>
@@ -33,16 +28,17 @@ The nominal value is 40mA, as this is between their estimate of 20-60. Note that
             <label class="control-label">Power consumption per LED (mA)</label>
             <div class="controls">
                 <div class="input-append">
-                    <input class="inline" id="currentInput_mA" type="number" class="input-medium" value="40">
+                    <input class="inline input-medium" data-bind="value: current_input" type="number">
                     <span class="add-on">mA</span>
                 </div>
-                <button class="inline btn btn-success" id="calc_btn"><i class="fas-custom fa-custom-calculator"></i> Calculate</button>
+                <button class="inline btn btn-success" data-bind="click: calculate_power"><i class="fas-custom fa-custom-calculator"></i> Calculate</button>
             </div>
         </div>
     </form>
     <div id="calc_output" class="well">
-        <p>Number of leds configured: <code data-bind="text: settingsViewModel.settings.plugins.ws281x_led_status.strip.count"></code>
-        <p>Predicted power requirement: <code id="power_req">--W</code></p>
-        <p>Predicted current requirement (@5V): <code id="current_req">--A</code></p>
+        <p>Number of LEDs configured: <code data-bind="text: settingsViewModel.settings.plugins.ws281x_led_status.strip.count"></code>
+        <p>Predicted power requirement (@5V): <code data-bind="text: power_req"></code></p>
+        <p>Predicted power requirement (@5V): <code data-bind="text: power_req_12v"></code></p>
+        <p>Predicted current requirement: <code data-bind="text: current_req"></code></p>
     </div>
 </div>
