@@ -1,8 +1,7 @@
 /*
  * View model for OctoPrint-WS281x LED Status
  *
- * Author: Charlie Powell
- * License: AGPLv3
+ * Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License
  */
 
 const ko = window.ko;
