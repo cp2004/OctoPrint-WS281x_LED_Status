@@ -398,7 +398,6 @@ class BrightnessManager:
         self.fade_active = True
         for step in self.fade_steps:
             self.current_brightness = int(round(step, 0))
-            print(self.current_brightness)
             self.strip.setBrightness(self.current_brightness)
             self.strip.show()
             milli_sleep(20)
@@ -416,7 +415,6 @@ class BrightnessManager:
         self.fade_active = True
         for step in reversed(self.fade_steps):
             self.current_brightness = int(round(step, 0))
-            print(self.current_brightness)
             self.strip.setBrightness(self.current_brightness)
             self.strip.show()
             milli_sleep(20)
