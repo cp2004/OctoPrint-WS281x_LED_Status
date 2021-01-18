@@ -17,6 +17,13 @@ def hex_to_rgb(h):
     return tuple(int(h[i : i + 2], 16) for i in (0, 2, 4))
 
 
+def apply_color_correction(settings, r, g, b):
+    red = int_0_255(r * (int(settings["red"]) / 100))
+    green = int_0_255(g * (int(settings["green"]) / 100))
+    blue = int_0_255(b * (int(settings["blue"]) / 100))
+    return red, green, blue
+
+
 def blend_two_colors(colour1, colour2, percent_of_c1=None):
     """"""
     if percent_of_c1:

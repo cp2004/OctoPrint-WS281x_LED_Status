@@ -21,6 +21,7 @@ defaults = {
         "reverse": False,
         "type": "WS2811_STRIP_GRB",
         "brightness": 50,
+        "adjustment": {"R": 100, "G": 100, "B": 100},
     },
     "effects": {
         "startup": {

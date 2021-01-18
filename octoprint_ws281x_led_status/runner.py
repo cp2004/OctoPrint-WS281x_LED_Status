@@ -15,6 +15,7 @@ from rpi_ws281x import PixelStrip
 
 from octoprint_ws281x_led_status import constants
 from octoprint_ws281x_led_status.util import (
+    apply_color_correction,
     hex_to_rgb,
     int_0_255,
     milli_sleep,
@@ -52,6 +53,11 @@ class EffectRunner:
         end = self.active_times_settings["end"].split(":")
         self.start_time = (int(start[0]) * 60) + int(start[1])
         self.end_time = (int(end[0]) * 60) + int(end[1])
+        self.color_correction = {
+            "red": self.strip_settings["adjustment"]["R"],
+            "green": self.strip_settings["adjustment"]["G"],
+            "blue": self.strip_settings["adjustment"]["B"],
+        }
 
         # State holders
         self.lights_on = True
@@ -193,7 +199,8 @@ class EffectRunner:
             constants.EFFECTS["Solid Color"](
                 self.strip,
                 self.queue,
-                (
+                apply_color_correction(
+                    self.color_correction,
                     self.previous_m150["r"],
                     self.previous_m150["g"],
                     self.previous_m150["b"],
@@ -211,8 +218,12 @@ class EffectRunner:
                 self.strip,
                 self.queue,
                 int(value),
-                hex_to_rgb(effect_settings["color"]),
-                hex_to_rgb(effect_settings["base"]),
+                apply_color_correction(
+                    self.color_correction, *hex_to_rgb(effect_settings["color"])
+                ),
+                apply_color_correction(
+                    self.color_correction, *hex_to_rgb(effect_settings["base"])
+                ),
                 self.max_brightness,
                 self.reverse,
                 brightness_manager=self.brightness_manager,
@@ -228,7 +239,9 @@ class EffectRunner:
             constants.EFFECTS[effect_settings["effect"]](
                 self.strip,
                 self.queue,
-                hex_to_rgb(effect_settings["color"]),
+                apply_color_correction(
+                    self.color_correction, *hex_to_rgb(effect_settings["color"])
+                ),
                 effect_settings["delay"],
                 self.max_brightness,
                 brightness_manager=self.brightness_manager,

@@ -66,6 +66,36 @@
                     <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.channel">
                 </div>
             </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Red correction ') }}</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.R">
+                        <span class="add-on">%</span>
+                    </div>
+                    <input type="range" min="50" max="150" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.R">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Green correction ') }}</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.G">
+                        <span class="add-on">%</span>
+                    </div>
+                    <input type="range" min="50" max="150" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.G">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Blue correction ') }}</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.B">
+                        <span class="add-on">%</span>
+                    </div>
+                    <input type="range" min="50" max="150" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.B">
+                </div>
+            </div>
         </form>
     </div>
 	<div class="modal-footer">
