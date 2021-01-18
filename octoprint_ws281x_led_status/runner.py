@@ -121,21 +121,25 @@ class EffectRunner:
             self.turn_off_timer.cancel()
 
         self.lights_on = True
-        start_daemon_thread(
-            target=self.brightness_manager.do_fade_in, name="Fade in thread"
-        )
+        if self.transition_settings["fade"]["enabled"]:
+            start_daemon_thread(
+                target=self.brightness_manager.do_fade_in, name="Fade in thread"
+            )
         self._logger.info("On message received, turning on LEDs")
 
     def turn_lights_off(self):
-        # Start fading brightness out
-        start_daemon_thread(
-            target=self.brightness_manager.do_fade_out, name="Fade out thread"
-        )
-        # Set timer to turn LEDs off after fade
-        self.turn_off_timer = start_daemon_timer(
-            interval=self.transition_settings["fade"]["time"] / 1000,
-            target=self.lights_off,
-        )
+        if self.transition_settings["fade"]["enabled"]:
+            # Start fading brightness out
+            start_daemon_thread(
+                target=self.brightness_manager.do_fade_out, name="Fade out thread"
+            )
+            # Set timer to turn LEDs off after fade
+            self.turn_off_timer = start_daemon_timer(
+                interval=self.transition_settings["fade"]["time"] / 1000,
+                target=self.lights_off,
+            )
+        else:
+            self.lights_on = False
         self._logger.info("Off message received, turning off LEDs")
 
     def lights_off(self):
