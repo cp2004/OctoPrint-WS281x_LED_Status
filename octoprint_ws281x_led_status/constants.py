@@ -65,9 +65,9 @@ EFFECTS = {
     "Blink": standard.blink,
     "Crossover": standard.crossover,
     "Bouncy Balls": standard.bouncy_balls,
-    "progress_heatup": progress.progress,
-    "progress_cooling": progress.progress,
-    "progress_print": progress.progress,
+}
+PROGRESS_EFFECTS = {
+    "Progress Bar": progress.progress,
 }
 MODES = [
     "startup",
