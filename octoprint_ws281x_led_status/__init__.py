@@ -529,27 +529,21 @@ class WS281xLedStatusPlugin(
     def process_at_command(
         self, comm, phase, command, parameters, tags=None, *args, **kwargs
     ):
-        if command not in constants.AT_COMMANDS or not self._settings.get(
-            ["at_command_reaction"]
-        ):
+        if not self._settings.get(["at_command_reaction"]):
             return
 
         if command == constants.ON_AT_COMMAND:
-            self._logger.debug("Recieved gcode @ command for lights on")
             self.activate_lights()
         elif command == constants.OFF_AT_COMMAND:
-            self._logger.debug("Recieved gcode @ command for lights off")
             self.deactivate_lights()
         elif (
             command == constants.TORCH_AT_COMMAND
             or command == constants.TORCH_ON_AT_COMMAND
         ):
-            self._logger.debug("Recieved gcode @ command for torch ON")
             self.activate_torch()
         elif command == constants.TORCH_OFF_AT_COMMAND and self._settings.get_boolean(
             ["effects", "torch", "toggle"]
         ):
-            self._logger.debug("Recieved gcode @ command for torch OFF")
             self.deactivate_torch()
 
     # Software update hook
