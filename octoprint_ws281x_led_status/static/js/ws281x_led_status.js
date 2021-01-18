@@ -95,6 +95,11 @@ $(function () {
             self.check_config(response.ws281x_led_status.details);
         };
         self.onBeforeWizardFinish = function () {
+            // Do not trigger notification if wizard is is not loaded
+            if (!$("#wizard_plugin_ws281x_led_status").length) {
+                return;
+            }
+
             /* Trigger Pnotify dialog:
                if config incomplete, tell them it should be,
                if config complete, tell them to restart.
