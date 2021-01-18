@@ -193,6 +193,7 @@ class WS281xLedStatusPlugin(
                 "active_times_settings": self._settings.get(
                     ["active_times"], merged=True
                 ),
+                "transition_settings": self._settings.get(["transitions"], merged=True),
                 "previous_state": self.current_state,
                 "log_path": self._settings.get_plugin_logfile_path(postfix="debug"),
             },

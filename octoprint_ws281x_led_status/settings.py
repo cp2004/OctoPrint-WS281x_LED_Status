@@ -94,6 +94,12 @@ defaults = {
         "start": "09:00",
         "end": "21:00",
     },
+    "transitions": {
+        "fade": {
+            "enabled": True,
+            "time": 1000,
+        }
+    },
     "progress_temp_start": 0,
     "at_command_reaction": True,
     "intercept_m150": True,

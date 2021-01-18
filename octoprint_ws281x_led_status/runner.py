@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+import math
 import time
 
 # noinspection PyPackageRequirements
@@ -9,7 +10,13 @@ from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
 from rpi_ws281x import PixelStrip
 
 from octoprint_ws281x_led_status import constants
-from octoprint_ws281x_led_status.util import hex_to_rgb, int_0_255
+from octoprint_ws281x_led_status.util import (
+    hex_to_rgb,
+    int_0_255,
+    milli_sleep,
+    start_daemon_thread,
+    start_daemon_timer,
+)
 
 
 class EffectRunner:
@@ -20,6 +27,7 @@ class EffectRunner:
         strip_settings,
         effect_settings,
         active_times_settings,
+        transition_settings,
         previous_state,
         log_path,
     ):
@@ -27,20 +35,26 @@ class EffectRunner:
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.runner")
         self.setup_custom_logger(log_path, debug)
 
+        # Save settings to class
         self.strip_settings = strip_settings
         self.effect_settings = effect_settings
         self.active_times_settings = active_times_settings
+        self.transition_settings = transition_settings
         self.reverse = strip_settings["reverse"]
-        self.max_brightness = strip_settings["brightness"]
+        self.max_brightness = int(
+            round((float(strip_settings["brightness"]) / 100) * 255)
+        )
         start = self.active_times_settings["start"].split(":")
         end = self.active_times_settings["end"].split(":")
         self.start_time = (int(start[0]) * 60) + int(start[1])
         self.end_time = (int(end[0]) * 60) + int(end[1])
 
+        # State holders
         self.lights_on = True
         self.previous_state = previous_state
         self.previous_m150 = {}  # type: dict
         self.active_times_state = True
+        self.turn_off_timer = None
 
         self.queue = queue
         try:
@@ -48,6 +62,10 @@ class EffectRunner:
         except StripFailedError:
             self._logger.info("No strip initialised, exiting the effect process.")
             return
+
+        self.brightness_manager = BrightnessManager(
+            self.strip, self.max_brightness, self.transition_settings
+        )
 
         if debug:
             self.log_settings()
@@ -99,12 +117,29 @@ class EffectRunner:
         self.previous_state = msg
 
     def turn_lights_on(self):
+        if self.turn_off_timer and self.turn_off_timer.is_alive():
+            self.turn_off_timer.cancel()
+
         self.lights_on = True
+        start_daemon_thread(
+            target=self.brightness_manager.do_fade_in, name="Fade in thread"
+        )
         self._logger.info("On message received, turning on LEDs")
 
     def turn_lights_off(self):
-        self.lights_on = False
+        # Start fading brightness out
+        start_daemon_thread(
+            target=self.brightness_manager.do_fade_out, name="Fade out thread"
+        )
+        # Set timer to turn LEDs off after fade
+        self.turn_off_timer = start_daemon_timer(
+            interval=self.transition_settings["fade"]["time"] / 1000,
+            target=self.lights_off,
+        )
         self._logger.info("Off message received, turning off LEDs")
+
+    def lights_off(self):
+        self.lights_on = False
 
     def progress_msg(self, msg):
         msg_split = msg.split()
@@ -156,6 +191,7 @@ class EffectRunner:
                     self.previous_m150["b"],
                 ),
                 max_brightness=self.previous_m150["brightness"],
+                brightness_manager=self.brightness_manager,
             )
         else:
             self.blank_leds()
@@ -171,6 +207,7 @@ class EffectRunner:
                 hex_to_rgb(effect_settings["base"]),
                 self.max_brightness,
                 self.reverse,
+                brightness_manager=self.brightness_manager,
             )
         else:
             self.blank_leds()
@@ -186,6 +223,7 @@ class EffectRunner:
                 hex_to_rgb(effect_settings["color"]),
                 effect_settings["delay"],
                 self.max_brightness,
+                brightness_manager=self.brightness_manager,
             )
         else:
             self.blank_leds()
@@ -198,6 +236,7 @@ class EffectRunner:
             [0, 0, 0],
             max_brightness=self.max_brightness,
             wait=False,
+            brightness_manager=self.brightness_manager,
         )
         if self.queue.empty():
             time.sleep(0.1)
@@ -291,6 +330,81 @@ class EffectRunner:
         line = line + "\n | - start: " + str(self.active_times_settings["start"])
         line = line + "\n | - end: " + str(self.active_times_settings["end"])
         self._logger.debug(line)
+
+
+class BrightnessManager:
+    def __init__(self, strip, max_brightness, transition_settings):
+        self.strip = strip
+        self.max_brightness = max_brightness
+        self.transition_settings = transition_settings
+        self.current_brightness = 0
+
+        # Perform heavy calculation on startup
+        self.fade_steps = self.calculate_fade_in()
+
+        # State flags
+        self.fade_active = False
+
+    def get_brightness(self):
+        """
+        Get current brightness from manager
+        """
+        return self.current_brightness
+
+    def calculate_fade_in(self):
+        """
+        Calculate a list of brightness values per ms, based on sine curve
+        """
+        fade_time = self.transition_settings["fade"]["time"]  # Fade time in ms
+        step = (math.pi / 2) / (fade_time / 20)
+        # Difference between steps, in radians (per 10ms)
+
+        # Work out brightness value per ms, based on sine curve
+        steps = []
+        for i in range(0, int(fade_time / 20)):
+            steps.append(math.sin(i * step) * self.max_brightness)
+
+        return steps
+
+    def do_fade_in(self):
+        """
+        Step through fade values to produce fade in effect
+        """
+        while self.fade_active:
+            # Wait for any previous fade to finish
+            milli_sleep(10)
+
+        self.fade_active = True
+        for step in self.fade_steps:
+            self.current_brightness = int(round(step, 0))
+            print(self.current_brightness)
+            self.strip.setBrightness(self.current_brightness)
+            self.strip.show()
+            milli_sleep(20)
+
+        self.fade_active = False
+
+    def do_fade_out(self):
+        """
+        Step through fade values to produce fade out effect
+        """
+        while self.fade_active:
+            # Wait for any previous fade to finish
+            milli_sleep(10)
+
+        self.fade_active = True
+        for step in reversed(self.fade_steps):
+            self.current_brightness = int(round(step, 0))
+            print(self.current_brightness)
+            self.strip.setBrightness(self.current_brightness)
+            self.strip.show()
+            milli_sleep(20)
+
+        self.fade_active = False
+
+    def reset_brightness(self):
+        if not self.fade_active:
+            self.strip.setBrightness(self.max_brightness)
 
 
 class StripFailedError(Exception):

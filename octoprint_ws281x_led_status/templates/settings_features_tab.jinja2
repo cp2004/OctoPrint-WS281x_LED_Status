@@ -22,6 +22,17 @@
     </div>
     <hr>
     <label class="checkbox inline">
+        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.transitions.fade.enabled">Enable fade on/off transition
+    </label>
+    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.transitions.fade.enabled">
+        <label class="inline"> Fade in time </label>
+        <div class="input-append">
+            <input type="number" step="1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.transitions.fade.time">
+            <span class="add-on">ms</span>
+        </div>
+    </div>
+    <hr>
+    <label class="checkbox inline">
         <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled">Enable torch effect and button
     </label>
     <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled">
