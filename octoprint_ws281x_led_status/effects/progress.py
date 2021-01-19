@@ -68,3 +68,5 @@ def gradient(
         strip.setPixelColorRGB(i, *color)
 
     strip.show()
+    if not q_poll_sleep(0.1, queue):
+        return
