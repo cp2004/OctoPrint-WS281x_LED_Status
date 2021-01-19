@@ -214,7 +214,7 @@ class EffectRunner:
     def progress_effect(self, mode, value):
         if self.check_times() and self.lights_on:
             effect_settings = self.effect_settings[mode]
-            constants.PROGRESS_EFFECTS["progress"](  # TODO More progress effects
+            constants.PROGRESS_EFFECTS[effect_settings["effect"]](
                 self.strip,
                 self.queue,
                 int(value),

@@ -80,6 +80,7 @@ defaults = {
             "enabled": True,
             "base": "#000000",
             "color": "#00ff00",
+            "effect": "Progress Bar",
         },
         "progress_heatup": {
             "enabled": True,
@@ -88,6 +89,7 @@ defaults = {
             "tool_enabled": True,
             "bed_enabled": True,
             "tool_key": 0,
+            "effect": "Progress Bar",
         },
         "progress_cooling": {
             "enabled": True,
@@ -95,6 +97,7 @@ defaults = {
             "color": "#ff0000",
             "bed_or_tool": "tool",
             "threshold": 40,
+            "effect": "Progress Bar",
         },
     },
     "active_times": {

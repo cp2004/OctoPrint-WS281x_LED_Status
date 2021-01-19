@@ -128,6 +128,7 @@ class WS281xLedStatusPlugin(
         global PI_MODEL
         return {
             "standard_names": constants.EFFECTS.keys(),
+            "progress_names": constants.PROGRESS_EFFECTS.keys(),
             "pi_model": PI_MODEL,
             "strip_types": constants.STRIP_TYPES,
             "timezone": util.get_timezone(),
