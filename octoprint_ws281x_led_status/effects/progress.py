@@ -70,3 +70,28 @@ def gradient(
     strip.show()
     if not q_poll_sleep(0.1, queue):
         return
+
+
+def single_pixel(
+    strip,
+    queue,
+    value,
+    progress_color,
+    base_color,
+    max_brightness,
+    reverse,
+    brightness_manager,
+):
+    brightness_manager.reset_brightness()
+
+    # Calculate which pixel needs to be lit
+    pixel_number = int(round(float(value) / 100 * strip.numPixels(), 0))
+
+    for i in range(strip.numPixels()):
+        strip.setPixelColorRGB(i, *base_color)
+
+    strip.setPixelColorRGB(pixel_number, *progress_color)
+
+    strip.show()
+    if not q_poll_sleep(0.1, queue):
+        return

@@ -73,6 +73,7 @@ EFFECTS = {
 PROGRESS_EFFECTS = {
     "Progress Bar": progress.progress_bar,
     "Gradient": progress.gradient,
+    "Single Pixel": progress.single_pixel,
 }
 MODES = [
     "startup",
