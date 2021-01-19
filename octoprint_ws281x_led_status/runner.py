@@ -226,7 +226,7 @@ class EffectRunner:
                 ),
                 self.max_brightness,
                 self.reverse,
-                brightness_manager=self.brightness_manager,
+                self.brightness_manager,
             )
         else:
             self.blank_leds()

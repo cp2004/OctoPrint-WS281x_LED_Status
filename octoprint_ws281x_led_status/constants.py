@@ -71,7 +71,8 @@ EFFECTS = {
     "Bouncy Balls": standard.bouncy_balls,
 }
 PROGRESS_EFFECTS = {
-    "Progress Bar": progress.progress,
+    "Progress Bar": progress.progress_bar,
+    "Gradient": progress.gradient,
 }
 MODES = [
     "startup",
