@@ -74,6 +74,7 @@ defaults = {
             "delay": "1",
             "toggle": False,
             "timer": "15",
+            "auto_on_webcam": True,
         },
         "progress_print": {
             "enabled": True,

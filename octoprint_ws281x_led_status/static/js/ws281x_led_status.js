@@ -229,6 +229,29 @@ $(function () {
                 }
             }
         };
+
+        // Tab change callback, if torch on webcam stream option enabled
+        self.onAfterTabChange = function (current, previous) {
+            if (
+                current === "#control" &&
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled() &&
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle() &&
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.auto_on_webcam() &&
+                !self.torch_on()
+            ) {
+                // All relevant options are enabled, and the torch is currently off: make it on
+                self.toggle_torch();
+            } else if (
+                previous === "#control" &&
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled() &&
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle() &&
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.auto_on_webcam() &&
+                self.torch_on()
+            ) {
+                // All relevant options are enabled, and the torch is on: make it off
+                self.toggle_torch();
+            }
+        };
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusNavbarViewModel,

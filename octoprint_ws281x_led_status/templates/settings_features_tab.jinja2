@@ -62,7 +62,16 @@
             <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle">Torch mode is a toggle
         </label>
         <p class="help-block">
-            This overrides the timer, so you have to manually turn torch mode off again.
+            This overrides the timer, so you have to manually turn torch mode off again. Enables auto-torch when viewing the webcam stream
+        </p>
+    </div>
+    <hr>
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle">
+        <label class="checkbox inline">
+            <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.auto_on_webcam"> Auto activate torch when viewing webcam stream
+        </label>
+        <p class="help-block">
+            Requires torch mode to be set to toggle
         </p>
     </div>
     <hr>
