@@ -103,6 +103,7 @@ def rainbow(strip, queue, color, delay, max_brightness=255, brightness_manager=N
             max_brightness,
             set_brightness=False,
             wait=False,
+            brightness_manager=brightness_manager,
         )
         if not q_poll_milli_sleep(delay, queue):
             return
