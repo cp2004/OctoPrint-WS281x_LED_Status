@@ -22,26 +22,20 @@ DIRECTIONS = [
 
 
 def solid_color(
-    strip,
-    queue,
-    color,
-    delay=None,
-    max_brightness=255,
-    set_brightness=True,
-    wait=True,
-    brightness_manager=None,
+    strip, queue, color, brightness_manager, wait=True, show=True, *args, **kwargs
 ):
     brightness_manager.reset_brightness()
     # Set pixels to a solid color
     for p in range(strip.numPixels()):
         strip.setPixelColorRGB(p, *color)
-    strip.show()
+    if show:
+        strip.show()
     if wait:
         if not q_poll_sleep(0.1, queue):
             return
 
 
-def color_wipe(strip, queue, color, delay, max_brightness=255, brightness_manager=None):
+def color_wipe(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
     for i in range(strip.numPixels()):
         strip.setPixelColorRGB(i, *color)
@@ -55,9 +49,7 @@ def color_wipe(strip, queue, color, delay, max_brightness=255, brightness_manage
             return
 
 
-def color_wipe_2(
-    strip, queue, color, delay, max_brightness=255, brightness_manager=None
-):
+def color_wipe_2(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
     for direction in DIRECTIONS:
         for i in (
@@ -73,35 +65,36 @@ def color_wipe_2(
                 return
 
 
-def simple_pulse(
-    strip, queue, color, delay, max_brightness=255, brightness_manager=None
-):
-    strip.setBrightness(1)
+def simple_pulse(strip, queue, color, delay, brightness_manager, *args, **kwargs):
+    max_brightness = brightness_manager.max_brightness
+    brightness_manager.set_brightness(1)
     solid_color(
-        strip, queue, color, delay, max_brightness, set_brightness=False, wait=False
+        strip=strip,
+        queue=queue,
+        color=color,
+        brightness_manager=brightness_manager,
+        wait=False,
     )
+
     for direction in DIRECTIONS:
         for b in (
             range(max_brightness)
             if direction == "forward"
             else reversed(range(max_brightness))
         ):
-            strip.setBrightness(b)
-            strip.show()
+            brightness_manager.set_brightness(b)
+
             if not q_poll_milli_sleep(delay, queue):
                 return
 
 
-def rainbow(strip, queue, color, delay, max_brightness=255, brightness_manager=None):
-    brightness_manager.reset_brightness()
+def rainbow(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     for i in range(256):
         solid_color(
-            strip,
-            queue,
-            wheel(i),
-            delay,
-            max_brightness,
-            set_brightness=False,
+            strip=strip,
+            queue=queue,
+            color=wheel(i),
+            delay=delay,
             wait=False,
             brightness_manager=brightness_manager,
         )
@@ -109,9 +102,7 @@ def rainbow(strip, queue, color, delay, max_brightness=255, brightness_manager=N
             return
 
 
-def rainbow_cycle(
-    strip, queue, color, delay, max_brightness=255, brightness_manager=None
-):
+def rainbow_cycle(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
     for j in range(256):
         for i in range(strip.numPixels()):
@@ -123,9 +114,7 @@ def rainbow_cycle(
             return
 
 
-def solo_bounce(
-    strip, queue, color, delay, max_brightness=255, brightness_manager=None
-):
+def solo_bounce(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
     for direction in DIRECTIONS:
         for i in (
@@ -133,16 +122,21 @@ def solo_bounce(
             if direction == "forward"
             else reversed(range(strip.numPixels()))
         ):
+            solid_color(
+                strip=strip,
+                queue=queue,
+                color=(0, 0, 0),
+                brightness_manager=brightness_manager,
+                wait=False,
+                show=False,
+            )
             strip.setPixelColorRGB(i, *color)
-            for blank in range(strip.numPixels()):
-                if blank != i:
-                    strip.setPixelColorRGB(blank, 0, 0, 0)
             strip.show()
             if not q_poll_milli_sleep(delay, queue):
                 return
 
 
-def bounce(strip, queue, color, delay, max_brightness=255, brightness_manager=None):
+def bounce(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
     red, green, blue = color
     size = 3
@@ -153,7 +147,12 @@ def bounce(strip, queue, color, delay, max_brightness=255, brightness_manager=No
             else range((strip.numPixels() - size - 2), 0, -1)
         ):
             solid_color(
-                strip, queue, (0, 0, 0), max_brightness=max_brightness, wait=False
+                strip=strip,
+                queue=queue,
+                color=(0, 0, 0),
+                brightness_manager=brightness_manager,
+                wait=False,
+                show=False,
             )
             strip.setPixelColorRGB(
                 i,
@@ -178,9 +177,7 @@ def bounce(strip, queue, color, delay, max_brightness=255, brightness_manager=No
                 return
 
 
-def random_single(
-    strip, queue, color, delay, max_brightness=255, brightness_manager=None
-):
+def random_single(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
     for p in range(strip.numPixels()):
         strip.setPixelColorRGB(p, *wheel(random.randint(0, 255)))
@@ -194,11 +191,15 @@ def random_single(
             return
 
 
-def blink(strip, queue, color, delay, max_brightness=255, brightness_manager=None):
-    solid_color(strip, queue, color, delay, max_brightness, wait=False)
+def blink(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     for direction in DIRECTIONS:
-        strip.setBrightness(max_brightness if direction == "forward" else 0)
-        strip.show()
+        solid_color(
+            strip=strip,
+            queue=queue,
+            color=color if direction == "forward" else (0, 0, 0),
+            brightness_manager=brightness_manager,
+            wait=False,
+        )
         for _ms in range(int(delay / 2)):
             if not q_poll_milli_sleep(2, queue):
                 # We do it this way so we can check the q more often, as for blink
@@ -207,16 +208,22 @@ def blink(strip, queue, color, delay, max_brightness=255, brightness_manager=Non
                 return
 
 
-def crossover(strip, queue, color, delay, max_brightness=255, brightness_manager=None):
+def crossover(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
-    solid_color(strip, queue, (0, 0, 0), wait=False)
     num_pixels = strip.numPixels()
     if num_pixels % 2 != 1:
+        # We need an odd number of pixels
         num_pixels -= 1
 
     for i in range(num_pixels):
-        for p in range(num_pixels):
-            strip.setPixelColorRGB(p, 0, 0, 0)
+        solid_color(
+            strip=strip,
+            queue=queue,
+            color=(0, 0, 0),
+            brightness_manager=brightness_manager,
+            wait=False,
+            show=False,
+        )
         strip.setPixelColorRGB(i, *color)
         strip.setPixelColorRGB(num_pixels - 1 - i, *color)
         strip.show()
@@ -226,9 +233,7 @@ def crossover(strip, queue, color, delay, max_brightness=255, brightness_manager
 
 # Credit to https://www.tweaking4all.com/hardware/arduino/adruino-led-strip-effects/#LEDStripEffectBouncingBalls
 # Translated from c++ to Python by me
-def bouncy_balls(
-    strip, queue, color, delay, max_brightness=255, brightness_manager=None
-):
+def bouncy_balls(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
     ball_count = 2
     gravity = -9.81

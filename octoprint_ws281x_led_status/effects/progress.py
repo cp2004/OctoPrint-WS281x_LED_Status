@@ -13,12 +13,13 @@ from octoprint_ws281x_led_status.util import blend_two_colors, q_poll_sleep
 def progress_bar(
     strip,
     queue,
+    brightness_manager,
     value,
     progress_color,
     base_color,
-    max_brightness,
     reverse,
-    brightness_manager,
+    *args,
+    **kwargs
 ):
     brightness_manager.reset_brightness()
     num_pixels = strip.numPixels()
@@ -51,14 +52,7 @@ def progress_bar(
 
 
 def gradient(
-    strip,
-    queue,
-    value,
-    progress_color,
-    base_color,
-    max_brightness,
-    reverse,
-    brightness_manager,
+    strip, queue, value, brightness_manager, progress_color, base_color, *args, **kwargs
 ):
     brightness_manager.reset_brightness()
 
@@ -73,14 +67,7 @@ def gradient(
 
 
 def single_pixel(
-    strip,
-    queue,
-    value,
-    progress_color,
-    base_color,
-    max_brightness,
-    reverse,
-    brightness_manager,
+    strip, queue, brightness_manager, value, progress_color, base_color, *args, **kwargs
 ):
     brightness_manager.reset_brightness()
 

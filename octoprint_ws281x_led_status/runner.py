@@ -196,54 +196,56 @@ class EffectRunner:
             self.previous_state = "M150"
 
         if self.check_times() and self.lights_on:  # Respect lights on/off
+            # Set brightness
+            self.brightness_manager.set_brightness(self.previous_m150["brightness"])
+            # Set the effects
             constants.EFFECTS["Solid Color"](
-                self.strip,
-                self.queue,
-                apply_color_correction(
+                strip=self.strip,
+                queue=self.queue,
+                color=apply_color_correction(
                     self.color_correction,
                     self.previous_m150["r"],
                     self.previous_m150["g"],
                     self.previous_m150["b"],
                 ),
-                max_brightness=self.previous_m150["brightness"],
                 brightness_manager=self.brightness_manager,
             )
         else:
             self.blank_leds()
 
     def progress_effect(self, mode, value):
+        effect_settings = self.effect_settings[mode]
         if self.check_times() and self.lights_on:
-            effect_settings = self.effect_settings[mode]
             constants.PROGRESS_EFFECTS[effect_settings["effect"]](
-                self.strip,
-                self.queue,
-                int(value),
-                apply_color_correction(
+                strip=self.strip,
+                queue=self.queue,
+                brightness_manager=self.brightness_manager,
+                value=int(value),
+                progress_color=apply_color_correction(
                     self.color_correction, *hex_to_rgb(effect_settings["color"])
                 ),
-                apply_color_correction(
+                base_color=apply_color_correction(
                     self.color_correction, *hex_to_rgb(effect_settings["base"])
                 ),
-                self.max_brightness,
-                self.reverse,
-                self.brightness_manager,
+                reverse=self.reverse,
             )
         else:
             self.blank_leds()
 
     def standard_effect(self, mode):
+        # Log if the effect is changing
         if self.previous_state != mode:
             self._logger.debug("Changing effect to {}".format(mode))
+
         if self.check_times() and self.lights_on:
             effect_settings = self.effect_settings[mode]
             constants.EFFECTS[effect_settings["effect"]](
-                self.strip,
-                self.queue,
-                apply_color_correction(
+                strip=self.strip,
+                queue=self.queue,
+                color=apply_color_correction(
                     self.color_correction, *hex_to_rgb(effect_settings["color"])
                 ),
-                effect_settings["delay"],
-                self.max_brightness,
+                delay=effect_settings["delay"],
                 brightness_manager=self.brightness_manager,
             )
         else:
@@ -360,7 +362,7 @@ class BrightnessManager:
         self.transition_settings = transition_settings
         self.current_brightness = 0
 
-        # Perform heavy calculation on startup
+        # Perform potentially heavy calculation on startup
         self.fade_steps = self.calculate_fade_in()
 
         # State flags
@@ -372,13 +374,28 @@ class BrightnessManager:
         """
         return self.current_brightness
 
+    def set_brightness(self, value, show=True):
+        if not isinstance(value, int):
+            value = int(value)
+
+        # If fade active, don't change brightness - would be overwritten quickly
+        if not self.fade_active:
+            self.current_brightness = value
+            self.strip.setBrightness(self.current_brightness)
+            if show:
+                self.strip.show()
+
+    def reset_brightness(self):
+        if not self.fade_active:
+            self.strip.setBrightness(self.max_brightness)
+
     def calculate_fade_in(self):
         """
         Calculate a list of brightness values per ms, based on sine curve
         """
         fade_time = self.transition_settings["fade"]["time"]  # Fade time in ms
         step = (math.pi / 2) / (fade_time / 20)
-        # Difference between steps, in radians (per 10ms)
+        # Difference between steps, in radians (per 20ms)
 
         # Work out brightness value per ms, based on sine curve
         steps = []
@@ -420,10 +437,6 @@ class BrightnessManager:
             milli_sleep(20)
 
         self.fade_active = False
-
-    def reset_brightness(self):
-        if not self.fade_active:
-            self.strip.setBrightness(self.max_brightness)
 
 
 class StripFailedError(Exception):
