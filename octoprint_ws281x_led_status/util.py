@@ -27,7 +27,7 @@ def apply_color_correction(settings, r, g, b):
         red = 0
         green = 0
         blue = 0
-        white = int_0_255(b * (int(settings["brightness"]) / 100))
+        white = int((settings["brightness"] / 100) * 255)
     return red, green, blue, white
 
 
