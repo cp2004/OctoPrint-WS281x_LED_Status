@@ -16,6 +16,12 @@
                     </select>
                 </div>
             </div>
+						<div class="control-group">
+							<label class="control-label">{{ _('White override for RGBW strips') }}</label>
+							<div class="controls">
+								<input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.ws281x_led_status.led_white_override">
+							</div>
+						</div
             <div class="control-group inline">
                 <label class="control-label">{{ _('Max brightness') }}</label>
                 <div class="controls">
@@ -31,7 +37,6 @@
                 <div class="controls">
                     <input type="number" id="ws281x_num_leds" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.count">
                 </div>
-
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('GPIO pin') }}</label>
