@@ -23,11 +23,11 @@ def apply_color_correction(settings, r, g, b):
     blue = int_0_255(b * (int(settings["blue"]) / 100))
     white = 0
     #Use white LEDs if white override is enabled
-    if 255 in (red, green, blue) and settings["white_override"] == True:
+    if 255 in (red, green, blue) and settings["white_override"] is True:
         red = 0
         green = 0
         blue = 0
-        White = int_0_255(b * (int(settings["brightness"]) / 100))
+        white = int_0_255(b * (int(settings["brightness"]) / 100))
     return red, green, blue, white
 
 
