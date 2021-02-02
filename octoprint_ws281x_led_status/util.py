@@ -21,7 +21,14 @@ def apply_color_correction(settings, r, g, b):
     red = int_0_255(r * (int(settings["red"]) / 100))
     green = int_0_255(g * (int(settings["green"]) / 100))
     blue = int_0_255(b * (int(settings["blue"]) / 100))
-    return red, green, blue
+    white = 0
+    #Use white LEDs if white override is enabled
+    if 255 in (red, green, blue) and settings["white_override"] == True:
+        red = 0
+        green = 0
+        blue = 0
+        White = int_0_255(b * (int(settings["brightness"]) / 100))
+    return red, green, blue, white
 
 
 def blend_two_colors(colour1, colour2, percent_of_c1=None):
