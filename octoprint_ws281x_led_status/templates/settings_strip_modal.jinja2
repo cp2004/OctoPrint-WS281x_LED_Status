@@ -17,9 +17,19 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label">{{ _('Enable white override for RGBW strips') }}</label>
+                <label class="control-label">{{ _('Use white with RGBW') }}</label>
                 <div class="controls">
-                    <input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.ws281x_led_status.led_white_override">
+                    <input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.ws281x_led_status.white_override">
+                </div>
+            </div>
+						<div class="control-group inline">
+                <label class="control-label">{{ _('White brightness') }}</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_brightness">
+                        <span class="add-on">%</span>
+                    </div>
+                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_brightness">
                 </div>
             </div>
             <div class="control-group inline">

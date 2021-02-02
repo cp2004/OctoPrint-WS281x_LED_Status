@@ -23,6 +23,7 @@ defaults = {
         "brightness": 50,
         "adjustment": {"R": 100, "G": 100, "B": 100},
         "white_override": False,
+        "white_brightness": 50,
     },
     "effects": {
         "startup": {
@@ -137,7 +138,6 @@ def migrate_none_to_one(settings):
             "reverse": settings.get_boolean(["reverse"]),
             "type": settings.get(["strip_type"]),
             "brightness": settings.get(["brightness"]),
-            "white_override": settings.get_boolean(["led_white_override"]),
         },
         "effects": {
             "startup": {
