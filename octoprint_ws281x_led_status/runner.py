@@ -300,6 +300,7 @@ class EffectRunner:
                 brightness=int(self.strip_settings["brightness"]),
                 channel=int(self.strip_settings["channel"]),
                 strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
+                white_override=bool(self.strip_settings["white_override"]),
             )
             strip.begin()
             self._logger.info("Strip successfully initialised")
