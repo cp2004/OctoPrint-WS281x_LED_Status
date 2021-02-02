@@ -19,7 +19,7 @@
             <div class="control-group">
                 <label class="control-label">{{ _('Use white with RGBW') }}</label>
                 <div class="controls">
-                    <input type="checkbox" class="input-medium" data-bind="checked: settings.plugins.ws281x_led_status.white_override">
+                    <input type="checkbox" class="input-medium" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.white_override">
                 </div>
             </div>
             <div class="control-group inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.white_override">
