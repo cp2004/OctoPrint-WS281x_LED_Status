@@ -108,7 +108,7 @@ class EffectRunner:
             return
         except Exception as e:
             self._logger.error("Unhandled exception in effect runner process")
-            self._logger.error(repr(e))
+            self._logger.exception(e)
             raise
 
     def parse_q_msg(self, msg):
