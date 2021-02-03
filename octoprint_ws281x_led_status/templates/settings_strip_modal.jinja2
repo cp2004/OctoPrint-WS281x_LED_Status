@@ -16,6 +16,22 @@
                     </select>
                 </div>
             </div>
+            <div class="control-group">
+                <label class="control-label">{{ _('Use dedicated white') }}</label>
+                <div class="controls">
+                    <input type="checkbox" class="input-medium" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_override">
+                </div>
+            </div>
+            <div class="control-group inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_override">
+                <label class="control-label">{{ _('White brightness') }}</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_brightness">
+                        <span class="add-on">%</span>
+                    </div>
+                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_brightness">
+                </div>
+            </div>
             <div class="control-group inline">
                 <label class="control-label">{{ _('Max brightness') }}</label>
                 <div class="controls">
@@ -31,7 +47,6 @@
                 <div class="controls">
                     <input type="number" id="ws281x_num_leds" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.count">
                 </div>
-
             </div>
             <div class="control-group">
                 <label class="control-label">{{ _('GPIO pin') }}</label>

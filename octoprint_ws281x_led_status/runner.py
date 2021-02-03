@@ -57,6 +57,8 @@ class EffectRunner:
             "red": self.strip_settings["adjustment"]["R"],
             "green": self.strip_settings["adjustment"]["G"],
             "blue": self.strip_settings["adjustment"]["B"],
+            "white_override": self.strip_settings["white_override"],
+            "white_brightness": self.strip_settings["white_brightness"],
         }
 
         # State holders

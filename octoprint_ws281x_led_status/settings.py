@@ -22,6 +22,8 @@ defaults = {
         "type": "WS2811_STRIP_GRB",
         "brightness": 50,
         "adjustment": {"R": 100, "G": 100, "B": 100},
+        "white_override": False,
+        "white_brightness": 50,
     },
     "effects": {
         "startup": {

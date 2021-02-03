@@ -18,10 +18,18 @@ def hex_to_rgb(h):
 
 
 def apply_color_correction(settings, r, g, b):
-    red = int_0_255(r * (int(settings["red"]) / 100))
-    green = int_0_255(g * (int(settings["green"]) / 100))
-    blue = int_0_255(b * (int(settings["blue"]) / 100))
-    return red, green, blue
+    #Use white LEDs if white override is enabled
+    if r == g == b == 255 and settings["white_override"] is True:
+        red = 0
+        green = 0
+        blue = 0
+        white = int((int(settings["white_brightness"]) / 100) * 255)
+        return red, green, blue, white
+    else:
+        red = int_0_255(r * (int(settings["red"]) / 100))
+        green = int_0_255(g * (int(settings["green"]) / 100))
+        blue = int_0_255(b * (int(settings["blue"]) / 100))
+        return red, green, blue
 
 
 def blend_two_colors(colour1, colour2, percent_of_c1=None):
