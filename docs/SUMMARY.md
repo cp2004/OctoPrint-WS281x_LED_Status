@@ -2,10 +2,32 @@
 
 * [Home of the docs](README.md)
 
-## Setup Guide
+## Guides
 
-* [Setup Guide](setup-guide/setup-guide/README.md)
-  * [Wiring your LEDs](setup-guide/setup-guide/wiring-your-leds.md)
-  * [SPI Setup](setup-guide/setup-guide/spi-setup.md)
-  * [Initial Configuration](setup-guide/setup-guide/initial-configuration.md)
+* [Setup Guide](guides/setup-guide-1/README.md)
+  * [Wiring your LEDs](guides/setup-guide-1/wiring-your-leds.md)
+  * [SPI Setup](guides/setup-guide-1/spi-setup.md)
+  * [Initial Configuration](guides/setup-guide-1/initial-configuration.md)
+* [OctoLapse Flash](guides/octolapse-flash.md)
+
+## Configuration
+
+* [LED Strip Configuration](configuration/led-strip-configuration.md)
+* [Printing Effects](configuration/printing-effects.md)
+* [Progress Effects](configuration/progress-effects.md)
+* [Features](configuration/features.md)
+
+---
+
+* [Utilities](utilities.md)
+
+## Documentation
+
+* [Host @ Commands](documentation/host-commands.md)
+* [M150 Intercept](documentation/m150-intercept.md)
+* [REST API](documentation/rest-api.md)
+
+---
+
+* [Troubleshooting Guide](troubleshooting-guide.md)
 
