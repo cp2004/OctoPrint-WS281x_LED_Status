@@ -1,4 +1,8 @@
 # Table of contents
 
-* [Initial page](README.md)
+* [Home](README.md)
+
+## Features
+
+* [Printing Event tracking](features/printing-event-tracking.md)
 
