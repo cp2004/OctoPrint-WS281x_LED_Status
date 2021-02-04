@@ -8,7 +8,7 @@ This documentation should tell you all you need to know about how to use the plu
 
 {% hint style="success" %}
 **Want to contribute? Go for it!**   
-There should be an 'Edit on Github' button to the top right of each page.
+There should be an 'Edit on GitHub' button to the top right of each page.
 {% endhint %}
 
 {% hint style="success" %}

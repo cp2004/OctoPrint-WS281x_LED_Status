@@ -20,14 +20,11 @@
 ---
 
 * [Utilities](utilities.md)
+* [Troubleshooting Guide](troubleshooting-guide.md)
 
 ## Documentation
 
 * [Host @ Commands](documentation/host-commands.md)
 * [M150 Intercept](documentation/m150-intercept.md)
 * [REST API](documentation/rest-api.md)
-
----
-
-* [Troubleshooting Guide](troubleshooting-guide.md)
 
