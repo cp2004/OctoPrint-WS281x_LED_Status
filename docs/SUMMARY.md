@@ -10,6 +10,7 @@
   * [Initial Configuration](guides/setup-guide-1/initial-configuration.md)
 * [Setup in Docker](guides/setup-in-docker.md)
 * [OctoLapse Flash](guides/octolapse-flash.md)
+* [Get Help Guide](guides/get-help-guide.md)
 
 ## Configuration
 
@@ -28,8 +29,4 @@
 * [Host @ Commands](documentation/host-commands.md)
 * [M150 Intercept](documentation/m150-intercept.md)
 * [REST API](documentation/rest-api.md)
-
----
-
-* [Get Help Guide](get-help-guide.md)
 
