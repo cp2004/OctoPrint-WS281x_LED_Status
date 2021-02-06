@@ -29,3 +29,7 @@
 * [M150 Intercept](documentation/m150-intercept.md)
 * [REST API](documentation/rest-api.md)
 
+---
+
+* [Get Help Guide](get-help-guide.md)
+
