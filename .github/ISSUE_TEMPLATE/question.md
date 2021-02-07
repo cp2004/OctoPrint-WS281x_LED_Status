@@ -23,4 +23,6 @@ Here are my log files:
 
 <!-- add an x in the box to make it [x] AFTER reading the full guide -->
 
-* [ ] I have read the get help guide https://cp2004.gitbook.io/ws281x-led-status/guides/get-help-guide
+* [ ] I have read the Get Help Guide 
+
+https://cp2004.gitbook.io/ws281x-led-status/guides/get-help-guide
