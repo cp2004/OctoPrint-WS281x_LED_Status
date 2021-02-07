@@ -1,0 +1,42 @@
+approve_label: approved
+problem_label: incomplete
+ignored_bales:
+  - approved
+  - confirmed bug
+  - documentation
+  - feedback
+  - grabbed
+  - improvement
+  - request
+  - potential bug
+  - not plugin
+  - question
+  - unreproduced
+  - solved
+  - up for grabs
+  - upstream library
+ignored_authors:
+  - "cp2004"
+  
+validation_comment: >
+  Hi @@@AUTHOR@@,
+
+  It looks like there is some information missing from this issue that is required to process it:
+
+  * It looks like you haven't read the ['Get Help Guide'](https://cp2004.gitbook.io/ws281x-led-status/guides/get-help-guide)
+
+  Please read this guide, especially the [troubleshooting](https://cp2004.gitbook.io/ws281x-led-status/troubleshooting-guide) section.
+
+  If you have read this guide, please tick the box in your issue next to 'I have read the Get Help Guide'
+
+  ```markdown
+  * [x] I have read the Get Help Guide
+  ```
+  
+  If you didn't mean to ask for help, please make sure you used the right template - 
+  bugs and requests should have `[Bug]` and `[Request]` respectively in the title.
+  
+  *I'm just a bot 🤖, not a human being, so don't expect any replies
+  from me :) Your ticket is read by humans too, I'm just not one of them.*
+  
+keyphrase: [x] I have read the Get Help Guide
