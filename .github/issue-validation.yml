@@ -15,7 +15,7 @@ ignored_bales:
   - up for grabs
   - upstream library
 ignored_authors:
-  - "cp2004"
+  - empty
   
 validation_comment: >
   Hi @@@AUTHOR@@,
