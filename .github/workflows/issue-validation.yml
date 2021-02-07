@@ -1,7 +1,7 @@
 name: "Issue Labeler"
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, closed, reopened]
 
 jobs:
   label-opened-and-edited:
@@ -46,3 +46,7 @@ jobs:
                 labels: labels
               })
             }
+      - uses: OctoPrint/actions/issue-validation@main
+        if: github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'edited')
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
