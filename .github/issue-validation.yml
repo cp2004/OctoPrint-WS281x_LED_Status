@@ -37,5 +37,5 @@ validation_comment: >
   
   *I'm just a bot 🤖, not a human being, so don't expect any replies
   from me :) Your ticket is read by humans too, I'm just not one of them.*
-  
-keyphrase: [x] I have read the Get Help Guide
+
+keyphrase: "[x] I have read the Get Help Guide"
