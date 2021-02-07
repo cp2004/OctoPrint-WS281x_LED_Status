@@ -10,7 +10,6 @@ ignored_bales:
   - request
   - potential bug
   - not plugin
-  - question
   - unreproduced
   - solved
   - up for grabs
