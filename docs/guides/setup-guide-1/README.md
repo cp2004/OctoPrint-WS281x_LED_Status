@@ -24,6 +24,10 @@ Once you have installed and enabled the plugin, OctoPrint will prompt you to res
 Using the OctoPrint Docker container? There's some [additional steps you have to follow ](../setup-in-docker.md)for this to work.
 {% endhint %}
 
+### Check you have the right hardware:
+
+{% page-ref page="supported-hardware.md" %}
+
 ### Next up: Wiring your LEDs
 
 {% page-ref page="wiring-your-leds.md" %}
