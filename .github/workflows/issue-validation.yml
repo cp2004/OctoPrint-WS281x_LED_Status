@@ -23,12 +23,26 @@ jobs:
                     labels.push('needs review');
                     setLabels = true;
                   }
+                  if (labels.includes("incomplete")){
+                    // Remove incomplete label
+                    const index = labels.indexOf("incomplete");
+                    if (index > -1) {
+                      array.splice(index, 1);
+                    }
+                  }
                 }
                 if (context.payload.issue.title.match(/bug/i)) {
                   if (!labels.includes("confirmed bug")){
                     labels.push('potential bug');
                     labels.push('needs review');
                     setLabels = true;
+                  }
+                  if (labels.includes("incomplete")){
+                    // Remove incomplete label
+                    const index = labels.indexOf("incomplete");
+                    if (index > -1) {
+                      array.splice(index, 1);
+                    }
                   }
                 }
                 if (labels.length === 0) {
