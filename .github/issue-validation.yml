@@ -1,6 +1,6 @@
 approve_label: approved
 problem_label: incomplete
-ignored_bales:
+ignored_labels:
   - approved
   - confirmed bug
   - documentation
