@@ -35,7 +35,7 @@ All the standard effects available, with fancy visualisations!
 
 Sets all LEDs to one colour, forever.
 
-![](../.gitbook/assets/solid_colour.gif)
+![](../.gitbook/assets/solid_colour%20%281%29.gif)
 
 ### Colour Wipe
 
@@ -53,13 +53,13 @@ Wipes colour pixel by pixel, as above, but to clear it turns around and heads ba
 
 Fades brightness up and down. Looks better in real life than the visualisation below!
 
-![](../.gitbook/assets/pulse.gif)
+![](../.gitbook/assets/pulse%20%281%29.gif)
 
 ### Bounce
 
 Sends a pulse of light bouncing from one side of your strip to the other.
 
-![](../.gitbook/assets/bounce.gif)
+![](../.gitbook/assets/bounce%20%281%29.gif)
 
 ### Solo Bounce
 
@@ -77,7 +77,7 @@ Cycles all the LEDs through the rainbow together.
 
 Rainbow that cycles across the strip, so a full rainbow is across the whole strip at once.
 
-![](../.gitbook/assets/rainbow_cycle.gif)
+![](../.gitbook/assets/rainbow_cycle%20%281%29.gif)
 
 ### Crossover
 

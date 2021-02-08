@@ -5,6 +5,7 @@
 ## Guides
 
 * [Setup Guide](guides/setup-guide-1/README.md)
+  * [Supported Hardware](guides/setup-guide-1/supported-hardware.md)
   * [Wiring your LEDs](guides/setup-guide-1/wiring-your-leds.md)
   * [SPI Setup](guides/setup-guide-1/spi-setup.md)
   * [Initial Configuration](guides/setup-guide-1/initial-configuration.md)

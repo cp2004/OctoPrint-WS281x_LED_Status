@@ -1,7 +1,7 @@
 name: "Issue Labeler"
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, closed, reopened]
 
 jobs:
   label-opened-and-edited:
@@ -23,12 +23,26 @@ jobs:
                     labels.push('needs review');
                     setLabels = true;
                   }
+                  if (labels.includes("incomplete")){
+                    // Remove incomplete label
+                    const index = labels.indexOf("incomplete");
+                    if (index > -1) {
+                      labels.splice(index, 1);
+                    }
+                  }
                 }
                 if (context.payload.issue.title.match(/bug/i)) {
                   if (!labels.includes("confirmed bug")){
                     labels.push('potential bug');
                     labels.push('needs review');
                     setLabels = true;
+                  }
+                  if (labels.includes("incomplete")){
+                    // Remove incomplete label
+                    const index = labels.indexOf("incomplete");
+                    if (index > -1) {
+                      labels.splice(index, 1);
+                    }
                   }
                 }
                 if (labels.length === 0) {
@@ -46,3 +60,7 @@ jobs:
                 labels: labels
               })
             }
+      - uses: OctoPrint/actions/issue-validation@main
+        if: github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'edited')
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}

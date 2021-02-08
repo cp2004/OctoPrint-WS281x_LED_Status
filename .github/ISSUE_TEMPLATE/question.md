@@ -21,4 +21,8 @@ Here are my log files:
 * `octoprint.log`: WRITE HERE
 * `plugin_ws281x_led_status_debug.log`: WRITE HERE
 
-* [ ] I have read the troubleshooting guide found at https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Troubleshooting-Guide
+<!-- add an x in the box to make it [x] AFTER reading the full guide -->
+
+* [ ] I have read the Get Help Guide 
+
+https://cp2004.gitbook.io/ws281x-led-status/guides/get-help-guide
