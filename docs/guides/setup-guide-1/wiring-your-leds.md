@@ -20,6 +20,10 @@ Using SPI to control the LEDs means you can **only use one LED strip at a time w
 
 The hardest part about wiring with a Raspberry Pi is connecting up the 3.3v logic from the Pi to the strip that wants 5v. There are several ways you can do this, which are described in more detail below.
 
+{% hint style="info" %}
+All of the references to GPIO pins here are referring to the BCM Pin numbering. For more details on GPIO pins and the different ways of numbering them please see [pinout.xyz](https://pinout.xyz)
+{% endhint %}
+
 ### No Level Shifting
 
 It is possible to connect the LEDs up without any kind of level shifting, however mileage varies from strip to strip. I have one setup like this, and one with the full logic shifter. This can work because the spec of the LED strips means they need 0.7 \* VDD\(5v\) which is ~3.5v. Close to the Pi's 3.3, so depending on how tight of a tolerance your strip has, this is possible.
@@ -27,7 +31,7 @@ It is possible to connect the LEDs up without any kind of level shifting, howeve
 Wiring is as follows:
 
 * Pi GND to LED GND
-* Pi GPIO 10 to LED Data in
+* Pi [GPIO 10](https://pinout.xyz/pinout/pin19_gpio10) to LED Data in
 * Power supply GND to LED GND
 * Power supply 5V to LED 5V
 
@@ -53,7 +57,7 @@ Wiring of this is as follows:
   * Power Supply GND
   * 74AHCT125 GND
   * 74AHCT125 pin 1OE
-* Pi GPIO 10 to 74AHCT125 pin 1A
+* Pi [GPIO 10](https://pinout.xyz/pinout/pin19_gpio10) to 74AHCT125 pin 1A
 * 74AHCT125 pin 1Y to LED Data in
 * Power supply 5V to:
   * 74AHCT125 VCC
@@ -75,7 +79,7 @@ Please note that whilst the wiring below is on a breadboard, this is for illustr
 
 Wiring is as follows:
 
-* Pi GPIO 10 to LED Data in
+* Pi [GPIO 10](https://pinout.xyz/pinout/pin19_gpio10) to LED Data in
 * Power supply 5V to 1N4001 diode anode \(side without the stripe\)
 * 1N4001 diode cathode \(side with the stripe\) to LED 5V
 * Power supply GND to Pi GND

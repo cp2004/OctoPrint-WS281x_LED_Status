@@ -4,11 +4,11 @@ description: 'The plugin reacts to a number of @ commands, this will tell you th
 
 # Host @ Commands
 
-From OctoPrint's documentation:
+From [OctoPrint's documentation](https://docs.octoprint.org/en/master/features/atcommands.html):
 
 > @ commands \(also known as host commands elsewhere\) are special commands you may include in GCODE files streamed through OctoPrint to your printer or send as part of GCODE scripts, through the Terminal Tab, the API or plugins. Contrary to other commands they will never be sent to the printer but instead trigger functions inside OctoPrint.
 
-The plugin reacts to some different @ commands
+The plugin reacts to some different @ commands, listed below:
 
 | Command | Explanation |
 | :--- | :--- |
