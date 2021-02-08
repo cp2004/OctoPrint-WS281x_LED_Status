@@ -138,7 +138,7 @@ def solo_bounce(strip, queue, color, delay, brightness_manager, *args, **kwargs)
 
 def bounce(strip, queue, color, delay, brightness_manager, *args, **kwargs):
     brightness_manager.reset_brightness()
-    red, green, blue = color
+    red, green, blue, white = color
     size = 3
     for direction in DIRECTIONS:
         for i in (
@@ -160,6 +160,7 @@ def bounce(strip, queue, color, delay, brightness_manager, *args, **kwargs):
                     int(math.floor(red / 10)),
                     int(math.floor(green / 10)),
                     int(math.floor(blue / 10)),
+                    int(math.floor(white / 10)),
                 )
             )
             for j in range(1, (size + 1)):
@@ -170,6 +171,7 @@ def bounce(strip, queue, color, delay, brightness_manager, *args, **kwargs):
                     int(math.floor(red / 10)),
                     int(math.floor(green / 10)),
                     int(math.floor(blue / 10)),
+                    int(math.floor(white / 10)),
                 )
             )
             strip.show()
