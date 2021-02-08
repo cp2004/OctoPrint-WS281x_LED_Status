@@ -21,7 +21,7 @@ Features include:
 - Power calculator
 - ... and more!
 
-You can take a look at the [wiki](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki) for more information about all that the plugin has to offer.
+You can take a look at the [documentation](https://cp2004.gitbook.io/ws281x-led-status/) for more information about all that the plugin has to offer.
 
 ![rainbow effect](/assets/color_wipe.gif)
 
@@ -33,15 +33,15 @@ Setting up the plugin couldn't be easier! There are 3 main steps, with the heavy
 - Configuring SPI
 - Configuring plugin settings
 
-For a full setup guide, with detailed instructions for each step, please see the [page on the wiki](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Setup-Guide)
+Follow the detailed [setup guide](https://cp2004.gitbook.io/ws281x-led-status/guides/setup-guide-1) in the documentation to get up and running.
 
 ### Getting help
 
-You may want to [check the wiki](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki), to see if your question has been answered there. Still got questions? Get in touch:
+Please read the [Get Help Guide](https://cp2004.gitbook.io/ws281x-led-status/guides/get-help-guide) as well as the [rest of the documentation](https://cp2004.gitbook.io/ws281x-led-status/), to see if your question has been answered there. Still got questions? Get in touch:
 
+- On the [OctoPrint Discord](https://discord.octoprint.org)
+- On the [Community Forums](https://community.octoprint.org)
 - Open an issue with the [question template](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=type%3A+question&template=question.md&title=)
-- Find me on the [OctoPrint Discord](https://discord.octoprint.org) @cp2004
-- Find me on the [Community Forums](https://community.octoprint.org) @Charlie_Powell
 
 ### Reporting problems
 
@@ -51,13 +51,7 @@ Whilst I don't like bugs, I want to hear about them! Let me know by [opening an 
 
 I created this plugin in my spare time, so if you have enjoyed using it then please [support it's development!](https://github.com/sponsors/cp2004)
 
-## Supporters
-
 <a href="https://www.jetbrains.com/?from=cp2004"><img align="left" width="100" height="100" src="jetbrains-variant-2.png" alt="JetBrains Logo"></a> Thanks to JetBrains for supporting an open source license for their brilliant IDEs!
-
-See the sponsors link above for details of how to get your name on the list here!
-
-.
 
 ## Thanks
 

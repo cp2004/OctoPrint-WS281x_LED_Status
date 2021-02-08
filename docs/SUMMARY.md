@@ -4,11 +4,13 @@
 
 ## Guides
 
-- [Setup Guide](guides/setup-guide-1/README.md)
-  - [Wiring your LEDs](guides/setup-guide-1/wiring-your-leds.md)
-  - [SPI Setup](guides/setup-guide-1/spi-setup.md)
-  - [Initial Configuration](guides/setup-guide-1/initial-configuration.md)
-- [OctoLapse Flash](guides/octolapse-flash.md)
+* [Setup Guide](guides/setup-guide-1/README.md)
+  * [Wiring your LEDs](guides/setup-guide-1/wiring-your-leds.md)
+  * [SPI Setup](guides/setup-guide-1/spi-setup.md)
+  * [Initial Configuration](guides/setup-guide-1/initial-configuration.md)
+* [Setup in Docker](guides/setup-in-docker.md)
+* [OctoLapse Flash](guides/octolapse-flash.md)
+* [Get Help Guide](guides/get-help-guide.md)
 
 ## Configuration
 
