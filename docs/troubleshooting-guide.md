@@ -52,3 +52,7 @@ The dependency that this plugin relies on was not updated to add support for the
 
 Some strips do not like 3.3V signals, and if you do use 3.3v \(**without a level shifter**\) then please keep the wires to the LEDs fairly short to avoid voltage drop.
 
+### Random flickering of LEDs, unstable signal
+
+Adding a 470Ω resistor in the signal line can help. Some guides recommend this, in my experience it is not always required. Worth a try if you have unstable signal to the LEDs. [Link to issue](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/72#issuecomment-775382060).
+
