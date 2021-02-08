@@ -27,7 +27,7 @@ jobs:
                     // Remove incomplete label
                     const index = labels.indexOf("incomplete");
                     if (index > -1) {
-                      array.splice(index, 1);
+                      labels.splice(index, 1);
                     }
                   }
                 }
@@ -41,7 +41,7 @@ jobs:
                     // Remove incomplete label
                     const index = labels.indexOf("incomplete");
                     if (index > -1) {
-                      array.splice(index, 1);
+                      labels.splice(index, 1);
                     }
                   }
                 }
