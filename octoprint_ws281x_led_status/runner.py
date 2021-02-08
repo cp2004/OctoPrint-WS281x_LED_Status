@@ -7,7 +7,17 @@ __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the ter
 
 import logging
 import math
+import multiprocessing
+import threading
 import time
+
+try:
+    # Py3
+    from queue import Queue
+except ImportError:
+    # Py2
+    from Queue import Queue
+
 
 # noinspection PyPackageRequirements
 from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
@@ -16,6 +26,7 @@ from rpi_ws281x import PixelStrip
 from octoprint_ws281x_led_status import constants
 from octoprint_ws281x_led_status.util import (
     apply_color_correction,
+    clear_queue,
     hex_to_rgb,
     int_0_255,
     milli_sleep,
@@ -68,12 +79,15 @@ class EffectRunner:
         self.active_times_state = True
         self.turn_off_timer = None
 
-        self.queue = queue
+        self.queue = queue  # type: multiprocessing.Queue
         try:
-            self.strip = self.start_strip()
+            self.strip = self.start_strip()  # type: PixelStrip
         except StripFailedError:
             self._logger.info("No strip initialised, exiting the effect process.")
             return
+
+        self.effect_queue = Queue()
+        self.effect_thread = None  # type: threading.Thread
 
         self.brightness_manager = BrightnessManager(
             self.strip, self.max_brightness, self.transition_settings
@@ -93,40 +107,40 @@ class EffectRunner:
         msg = self.previous_state
         try:
             while True:
-                if not self.queue.empty():
-                    msg = self.queue.get()  # The ONLY place the queue should be 'got'
+                msg = self.queue.get()
                 if msg:
                     if msg == constants.KILL_MSG:
-                        self.blank_leds()
-                        self._logger.info("Kill message recieved, Bye!")
+                        self.kill()
                         # Exit the process
                         return
                     self.parse_q_msg(msg)  # Effects are run from parse_q_msg
-                    msg = self.previous_state
+
         except KeyboardInterrupt:
-            self.blank_leds()
+            self.kill()
             return
         except Exception as e:
             self._logger.error("Unhandled exception in effect runner process")
             self._logger.exception(e)
             raise
 
+    def kill(self):
+        self.blank_leds()
+        self.stop_effect()
+        self._logger.info("Kill message recieved, all effects stopped. Bye!")
+
     def parse_q_msg(self, msg):
         if msg == "on":
             self.turn_lights_on()
-            return
         elif msg == "off":
             self.turn_lights_off()
-            return
         elif "progress" in msg:
             self.progress_msg(msg)
         elif "M150" in msg:
             self.parse_m150(msg)
-            return
+            self.previous_state = msg
         else:
             self.standard_effect(msg)
-
-        self.previous_state = msg
+            self.previous_state = msg
 
     def turn_lights_on(self):
         if self.turn_off_timer and self.turn_off_timer.is_alive():
@@ -137,7 +151,10 @@ class EffectRunner:
             start_daemon_thread(
                 target=self.brightness_manager.do_fade_in, name="Fade in thread"
             )
-        self._logger.info("On message received, turning on LEDs")
+        self._logger.info(
+            "On message received, turning on LEDs to {}".format(self.previous_state)
+        )
+        self.parse_q_msg(self.previous_state)
 
     def turn_lights_off(self):
         if self.transition_settings["fade"]["enabled"]:
@@ -151,10 +168,16 @@ class EffectRunner:
                 target=self.lights_off,
             )
         else:
-            self.lights_on = False
-        self._logger.info("Off message received, turning off LEDs")
+            self.lights_off()
+
+        self._logger.info(
+            "Off message received, turning off LEDs (fade: {})".format(
+                self.transition_settings["fade"]["enabled"]
+            )
+        )
 
     def lights_off(self):
+        self.blank_leds()
         self.lights_on = False
 
     def progress_msg(self, msg):
@@ -201,16 +224,20 @@ class EffectRunner:
             # Set brightness
             self.brightness_manager.set_brightness(self.previous_m150["brightness"])
             # Set the effects
-            constants.EFFECTS["Solid Color"](
-                strip=self.strip,
-                queue=self.queue,
-                color=apply_color_correction(
-                    self.color_correction,
-                    self.previous_m150["r"],
-                    self.previous_m150["g"],
-                    self.previous_m150["b"],
-                ),
-                brightness_manager=self.brightness_manager,
+            self.run_effect(
+                target=constants.EFFECTS["Solid Color"],
+                kwargs={
+                    "strip": self.strip,
+                    "queue": self.effect_queue,
+                    "color": apply_color_correction(
+                        self.color_correction,
+                        self.previous_m150["r"],
+                        self.previous_m150["g"],
+                        self.previous_m150["b"],
+                    ),
+                    "brightness_manager": self.brightness_manager,
+                },
+                name="Solid Color",
             )
         else:
             self.blank_leds()
@@ -218,18 +245,22 @@ class EffectRunner:
     def progress_effect(self, mode, value):
         effect_settings = self.effect_settings[mode]
         if self.check_times() and self.lights_on:
-            constants.PROGRESS_EFFECTS[effect_settings["effect"]](
-                strip=self.strip,
-                queue=self.queue,
-                brightness_manager=self.brightness_manager,
-                value=int(value),
-                progress_color=apply_color_correction(
-                    self.color_correction, *hex_to_rgb(effect_settings["color"])
-                ),
-                base_color=apply_color_correction(
-                    self.color_correction, *hex_to_rgb(effect_settings["base"])
-                ),
-                reverse=self.reverse,
+            self.run_effect(
+                target=constants.PROGRESS_EFFECTS[effect_settings["effects"]],
+                kwargs={
+                    "strip": self.strip,
+                    "queue": self.effect_queue,
+                    "brightness_manager": self.brightness_manager,
+                    "value": int(value),
+                    "progress_color": apply_color_correction(
+                        self.color_correction, *hex_to_rgb(effect_settings["color"])
+                    ),
+                    "base_color": apply_color_correction(
+                        self.color_correction, *hex_to_rgb(effect_settings["base"])
+                    ),
+                    "reverse": self.reverse,
+                },
+                name=mode,
             )
         else:
             self.blank_leds()
@@ -239,29 +270,55 @@ class EffectRunner:
         if self.previous_state != mode:
             self._logger.debug("Changing effect to {}".format(mode))
 
-        if self.check_times() and self.lights_on:
+        if self.check_times() and self.lights_on and not mode == "blank":
             effect_settings = self.effect_settings[mode]
-            constants.EFFECTS[effect_settings["effect"]](
-                strip=self.strip,
-                queue=self.queue,
-                color=apply_color_correction(
-                    self.color_correction, *hex_to_rgb(effect_settings["color"])
-                ),
-                delay=effect_settings["delay"],
-                brightness_manager=self.brightness_manager,
+            self.run_effect(
+                target=constants.EFFECTS[effect_settings["effect"]],
+                kwargs={
+                    "strip": self.strip,
+                    "queue": self.effect_queue,
+                    "color": apply_color_correction(
+                        self.color_correction, *hex_to_rgb(effect_settings["color"])
+                    ),
+                    "delay": effect_settings["delay"],
+                    "brightness_manager": self.brightness_manager,
+                },
+                name=mode,
             )
         else:
             self.blank_leds()
 
+    def run_effect(self, target, args=(), kwargs=None, name="WS281x Effect"):
+        if kwargs is None:
+            kwargs = {}
+
+        self.stop_effect()
+
+        self.effect_thread = start_daemon_thread(
+            target=target,
+            args=args,
+            kwargs=kwargs,
+            name=name,
+        )
+
+    def stop_effect(self):
+        if self.effect_thread and self.effect_thread.is_alive():
+            self.effect_queue.put(constants.KILL_MSG)
+            self.effect_thread.join()
+            clear_queue(self.effect_queue)
+
     def blank_leds(self):
         """Set LEDs to off, wait 0.1secs to prevent CPU burn"""
-        constants.EFFECTS["Solid Color"](
-            self.strip,
-            self.queue,
-            [0, 0, 0],
-            max_brightness=self.max_brightness,
-            wait=False,
-            brightness_manager=self.brightness_manager,
+        self.run_effect(
+            target=constants.EFFECTS["Solid Color"],
+            kwargs={
+                "strip": self.strip,
+                "queue": self.effect_queue,
+                "color": (0, 0, 0),
+                "brightness_manager": self.brightness_manager,
+                "wait": False,
+            },
+            name="Solid Color",
         )
         if self.queue.empty():
             time.sleep(0.1)

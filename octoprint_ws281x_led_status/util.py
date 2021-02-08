@@ -148,3 +148,8 @@ def start_daemon_timer(target, interval, args=(), kwargs=None):
 
 def int_0_255(value):
     return max(min(int(value), 255), 0)
+
+
+def clear_queue(q):
+    while not q.empty():
+        q.get(False)
