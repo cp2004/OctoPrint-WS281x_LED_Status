@@ -40,7 +40,7 @@ def blend_two_colors(colour1, colour2, percent_of_c1=None):
     r = average(colour1[0], colour2[0])
     g = average(colour1[1], colour2[1])
     b = average(colour1[2], colour2[2])
-    return tuple([int(r), int(g), int(b)])
+    return tuple([int_0_255(r), int_0_255(g), int_0_255(b)])
 
 
 def average(a, b):
