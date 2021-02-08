@@ -327,6 +327,11 @@ class WS281xLedStatusPlugin(
         If progress effect, value must be specified
         :param mode_name: (str) effect to be run
         """
+        # If mode is on or off, this doesn't affect state - send straight away
+        if mode_name in ["on", "off"]:
+            self.effect_queue.put(mode_name)
+            return
+
         # Cancel return to idle timer if active
         if self.return_timer is not None and self.return_timer.is_alive():
             self.return_timer.cancel()
@@ -334,11 +339,6 @@ class WS281xLedStatusPlugin(
         # If torch is on, state is saved until torch is finished
         if self.torch_on and mode_name != "torch":
             self.next_state = mode_name
-            return
-
-        # If mode is on or off, this doesn't affect state - send straight away
-        if mode_name in ["on", "off"]:
-            self.effect_queue.put(mode_name)
             return
 
         # If the mode is an M150 command, then send the whole command.
