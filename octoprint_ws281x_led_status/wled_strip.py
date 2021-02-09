@@ -22,6 +22,8 @@ class WLEDStrip:
 
     # Buffer of LED values to allow selective updates
     _pixel_buffer: bytearray
+    # Overwrite brightness on each pixel
+    _brightness: int = 255
 
     def __init__(
         self,
@@ -67,14 +69,14 @@ class WLEDStrip:
         return self._numPixels
 
     def setBrightness(self, brightness: int):
-        """Control brightness for all pixels, currently not implemented."""
-        pass
+        """Control brightness for all pixels."""
+        self._brightness = brightness
 
     def setPixelColorRGB(
         self, index: int, red: int, green: int, blue: int, white: Optional[int] = None
     ):
         """Set the color of a single pixel at a specific index."""
-        if index > self._numPixels:
+        if index >= self._numPixels:
             raise Exception("Invalid index")
 
         if white:
@@ -90,4 +92,16 @@ class WLEDStrip:
 
     def show(self):
         """Send the buffer to the strip."""
-        self._socket.sendto(self._pixel_buffer, self._addr)
+        if self._brightness != 255:
+            values = bytes(
+                [
+                    int(val * (self._brightness / 255))
+                    if idx >= self._pixelDataOffset
+                    else val
+                    for idx, val in enumerate(self._pixel_buffer)
+                ]
+            )
+        else:
+            values = self._pixel_buffer
+
+        self._socket.sendto(values, self._addr)
