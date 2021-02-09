@@ -38,9 +38,9 @@ class WLEDStrip:
         self._socket.settimeout(1.0)
 
         if enableRGBW:
-            self._CONTROL_BYTES = bytes([3, 5])
+            self._CONTROL_BYTES = bytes([3, 255])
         else:
-            self._CONTROL_BYTES = bytes([2, 5])
+            self._CONTROL_BYTES = bytes([2, 255])
 
         self._pixel_buffer = bytearray(
             self._CONTROL_BYTES + bytes([0] * numPixels * self.bytesPerPixel)
