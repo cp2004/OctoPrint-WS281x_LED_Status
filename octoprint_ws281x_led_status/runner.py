@@ -33,6 +33,7 @@ from octoprint_ws281x_led_status.util import (
     start_daemon_thread,
     start_daemon_timer,
 )
+from octoprint_ws281x_led_status.wled_strip import WLEDStrip
 
 
 class EffectRunner:
@@ -350,16 +351,25 @@ class EffectRunner:
         """
         self._logger.info("Initialising LED strip")
         try:
-            strip = PixelStrip(
-                num=int(self.strip_settings["count"]),
-                pin=int(self.strip_settings["pin"]),
-                freq_hz=int(self.strip_settings["freq_hz"]),
-                dma=int(self.strip_settings["dma"]),
-                invert=bool(self.strip_settings["invert"]),
-                brightness=int(self.strip_settings["brightness"]),
-                channel=int(self.strip_settings["channel"]),
-                strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
-            )
+            strip_type = constants.STRIP_TYPES[self.strip_settings["type"]]
+            if strip_type == constants.STRIP_TYPES["WLED_UDP"]:
+                strip = WLEDStrip(
+                    int(self.strip_settings["count"]),
+                    self.strip_settings["wled_host"],
+                    int(self.strip_settings["wled_port"]),
+                    bool(self.strip_settings["white_override"]),
+                )
+            else:
+                strip = PixelStrip(
+                    num=int(self.strip_settings["count"]),
+                    pin=int(self.strip_settings["pin"]),
+                    freq_hz=int(self.strip_settings["freq_hz"]),
+                    dma=int(self.strip_settings["dma"]),
+                    invert=bool(self.strip_settings["invert"]),
+                    brightness=int(self.strip_settings["brightness"]),
+                    channel=int(self.strip_settings["channel"]),
+                    strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
+                )
             strip.begin()
             self._logger.info("Strip successfully initialised")
             return strip

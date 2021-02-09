@@ -24,6 +24,8 @@ defaults = {
         "adjustment": {"R": 100, "G": 100, "B": 100},
         "white_override": False,
         "white_brightness": 50,
+        "wled_host": "4.3.2.1",
+        "wled_port": 21324,
     },
     "effects": {
         "startup": {

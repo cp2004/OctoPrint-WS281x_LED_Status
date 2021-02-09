@@ -55,6 +55,7 @@ STRIP_TYPES = {
     "SK6812_STRIP_GBRW": rpi_ws281x.SK6812_STRIP_GBRW,
     "SK6812_STRIP_BRGW": rpi_ws281x.SK6812_STRIP_BRGW,
     "SK6812_STRIP_BGRW": rpi_ws281x.SK6812_STRIP_BGRW,
+    "WLED_UDP": 0xFFFFFFFF,
 }
 EFFECTS = {
     "Solid Color": standard.solid_color,
