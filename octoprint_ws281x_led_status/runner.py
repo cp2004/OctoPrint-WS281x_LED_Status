@@ -246,7 +246,7 @@ class EffectRunner:
         effect_settings = self.effect_settings[mode]
         if self.check_times() and self.lights_on:
             self.run_effect(
-                target=constants.PROGRESS_EFFECTS[effect_settings["effects"]],
+                target=constants.PROGRESS_EFFECTS[effect_settings["effect"]],
                 kwargs={
                     "strip": self.strip,
                     "queue": self.effect_queue,
