@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import socket
 
@@ -13,7 +13,7 @@ class WLEDStrip:
     # Number of pixels to control
     _numPixels: int
     # If RGBW values are buffered and sent to WLED
-    _enableRGBW = False
+    _enableRGBW: bool
 
     # Address of WLED instance's UDP realtime control
     _addr: Tuple[str, int]
@@ -93,6 +93,7 @@ class WLEDStrip:
     def show(self):
         """Send the buffer to the strip."""
         if self._brightness != 255:
+            # Only recalculate brightness for pixel values, skip the additional data.
             values = bytes(
                 [
                     int(val * (self._brightness / 255))

@@ -368,7 +368,7 @@ class EffectRunner:
                     invert=bool(self.strip_settings["invert"]),
                     brightness=int(self.strip_settings["brightness"]),
                     channel=int(self.strip_settings["channel"]),
-                    strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
+                    strip_type=strip_type,
                 )
             strip.begin()
             self._logger.info("Strip successfully initialised")
