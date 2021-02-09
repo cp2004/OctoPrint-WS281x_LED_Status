@@ -7,7 +7,7 @@ class WLEDStrip:
     """Emulates the PixelStrip class provided by rpi-ws281x but instead of
     outputing data to a local LED strip, it outputs data over UDP to WLED."""
 
-    # Magic bytes for WLED, specifies DRGB mode with a 5 second return delay.
+    # Magic bytes for WLED, specify control protocol and return delay.
     _CONTROL_BYTES: bytes
 
     # Number of pixels to control
@@ -39,6 +39,8 @@ class WLEDStrip:
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket.settimeout(1.0)
 
+        # If using RGBW, we need to use WLED's DRGBW mode (3) instead of DRGB (2).
+        # We also specify that WLED shouldn't ever return to normal mode.
         if enableRGBW:
             self._CONTROL_BYTES = bytes([3, 255])
         else:
