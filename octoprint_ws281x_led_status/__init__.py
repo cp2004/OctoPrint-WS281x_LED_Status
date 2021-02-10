@@ -434,6 +434,12 @@ class WS281xLedStatusPlugin(
             # New M109 or M190, start tracking heating
             self.heating = True
             self.current_heater_heating = constants.BLOCKING_TEMP_GCODES[gcode]
+
+        elif gcode == "M150" and self._settings.get_boolean(["intercept_m150"]):
+            # Update effect to M150 and suppress it
+            self.update_effect(cmd)
+            return (None,)
+
         else:
             if self.heating:
                 # Currently heating, now stopping - go back to last event
@@ -444,11 +450,6 @@ class WS281xLedStatusPlugin(
                 else:
                     # Otherwise go back to the previous effect
                     self.process_previous_event()
-
-        if gcode == "M150" and self._settings.get_boolean(["intercept_m150"]):
-            # Update effect to M150 and suppress it
-            self.update_effect(cmd)
-            return (None,)
 
     def temperatures_received(self, _comm, parsed_temps, *args, **kwargs):
         tool_key = self._settings.get(["effects", "progress_heatup", "tool_key"])
