@@ -63,8 +63,7 @@ class WS281xLedStatusPlugin(
     current_heater_heating = None  # type: str
     tool_to_target = 0  # type: int
 
-    previous_event_q = []  # type: list
-    # Add effects to this list, if you want them to run after things like progress, torch, etc.
+    previous_event = ""  # type: str # Effect here will be run when progress expires
 
     lights_on = True  # Lights should be on by default, makes sense.  TODO #65
     torch_on = False  # Torch is off by default, because who would want that?
@@ -382,9 +381,10 @@ class WS281xLedStatusPlugin(
             self.update_effect("progress_print {}".format(self.current_progress))
 
         if event in constants.SUPPORTED_EVENTS.keys():
-            self.update_effect(constants.SUPPORTED_EVENTS[event])
-            # add all events to a backlog, so we know what the last one was.
-            self.previous_event_q.append(event)
+            effect = constants.SUPPORTED_EVENTS[event]
+            self.update_effect(effect)
+            # Record the event's effect so that it can used when progress expires
+            self.previous_event = effect
 
     def on_print_progress(self, storage="", path="", progress=1):
         if (progress == 100 and self.current_state == "success") or self.heating:
@@ -407,14 +407,16 @@ class WS281xLedStatusPlugin(
             )
             return 0
 
-    def process_previous_event_q(self):
+    def process_previous_event(self):
         """
         Runs the last event again, to put it back in the case of heating or cooling finishing, then clears the backlog.
         :return: None
         """
-        if len(self.previous_event_q):
-            self.on_event(self.previous_event_q[-1], payload={})
-        self.previous_event_q = []
+        if self.previous_event:
+            self._logger.info("Processing previous queue")
+            self._logger.info("Previous event: {}".format(self.previous_event))
+            self.update_effect(self.previous_event)
+        self.previous_event = ""
 
     def process_gcode_q(
         self,
@@ -434,12 +436,14 @@ class WS281xLedStatusPlugin(
             self.current_heater_heating = constants.BLOCKING_TEMP_GCODES[gcode]
         else:
             if self.heating:
-                # Currently heating, process event backlog
+                # Currently heating, now stopping - go back to last event
                 self.heating = False
-                self.process_previous_event_q()
-                # If printing, go back to print progress immediately
                 if self._printer.is_printing():
+                    # If printing, go back to print progress immediately
                     self.on_print_progress(progress=self.current_progress)
+                else:
+                    # Otherwise go back to the previous effect
+                    self.process_previous_event()
 
         if gcode == "M150" and self._settings.get_boolean(["intercept_m150"]):
             # Update effect to M150 and suppress it
@@ -487,7 +491,7 @@ class WS281xLedStatusPlugin(
                     "Heater {} not found, can't show progress".format(heater)
                 )
                 self.heating = False
-                self.process_previous_event_q()
+                self.process_previous_event()
                 return parsed_temps
 
             self.update_effect(
@@ -516,7 +520,7 @@ class WS281xLedStatusPlugin(
                 ["effects", "progress_cooling", "threshold"]
             ):
                 self.cooling = False
-                self.process_previous_event_q()
+                self.process_previous_event()
                 return parsed_temps
 
             self.update_effect(
