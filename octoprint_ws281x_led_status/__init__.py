@@ -100,7 +100,7 @@ class WS281xLedStatusPlugin(
     # Shutdown plugin
     def on_shutdown(self):
         if self.current_effect_process is not None:
-            self.effect_queue.put("KILL")
+            self.effect_queue.put(constants.KILL_MSG)
             self.current_effect_process.join()
         self._logger.info("WS281x LED Status runner stopped")
 
