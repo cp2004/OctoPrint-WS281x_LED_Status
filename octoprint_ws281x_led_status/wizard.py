@@ -5,8 +5,11 @@ __author__ = "Charlie Powell <cp2004.github@gmail.com"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
 
+import getpass
+import grp
 import io
 import logging
+import os
 
 from octoprint_ws281x_led_status import api
 from octoprint_ws281x_led_status.util import run_system_command
@@ -56,8 +59,7 @@ class PluginWizard:
 
     @staticmethod
     def is_adduser_done():
-        groups, error = run_system_command(["groups", "pi"])
-        return "gpio" in groups
+        return "gpio" in [grp.getgrgid(g).gr_name for g in os.getgroups()]
 
     @staticmethod
     def is_spi_enabled():
@@ -99,7 +101,7 @@ class PluginWizard:
     def run_wizard_command(self, cmd, data):
         command_to_system = {
             # -S for sudo commands means accept password from stdin, see https://www.sudo.ws/man/1.8.13/sudo.man.html#S
-            api.WIZ_ADDUSER: ["sudo", "-S", "adduser", "pi", "gpio"],
+            api.WIZ_ADDUSER: ["sudo", "-S", "adduser", getpass.getuser(), "gpio"],
             api.WIZ_ENABLE_SPI: [
                 "sudo",
                 "-S",
