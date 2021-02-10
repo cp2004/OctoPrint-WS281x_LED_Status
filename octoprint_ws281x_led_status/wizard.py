@@ -8,9 +8,6 @@ __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the ter
 import io
 import logging
 
-# noinspection PyPackageRequirements
-from flask import jsonify
-
 from octoprint_ws281x_led_status import api
 from octoprint_ws281x_led_status.util import run_system_command
 
@@ -33,7 +30,7 @@ class PluginWizard:
             return
 
         if not self.validate(cmd):
-            self.run_wizard_command(cmd, data)
+            return self.run_wizard_command(cmd, data)
 
         return self.on_api_get()
 
@@ -140,13 +137,11 @@ class PluginWizard:
         sys_command = command_to_system[cmd]
         self._logger.info("Running system command for {}:{}".format(cmd, sys_command))
         stdout, error = run_system_command(sys_command, data.get("password"))
-        return jsonify(
-            {
-                "adduser_done": self.validate(api.WIZ_ADDUSER),
-                "spi_enabled": self.validate(api.WIZ_ENABLE_SPI),
-                "spi_buffer_increase": self.validate(api.WIZ_INCREASE_BUFFER),
-                "core_freq_set": self.validate(api.WIZ_SET_CORE_FREQ),
-                "core_freq_min_set": self.validate(api.WIZ_SET_FREQ_MIN),
-                "errors": error,
-            }
-        )
+        return {
+            "adduser_done": self.validate(api.WIZ_ADDUSER),
+            "spi_enabled": self.validate(api.WIZ_ENABLE_SPI),
+            "spi_buffer_increase": self.validate(api.WIZ_INCREASE_BUFFER),
+            "core_freq_set": self.validate(api.WIZ_SET_CORE_FREQ),
+            "core_freq_min_set": self.validate(api.WIZ_SET_FREQ_MIN),
+            "errors": error,
+        }
