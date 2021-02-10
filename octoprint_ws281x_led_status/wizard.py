@@ -71,11 +71,17 @@ class PluginWizard:
 
     @staticmethod
     def is_spi_buffer_increased():
+        # Check `/boot/cmdline.txt` first
         with io.open("/boot/cmdline.txt") as file:
             for line in file:
                 if "spidev.bufsiz=32768" in line:
                     return True
-        return False
+
+        # Check sys modules next - this is higher reliability but needs a reboot for changes
+        with io.open(
+            "/sys/module/spidev/parameters/bufsiz", encoding="utf-8", mode="rt"
+        ) as file:
+            return "32768" in file.readline().strip(" \t\r\n\0")
 
     def is_core_freq_set(self):
         if self.pi_model == "4":  # Pi 4's default is 500, which is compatible with SPI.
