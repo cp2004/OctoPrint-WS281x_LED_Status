@@ -101,10 +101,13 @@ class EffectRunner:
                 "under 'Features' in the settings page."
             )
 
+        # Set back previous state, unless it is `blank`, then start main loop
+        if self.previous_state != "blank":
+            self.parse_q_msg(self.previous_state)
+
         self.main_loop()
 
     def main_loop(self):
-        msg = self.previous_state
         try:
             while True:
                 msg = self.queue.get()
@@ -135,9 +138,9 @@ class EffectRunner:
             self.turn_lights_off()
         elif "progress" in msg:
             self.progress_msg(msg)
+            self.previous_state = msg
         elif "M150" in msg:
             self.parse_m150(msg)
-            self.previous_state = msg
         else:
             self.standard_effect(msg)
             self.previous_state = msg

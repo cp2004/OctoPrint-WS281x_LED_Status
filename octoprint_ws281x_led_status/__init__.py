@@ -49,7 +49,7 @@ class WS281xLedStatusPlugin(
     effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
 
     previous_state = ""
-    current_state = "startup"
+    current_state = "blank"
     next_state = ""
 
     # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
@@ -77,6 +77,8 @@ class WS281xLedStatusPlugin(
         global PI_MODEL
         self.api = api.PluginApi(self)
         self.wizard = wizard.PluginWizard(self, PI_MODEL)
+        if self._settings.get_boolean(["effects", "startup", "enabled"]):
+            self.current_state = "startup"
 
     # Asset plugin
     def get_assets(self):
