@@ -279,10 +279,10 @@ class WS281xLedStatusPlugin(
 
     # Lights and torch on/off handling
     def activate_lights(self):
-        self._logger.info("Turning lights on")
+        self._send_UI_msg("lights", {"on": True})
         self.lights_on = True
         self.update_effect("on")
-        self._send_UI_msg("lights", {"on": True})
+        self._logger.info("Turning lights on")
 
     def deactivate_lights(self):
         self._send_UI_msg("lights", {"on": False})
