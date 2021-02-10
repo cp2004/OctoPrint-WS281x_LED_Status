@@ -39,7 +39,6 @@ jobs:
     strategy:
       matrix:
         python: ["2.7", "3.7", "3.8", "3.9"]
-        octoprint: ["<1.5.0", ">=1.5.0"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -49,7 +48,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: 🏗 Set up test dependencies
         run: |
-          pip install octoprint${{ matrix.octoprint }} pytest
+          pip install octoprint pytest
           pip install -e .
       - name: 🚀 Run test suite
         run: |
