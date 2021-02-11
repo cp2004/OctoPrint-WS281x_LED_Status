@@ -32,7 +32,7 @@ class PluginWizard:
             # TODO return error?
             return
 
-        if not self.validate(cmd):
+        if not self.validate(cmd)["passed"]:
             return self.run_wizard_command(cmd, data)
 
         return self.on_api_get()
@@ -55,54 +55,107 @@ class PluginWizard:
             api.WIZ_SET_CORE_FREQ: self.is_core_freq_set,
             api.WIZ_SET_FREQ_MIN: self.is_core_freq_min_set,
         }
-        return validators[cmd]()
+        try:
+            result = validators[cmd]()
+        except FileNotFoundError:
+            self._logger.warning("Tried to validate {} but files were missing")
+            result = {"check": cmd, "passed": False, "reason": "missing"}
+        except Exception as e:
+            self._logger.error(
+                "Something went wrong validating this command, please report to the issue tracker!"
+            )
+            self._logger.exception(e)
+            result = {"check": cmd, "passed": False, "reason": "error"}
+
+        return result
 
     @staticmethod
     def is_adduser_done():
-        return "gpio" in [grp.getgrgid(g).gr_name for g in os.getgroups()]
+        if "gpio" not in [grp.getgrgid(g).gr_name for g in os.getgroups()]:
+            result = {"check": api.WIZ_ADDUSER, "passed": False, "reason": "failed"}
+        else:
+            result = {"check": api.WIZ_ADDUSER, "passed": True, "reason": ""}
+        return result
 
     @staticmethod
     def is_spi_enabled():
+        result = {"check": api.WIZ_ENABLE_SPI, "passed": False, "reason": "failed"}
         with io.open("/boot/config.txt") as file:
             for line in file:
                 if line.startswith("dtparam=spi=on"):
-                    return True
-        return False
+                    result = {"check": api.WIZ_ENABLE_SPI, "passed": True, "reason": ""}
+        return result
 
     @staticmethod
     def is_spi_buffer_increased():
+        result = {"check": api.WIZ_INCREASE_BUFFER, "passed": False, "reason": "failed"}
         # Check `/boot/cmdline.txt` first
         with io.open("/boot/cmdline.txt") as file:
             for line in file:
                 if "spidev.bufsiz=32768" in line:
-                    return True
+                    return {
+                        "check": api.WIZ_INCREASE_BUFFER,
+                        "passed": True,
+                        "reason": "",
+                    }
+        if not result["passed"]:
+            # Check sys modules next - this is higher reliability but needs a reboot for changes
+            with io.open(
+                "/sys/module/spidev/parameters/bufsiz", encoding="utf-8", mode="rt"
+            ) as file:
+                if "32768" in file.readline().strip(" \t\r\n\0"):
+                    result = {
+                        "check": api.WIZ_INCREASE_BUFFER,
+                        "passed": True,
+                        "reason": "",
+                    }
 
-        # Check sys modules next - this is higher reliability but needs a reboot for changes
-        with io.open(
-            "/sys/module/spidev/parameters/bufsiz", encoding="utf-8", mode="rt"
-        ) as file:
-            return "32768" in file.readline().strip(" \t\r\n\0")
+        return result
 
     def is_core_freq_set(self):
-        if self.pi_model == "4":  # Pi 4's default is 500, which is compatible with SPI.
-            return True
-            # any change to core_freq is ignored on a Pi 4, so let's not bother.
+        result = {
+            "check": api.WIZ_SET_CORE_FREQ,
+            "passed": True if self.pi_model == "4" else False,
+            "reason": "" if self.pi_model == "4" else "failed",
+        }
+
         with io.open("/boot/config.txt") as file:
             for line in file:
                 if line.startswith("core_freq=250"):
-                    return True
-        return False
+                    if self.pi_model == "4":
+                        result = {
+                            "check": api.WIZ_SET_CORE_FREQ,
+                            "passed": False,
+                            "reason": "pi4_250",
+                        }
+                    else:
+                        result = {
+                            "check": api.WIZ_SET_CORE_FREQ,
+                            "passed": True,
+                            "reason": "",
+                        }
+        return result
 
     def is_core_freq_min_set(self):
+        result = {"check": api.WIZ_SET_CORE_FREQ, "passed": False, "reason": "failed"}
+
         if self.pi_model == "4":
             # Pi 4 has a variable clock speed, which messes up SPI timing
             with io.open("/boot/config.txt") as file:
                 for line in file:
                     if line.startswith("core_freq_min=500"):
-                        return True
-            return False
+                        result = {
+                            "check": api.WIZ_SET_CORE_FREQ,
+                            "passed": True,
+                            "reason": "",
+                        }
         else:
-            return True
+            result = {
+                "check": api.WIZ_SET_CORE_FREQ,
+                "passed": True,
+                "reason": "not_required",
+            }
+        return result
 
     def run_wizard_command(self, cmd, data):
         command_to_system = {
@@ -145,11 +198,4 @@ class PluginWizard:
         sys_command = command_to_system[cmd]
         self._logger.info("Running system command for {}:{}".format(cmd, sys_command))
         stdout, error = run_system_command(sys_command, data.get("password"))
-        return {
-            "adduser_done": self.validate(api.WIZ_ADDUSER),
-            "spi_enabled": self.validate(api.WIZ_ENABLE_SPI),
-            "spi_buffer_increase": self.validate(api.WIZ_INCREASE_BUFFER),
-            "core_freq_set": self.validate(api.WIZ_SET_CORE_FREQ),
-            "core_freq_min_set": self.validate(api.WIZ_SET_FREQ_MIN),
-            "errors": error,
-        }
+        return self.on_api_get().update({"errors": error})

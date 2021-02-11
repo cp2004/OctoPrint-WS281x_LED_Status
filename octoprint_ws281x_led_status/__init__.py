@@ -258,18 +258,24 @@ class WS281xLedStatusPlugin(
                 self._send_UI_msg(
                     _UI_MSG_TYPE, {"test": test_key, "status": "in_progress"}
                 )
-            status = "passed" if test_func() else "failed"
+
+            status = test_func()
             if send_ui:
                 self._send_UI_msg(_UI_MSG_TYPE, {"test": test_key, "status": status})
+
             statuses[test_key] = status
             if send_ui:
                 # Artificially increase the length of time, to make the UI look nice.
                 # Without this, there is a confusing amount of popping in/out of status etc.
-                time.sleep(0.5)
+                time.sleep(0.3)
 
         log_content = "OS config test complete. Results:"
         for test_key, status in statuses.items():
-            log_content = log_content + "\n| - " + test_key + ": " + status
+            log_content = log_content + "\n| - {}: {}".format(
+                test_key, status["passed"]
+            )
+            if not status["passed"]:
+                log_content = log_content + " !! Reason: {}".format(status["reason"])
 
         if send_ui:
             self._send_UI_msg(_UI_MSG_TYPE, {"test": "complete", "status": "complete"})
