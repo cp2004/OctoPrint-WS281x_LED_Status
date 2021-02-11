@@ -28,7 +28,7 @@ def solid_color(
         strip.show()
 
     while wait:
-        if not q_poll_milli_sleep(0.1, queue):
+        if not q_poll_milli_sleep(100, queue):
             return
 
 
