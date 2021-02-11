@@ -48,20 +48,20 @@ def color_wipe(strip, queue, color, delay, brightness_manager, *args, **kwargs):
 
 
 def color_wipe_2(strip, queue, color, delay, brightness_manager, *args, **kwargs):
+    def set_pixel(pixel, pixel_color):
+        strip.setPixelColorRGB(pixel, *pixel_color)
+        strip.show()
+
+    brightness_manager.reset_brightness()
     while True:
-        brightness_manager.reset_brightness()
-        for direction in DIRECTIONS:
-            for i in (
-                range(strip.numPixels())
-                if direction == "forward"
-                else reversed(range(strip.numPixels()))
-            ):
-                if direction == "backward":
-                    color = (0, 0, 0)
-                strip.setPixelColorRGB(i, *color)
-                strip.show()
-                if not q_poll_milli_sleep(delay, queue):
-                    return
+        for i in range(strip.numPixels()):
+            set_pixel(i, color)
+            if not q_poll_milli_sleep(delay, queue):
+                return
+        for i in reversed(range(strip.numPixels())):
+            set_pixel(i, (0, 0, 0))
+            if not q_poll_milli_sleep(delay, queue):
+                return
 
 
 def simple_pulse(strip, queue, color, delay, brightness_manager, *args, **kwargs):
