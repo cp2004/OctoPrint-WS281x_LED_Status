@@ -392,6 +392,6 @@ $(function () {
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281x_led_status_config_test_VM,
         dependencies: [],
-        elements: ["#generic_plugin_ws281x_led_status"],
+        elements: ["#WS_OS_CONFIG_TEST"],
     });
 });
