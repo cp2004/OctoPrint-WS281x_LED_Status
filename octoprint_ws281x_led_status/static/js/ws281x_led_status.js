@@ -302,30 +302,45 @@ $(function () {
 
         self.testInProgress = ko.observable(false);
         self.currentTest = ko.observable("");
-        self.testSuccess = ko.observable(false);
-        self.testFailures = ko.observable(false);
 
         self.passwordForPi = ko.observable("");
 
-        self.addUserStatus = ko.observable("");
-        self.spiEnabledStatus = ko.observable("");
-        self.spiBufferStatus = ko.observable("");
-        self.coreFreqStatus = ko.observable("");
-        self.coreFreqMinStatus = ko.observable("");
+        self.successfulTests = ko.observableArray();
+        self.failedTests = ko.observableArray();
+
+        self.test_id_map = {
+            adduser: "User is in gpio group",
+            spi_enabled: "SPI Enabled",
+            spi_buffer_increase: "SPI buffer size increased",
+            set_core_freq: "core_freq correct in /boot/config.txt",
+            set_core_freq_min: "core_freq_min correct in /boot/config.txt",
+        };
+        self.reason_id_map = {
+            failed: "This test did not pass",
+            error:
+                "There was an unknown error running this test, please check the log",
+            missing: "The file this check expected does not exist",
+            pi4_250:
+                "It looks like core_freq_min=250 is set in your /boot/config.txt file." +
+                " This needs to be removed manually for LEDs to work on a Pi 4.",
+            not_required: "This is not required on your Raspberry Pi",
+            "": "Test Passed",
+        };
+        self.test_id_to_command = {
+            adduser: "wiz_adduser",
+            spi_enabled: "wiz_enable_spi",
+            spi_buffer_increase: "wiz_increase_buffer",
+            set_core_freq: "wiz_set_core_freq",
+            set_core_freq_min: "wiz_set_core_freq_min",
+        };
 
         self.runConfigTest = function () {
             console.log("Starting ws281x_led_status OS configuration test");
             self.testInProgress(true);
-            self.testSuccess(false);
-            self.testFailures(false);
-
+            self.currentTest("");
             self.passwordForPi("");
-
-            self.addUserStatus("");
-            self.spiEnabledStatus("");
-            self.spiBufferStatus("");
-            self.coreFreqStatus("");
-            self.coreFreqMinStatus("");
+            self.successfulTests([]);
+            self.failedTests([]);
 
             OctoPrint.simpleApiCommand("ws281x_led_status", "test_os_config");
         };
@@ -337,94 +352,38 @@ $(function () {
             if (data.type === "os_config_test") {
                 // Received data for the config test
                 if (data.payload.status === "in_progress") {
-                    if (data.payload.test === "adduser") {
-                        self.currentTest("User pi in gpio group");
-                    } else if (data.payload.test === "spi_enabled") {
-                        self.currentTest("SPI enabled");
-                    } else if (data.payload.test === "spi_buffer_increase") {
-                        self.currentTest("SPI Buffer size increased");
-                    } else if (data.payload.test === "set_core_freq") {
-                        self.currentTest("core_freq set in /boot/config.txt");
-                    } else if (data.payload.test === "set_core_freq_min") {
-                        self.currentTest(
-                            "core_freq_min set in /boot/config.txt"
-                        );
-                    }
+                    self.currentTest(self.test_id_map[data.payload.test]);
+                } else if (data.payload.status === "complete") {
+                    self.testInProgress(false);
+                } else if (data.payload.status.passed === true) {
+                    self.successfulTests.push({
+                        name: self.test_id_map[data.payload.test],
+                        reason: self.reason_id_map[data.payload.status.reason],
+                    });
+                } else if (data.payload.status.passed === false) {
+                    self.failedTests.push({
+                        name: self.test_id_map[data.payload.test],
+                        reason: self.reason_id_map[data.payload.status.reason],
+                        fix_command: self.test_id_to_command[data.payload.test],
+                        fixed: ko.observable(false),
+                    });
+                }
+            }
+        };
+
+        self.runFixCommand = function (command, fixed) {
+            var fixed_observable = fixed;
+            OctoPrint.simpleApiCommand("ws281x_led_status", command, {
+                password: self.passwordForPi(),
+            }).done(function (response) {
+                if (response.errors === "password") {
+                    $("#cfgTestPasswordField").popover("show");
                 } else {
-                    if (data.payload.test === "adduser") {
-                        self.addUserStatus(data.payload.status);
-                    } else if (data.payload.test === "spi_enabled") {
-                        self.spiEnabledStatus(data.payload.status);
-                    } else if (data.payload.test === "spi_buffer_increase") {
-                        self.spiBufferStatus(data.payload.status);
-                    } else if (data.payload.test === "set_core_freq") {
-                        self.coreFreqStatus(data.payload.status);
-                    } else if (data.payload.test === "set_core_freq_min") {
-                        self.coreFreqMinStatus(data.payload.status);
-                    } else if (data.payload.test === "complete") {
-                        if (!self.testFailures()) {
-                            self.testSuccess(true);
-                        }
-                        self.testInProgress(false);
-                    }
+                    fixed_observable(true);
                 }
-                // if any tests fail, this will tell the user to do something & show password
-                if (data.payload.status === "failed") {
-                    self.testFailures(true);
-                }
-            }
+            });
         };
 
-        self.fixAddUser = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "adduser", {
-                password: self.passwordForPi(),
-            }).done(self.processApiCmdResponse);
-        };
-        self.fixEnableSpi = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "enable_spi", {
-                password: self.passwordForPi(),
-            }).done(self.processApiCmdResponse);
-        };
-        self.fixIncreaseSpiBuffer = function () {
-            OctoPrint.simpleApiCommand(
-                "ws281x_led_status",
-                "spi_buffer_increase",
-                { password: self.passwordForPi() }
-            ).done(self.processApiCmdResponse);
-        };
-        self.fixCoreFreq = function () {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "set_core_freq", {
-                password: self.passwordForPi(),
-            }).done(self.processApiCmdResponse);
-        };
-        self.fixCoreFreqMin = function () {
-            OctoPrint.simpleApiCommand(
-                "ws281x_led_status",
-                "set_core_freq_min",
-                { password: self.passwordForPi() }
-            ).done(self.processApiCmdResponse);
-        };
-
-        self.processApiCmdResponse = function (response) {
-            if (response.errors === "password") {
-                $("#cfgTestPasswordField").popover("show");
-            }
-            if (response.adduser_done) {
-                self.addUserStatus("passed");
-            }
-            if (response.spi_enabled) {
-                self.spiEnabledStatus("passed");
-            }
-            if (response.spi_buffer_increase) {
-                self.spiBufferStatus("passed");
-            }
-            if (response.core_freq_set) {
-                self.coreFreqStatus("passed");
-            }
-            if (response.core_freq_min_set) {
-                self.coreFreqMinStatus("passed");
-            }
-        };
         self.passwdPopoverRemove = function () {
             $("#cfgTestPasswordField").popover("hide");
             return true;

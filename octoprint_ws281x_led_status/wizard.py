@@ -116,7 +116,7 @@ class PluginWizard:
         result = {
             "check": api.WIZ_SET_CORE_FREQ,
             "passed": True if self.pi_model == "4" else False,
-            "reason": "" if self.pi_model == "4" else "failed",
+            "reason": "not_required" if self.pi_model == "4" else "failed",
         }
 
         with io.open("/boot/config.txt") as file:
@@ -198,4 +198,6 @@ class PluginWizard:
         sys_command = command_to_system[cmd]
         self._logger.info("Running system command for {}:{}".format(cmd, sys_command))
         stdout, error = run_system_command(sys_command, data.get("password"))
-        return self.on_api_get().update({"errors": error})
+        api_get = self.on_api_get()
+        api_get.update({"errors": error})
+        return api_get
