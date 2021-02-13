@@ -7,134 +7,6 @@
 const ko = window.ko;
 
 $(function () {
-    function ws281xLEDStatusWizardViewModel(parameters) {
-        var self = this;
-
-        self.passwordForPi = ko.observable("");
-        self.addUserDone = ko.observable(false);
-        self.inProgressAddUser = ko.observable(false);
-        self.enabledSPI = ko.observable(false);
-        self.inProgressEnableSPI = ko.observable(false);
-        self.spiBufferIncreased = ko.observable(false);
-        self.inProgressSpiBuffer = ko.observable(false);
-        self.coreFreqSet = ko.observable(false);
-        self.inProgressCoreFreq = ko.observable(false);
-        self.coreFreqMinSet = ko.observable(false);
-        self.inProgressCoreFreqMin = ko.observable(false);
-
-        self.passwdPopoverRemove = function () {
-            $("#wizardPasswordField").popover("hide");
-        };
-
-        self.runApiCommand = function (command) {
-            OctoPrint.simpleApiCommand("ws281x_led_status", command, {
-                password: self.passwordForPi(),
-            }).done(self.check_config);
-        };
-
-        self.runAddUser = function () {
-            self.inProgressAddUser(true);
-            self.runApiCommand("wiz_adduser");
-        };
-        self.runEnableSPI = function () {
-            self.inProgressEnableSPI(true);
-            self.runApiCommand("wiz_enable_spi");
-        };
-        self.runIncreaseSPIBuffer = function () {
-            self.inProgressSpiBuffer(true);
-            self.runApiCommand("wiz_increase_buffer");
-        };
-        self.runSetCoreFreq = function () {
-            self.inProgressCoreFreq(true);
-            self.runApiCommand("wiz_set_core_freq");
-        };
-        self.runSetCoreFreqMin = function () {
-            self.inProgressCoreFreqMin(true);
-            self.runApiCommand("wiz_set_core_freq_min");
-        };
-
-        self.check_config = function (response) {
-            if (response.errors === "password") {
-                $("#wizardPasswordField").popover("show");
-            } else {
-                $("#wizardPasswordField").popover("hide");
-            }
-            if (response.adduser_done) {
-                self.addUserDone(true);
-            } else {
-                self.addUserDone(false);
-            }
-            if (response.spi_enabled) {
-                self.enabledSPI(true);
-            } else {
-                self.enabledSPI(false);
-            }
-            if (response.spi_buffer_increase) {
-                self.spiBufferIncreased(true);
-            } else {
-                self.spiBufferIncreased(false);
-            }
-            if (response.core_freq_set) {
-                self.coreFreqSet(true);
-            } else {
-                self.coreFreqSet(false);
-            }
-            if (response.core_freq_min_set) {
-                self.coreFreqMinSet(true);
-            } else {
-                self.coreFreqMinSet(false);
-            }
-            // Set all request spinners to false
-            self.inProgressAddUser(false);
-            self.inProgressEnableSPI(false);
-            self.inProgressSpiBuffer(false);
-            self.inProgressCoreFreq(false);
-            self.inProgressCoreFreqMin(false);
-        };
-        self.onWizardDetails = function (response) {
-            self.check_config(response.ws281x_led_status.details);
-        };
-        self.onBeforeWizardFinish = function () {
-            // Do not trigger notification if wizard is is not loaded
-            if (!$("#wizard_plugin_ws281x_led_status").length) {
-                return;
-            }
-
-            /* Trigger Pnotify dialog:
-               if config incomplete, tell them it should be,
-               if config complete, tell them to restart.
-             */
-            if (
-                !self.addUserDone() ||
-                !self.enabledSPI() ||
-                !self.spiBufferIncreased() ||
-                !self.coreFreqSet() ||
-                !self.coreFreqMinSet()
-            ) {
-                new PNotify({
-                    title: "WS281X LED Status: Incomplete config",
-                    text:
-                        "Your configuration is not complete! please head to the utilities tab in the settings page to fix this!",
-                    type: "error",
-                    hide: false,
-                });
-            } else {
-                new PNotify({
-                    title: "Restart needed!",
-                    text:
-                        "WS281x LED Status configuration complete. You will need to restart your Pi for the changes to take effect.",
-                    type: "success",
-                    hide: false,
-                });
-            }
-        };
-    }
-    OCTOPRINT_VIEWMODELS.push({
-        construct: ws281xLEDStatusWizardViewModel,
-        dependencies: ["wizardViewModel"],
-        elements: ["#wizard_plugin_ws281x_led_status"],
-    });
-
     function ws281xLedStatusNavbarViewModel(parameters) {
         var self = this;
         self.settingsViewModel = parameters[0];
@@ -293,7 +165,10 @@ $(function () {
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusSettingsViewModel,
         dependencies: ["settingsViewModel"],
-        elements: "#settings_plugin_ws281x_led_status",
+        elements: [
+            "#settings_plugin_ws281x_led_status",
+            "#wizard_plugin_ws281x_led_status",
+        ],
     });
 
     function ws281x_led_status_config_test_VM(parameters) {
@@ -387,6 +262,37 @@ $(function () {
         self.passwdPopoverRemove = function () {
             $("#cfgTestPasswordField").popover("hide");
             return true;
+        };
+        self.onBeforeWizardFinish = function () {
+            // Do not trigger notification if wizard is is not loaded
+            if (!$("#wizard_plugin_ws281x_led_status").length) {
+                return;
+            }
+
+            /* Trigger Pnotify dialog:
+               if config incomplete, tell them it should be,
+               if config complete, tell them to restart.
+             */
+            if (
+                self.failedTests().length &&
+                !(self.successfulTests().length === 5)
+            ) {
+                new PNotify({
+                    title: "WS281X LED Status: Incomplete config",
+                    text:
+                        "Your configuration is not complete! Please head to the utilities tab in the settings page to fix this.",
+                    type: "error",
+                    hide: false,
+                });
+            } else {
+                new PNotify({
+                    title: "Restart needed!",
+                    text:
+                        "WS281x LED Status configuration complete. You will need to restart your Pi for the changes to take effect.",
+                    type: "success",
+                    hide: false,
+                });
+            }
         };
     }
     OCTOPRINT_VIEWMODELS.push({
