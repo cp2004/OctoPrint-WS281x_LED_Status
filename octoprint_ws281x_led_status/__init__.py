@@ -145,7 +145,7 @@ class WS281xLedStatusPlugin(
             api.WIZ_SET_CORE_FREQ,
             api.WIZ_SET_FREQ_MIN,
         ]:
-            if not self.wizard.validate(cmd):
+            if not self.wizard.validate(cmd)["passed"]:
                 return True
         return False
 
