@@ -13,24 +13,24 @@
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="tabOverview">
-                {% include 'settings_overview_tab.jinja2' %}
+                {% include "settings/overview.jinja2" %}
             </div>
             <div class="tab-pane" id="tabPrinting">
-                {%  include 'settings_printing_effects_tab.jinja2' %}
+                {%  include "settings/printing_effects.jinja2" %}
             </div>
             <div class="tab-pane" id="tabProgress">
-                {%  include 'settings_progress_effects_tab.jinja2' %}
+                {%  include "settings/progress_effects.jinja2" %}
             </div>
             <div class="tab-pane" id="tabFeatures">
-                {%  include 'settings_features_tab.jinja2' %}
+                {%  include "settings/features.jinja2" %}
             </div>
             <div class="tab-pane" id="tabUtilities">
-                {% include 'settings_utilities_tab.jinja2' %}
+                {% include "settings/utilities.jinja2" %}
             </div>
             <div class="tab-pane" id="tabAbout">
-                {%  include 'settings_about_tab.jinja2' %}
+                {%  include "settings/about.jinja2" %}
             </div>
         </div>
     </div>
 </form>
-{% include 'settings_strip_modal.jinja2' %}
+{% include "settings/strip_modal.jinja2" %}
