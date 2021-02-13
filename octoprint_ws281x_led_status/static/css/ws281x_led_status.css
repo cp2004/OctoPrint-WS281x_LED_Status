@@ -21,7 +21,7 @@
     margin: 10px 0;
 }
 
-#WS_OS_CONFIG_TEST {
+#WS_OS_CONFIG_TEST, #LEDStripEditor .modal-body {
     height: 500px;
     overflow-y: auto;
 }

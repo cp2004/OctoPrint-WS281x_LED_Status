@@ -1,119 +1,156 @@
+{% import "macros/binding.jinja2" as binding %}
+{% import "macros/docs.jinja2" as docs %}
+
+{% macro strip_binding(setting) %}{{ binding.bind_setting("strip." + setting) }}{% endmacro %}
+
+{% macro number_input(setting, min="", max="", append=None) %}
+    {% if append %}
+        <div class="input-append">
+    {% endif %}
+        <input
+            type="number"
+            class="input-block-level"
+            min="{{ min }}"
+            max="{{ max }}"
+            data-bind="value: {{ strip_binding(setting) }}"
+        >
+    {% if append %}
+        <span class="add-on">{{ append }}</span>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro slider_input(setting, min=0, max=100) %}
+<input
+    type="range"
+    min="{{ min }}"
+    max="{{ max }}"
+    data-bind="value: {{ strip_binding(setting) }}"
+    class="input-block-level"
+>
+{% endmacro %}
+
+{% macro control_label(text) %}
+<div class="span4">
+    <label class="text-right">{{ _(text) }}</label>
+</div>
+{% endmacro %}
+
 <div id="LEDStripEditor" class="modal hide fade">
-	<div class="modal-header">
-		<a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-		<h3>{{ _('LED Strip editor') }}</h3>
-	</div>
-	<div class="modal-body">
-        <p><a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/LED-Strip-configuration" target="_blank"><i class="fa fa-lg fa-info-circle text-info" aria-hidden="true"></i> More information about these options</a></p>
+    <div class="modal-header">
+        <div class="pull-right">
+            {{ docs.doc_link("configuration/led-strip-configuration", '<i class="fa fa-book"></i> View the docs') }}
+            <a href="#" class="close" style="margin-left: 10px;" data-dismiss="modal" aria-hidden="true">&times;</a>
+        </div>
+        <h3>{{ _("LED Strip editor") }}</h3>
+    </div>
+    <div class="modal-body">
         <form class="form-horizontal">
-            <div class="control-group">
-                <label class="control-label">{{ _('Strip Type') }}</label>
-                <div class="controls">
-                    <select class="input-block-level" id="stripType" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.type">
+            <h5>Strip Settings</h5>
+            <div class="row-fluid">
+                {{ control_label("Strip Type") }}
+                <div class="span8">
+                    <select class="input-block-level" id="stripType" data-bind="value: {{ strip_binding("type") }}">
                         {% for type in plugin_ws281x_led_status_strip_types %}
-                            <option value="{{ type }}">{{ type }}</option>
+                        <option value="{{ type }}">{{ type }}</option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('Use dedicated white') }}</label>
-                <div class="controls">
-                    <input type="checkbox" class="input-medium" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_override">
+            <br>
+            <div class="row-fluid">
+                {{ control_label("Number of LEDs") }}
+                <div class="span4">
+                    {{ number_input("count", 0) }}
                 </div>
             </div>
-            <div class="control-group inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_override">
-                <label class="control-label">{{ _('White brightness') }}</label>
-                <div class="controls">
-                    <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_brightness">
-                        <span class="add-on">%</span>
+            <br>
+            <div class="row-fluid">
+                {{ control_label("Max Brightness") }}
+                <div class="span4">
+                    {{ number_input("brightness", 0, 100, "%") }}
+                </div>
+                <div class="span4">
+                    {{ slider_input("brightness", 0, 100) }}
+                </div>
+            </div>
+            <br>
+            <div class="row-fluid">
+                {{ control_label("GPIO Pin") }}
+                <div class="span4">
+                    {{ number_input("pin", 10, 10) }}
+                </div>
+            </div>
+            <h5>{{ _("Color Correction Settings") }}</h5>
+            <div class="row-fluid">
+                {{ control_label("Red correction") }}
+                <div class="span4">
+                    {{ number_input("adjustment.R", 0, 200, append="%") }}
+                </div>
+                <div class="span4">
+                    {{ slider_input("adjustment.R", 50, 150) }}
+                </div>
+            </div>
+            <br>
+            <div class="row-fluid">
+                {{ control_label("Green correction") }}
+                <div class="span4">
+                    {{ number_input("adjustment.G", 0, 200, append="%") }}
+                </div>
+                <div class="span4">
+                    {{ slider_input("adjustment.G", 50, 150) }}
+                </div>
+            </div>
+            <br>
+            <div class="row-fluid">
+                {{ control_label("Blue correction") }}
+                <div class="span4">
+                    {{ number_input("adjustment.B", 0, 200, append="%") }}
+                </div>
+                <div class="span4">
+                    {{ slider_input("adjustment.B", 50, 150) }}
+                </div>
+            </div>
+            <br>
+            <div class="row-fluid">
+                <div class="span4">
+                    <label class="inline text-right">
+                        Use dedicated white
+                        <input type="checkbox" style="margin: 0 0 0 10px;" data-bind="checked: {{ strip_binding("white_override") }}">
+                    </label>
+                </div>
+                <div class="span4" data-bind="visible: {{ strip_binding("white_override") }}">
+                    <label style="text-align: right">
+                        White brightness:
+                    </label>
+                </div>
+                <div class="span4" data-bind="visible: {{ strip_binding("white_override") }}">
+                    {{ number_input("white_brightness", 0, 100, "%") }}
+                </div>
+            </div>
+            <h5 data-bind="click: toggleAdvancedStrip" style="cursor: pointer">
+                <i class="fa fa-fw" data-bind="css: {'fa-caret-right': !advancedStripOpen(), 'fa-caret-down': advancedStripOpen()}"></i>
+                Advanced Settings
+            </h5>
+            <div id="advancedStrip" class="collapse">
+                <div class="row-fluid">
+                    {{ control_label("Frequency") }}
+                    <div class="span4">
+                        {{ number_input("freq_hz", append="hz") }}
                     </div>
-                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.white_brightness">
                 </div>
-            </div>
-            <div class="control-group inline">
-                <label class="control-label">{{ _('Max brightness') }}</label>
-                <div class="controls">
-                    <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.brightness">
-                        <span class="add-on">%</span>
-                    </div>
-                    <input type="range" min="1" max="100" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.brightness">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('Number of LEDs') }}</label>
-                <div class="controls">
-                    <input type="number" id="ws281x_num_leds" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.count">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('GPIO pin') }}</label>
-                <div class="controls">
-                    <input type="number" min="10" max="10" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.pin">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('Frequency') }}</label>
-                <div class="controls">
-                    <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.freq_hz">
-                        <span class="add-on">hz</span>
+                <br>
+                <div class="row-fluid">
+                    {{ control_label("Invert Pin output") }}
+                    <div class="span4">
+                        <input type="checkbox" data-bind="checked: {{ strip_binding("invert") }}">
                     </div>
                 </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('DMA channel') }}</label>
-                <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.dma">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('Invert pin output') }}</label>
-                <div class="controls">
-                    <input type="checkbox" class="input-medium" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.strip.invert">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('PWM channel ') }}</label>
-                <div class="controls">
-                    <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.channel">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('Red correction ') }}</label>
-                <div class="controls">
-                    <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.R">
-                        <span class="add-on">%</span>
-                    </div>
-                    <input type="range" min="50" max="150" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.R">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('Green correction ') }}</label>
-                <div class="controls">
-                    <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.G">
-                        <span class="add-on">%</span>
-                    </div>
-                    <input type="range" min="50" max="150" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.G">
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label">{{ _('Blue correction ') }}</label>
-                <div class="controls">
-                    <div class="input-append">
-                        <input type="number" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.B">
-                        <span class="add-on">%</span>
-                    </div>
-                    <input type="range" min="50" max="150" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.adjustment.B">
-                </div>
+                <br>
             </div>
         </form>
     </div>
-	<div class="modal-footer">
-		<small>Make sure to click save in the main settings after making changes here.</small> <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">{{ _('Close') }}</a>
-	</div>
+    <div class="modal-footer">
+        <small>Make sure to click save in the main settings after making changes here.</small> <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">{{ _('Close') }}</a>
+    </div>
 </div>

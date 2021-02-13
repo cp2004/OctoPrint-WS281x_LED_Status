@@ -161,6 +161,12 @@ $(function () {
                 blue: blue,
             });
         };
+
+        self.advancedStripOpen = ko.observable(false);
+        self.toggleAdvancedStrip = function () {
+            $("#advancedStrip").collapse("toggle");
+            self.advancedStripOpen(!self.advancedStripOpen());
+        };
     }
     OCTOPRINT_VIEWMODELS.push({
         construct: ws281xLedStatusSettingsViewModel,
