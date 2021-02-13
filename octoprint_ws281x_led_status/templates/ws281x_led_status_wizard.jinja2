@@ -31,9 +31,9 @@
 </h3>
 <form class="form-horizontal">
     <div class="control-group">
-        <label for="stripType" class="control-label">{{ _('Strip Type') }}</label>
+        <label for="wizard_stripType" class="control-label">{{ _('Strip Type') }}</label>
         <div class="controls">
-            <select class="input-block-level" id="stripType" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.type">
+            <select class="input-block-level" id="wizard_stripType" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.type">
                 {% for type in plugin_ws281x_led_status_strip_types %}
                     <option value="{{ type }}">{{ type }}</option>
                 {% endfor %}
