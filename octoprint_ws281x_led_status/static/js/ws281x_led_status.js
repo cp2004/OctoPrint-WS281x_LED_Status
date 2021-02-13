@@ -149,9 +149,9 @@ $(function () {
             );
 
             var current = (num_pixels * current_ma) / 1000;
-            self.power_req(current * 5);
-            self.power_req_12v(current * 12);
-            self.current_req(current);
+            self.power_req((current * 5).toString(10) + "W");
+            self.power_req_12v((current * 12).toString(10) + "W");
+            self.current_req(current.toString(10) + "A");
         };
 
         self.sendTestCommand = function (red, green, blue) {
