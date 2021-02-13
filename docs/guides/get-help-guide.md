@@ -6,9 +6,9 @@ description: Need help using the plugin? Read this page first.
 
 Please select the area that most describes what you need help with:
 
-* Configuration of the plugin
-* Connecting LEDs and getting them to work
-* Reporting a bug in the plugin
+* [Configuration of the plugin](get-help-guide.md#configuration-of-the-plugin)
+* [Connecting LEDs and getting them to work](get-help-guide.md#connecting-leds-and-making-them-work)
+* [Reporting a bug in the plugin](get-help-guide.md#reporting-a-bug-with-the-plugin)
 
 ### Configuration of the plugin
 

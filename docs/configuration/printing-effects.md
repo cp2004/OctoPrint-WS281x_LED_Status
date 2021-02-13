@@ -35,13 +35,13 @@ All the standard effects available, with fancy visualisations!
 
 Sets all LEDs to one colour, forever.
 
-![](../.gitbook/assets/solid_colour%20%281%29.gif)
+![](../.gitbook/assets/solid_colour%20%282%29.gif)
 
 ### Colour Wipe
 
 Wipes colour across the strip pixel by pixel, then clears it pixel by pixel.
 
-![](../.gitbook/assets/color_wipe.gif)
+![](../.gitbook/assets/color_wipe%20%281%29.gif)
 
 ### Colour Wipe V2
 
@@ -59,7 +59,7 @@ Fades brightness up and down. Looks better in real life than the visualisation b
 
 Sends a pulse of light bouncing from one side of your strip to the other.
 
-![](../.gitbook/assets/bounce%20%281%29.gif)
+![](../.gitbook/assets/bounce%20%282%29.gif)
 
 ### Solo Bounce
 
@@ -77,7 +77,7 @@ Cycles all the LEDs through the rainbow together.
 
 Rainbow that cycles across the strip, so a full rainbow is across the whole strip at once.
 
-![](../.gitbook/assets/rainbow_cycle%20%281%29.gif)
+![](../.gitbook/assets/rainbow_cycle%20%282%29.gif)
 
 ### Crossover
 
@@ -89,7 +89,7 @@ Two pixels bouncing in opposite directions, crossing over in the middle.
 
 Sets all LEDs to a random colour, then changes a random pixel, to a new random colour
 
-![](../.gitbook/assets/random.gif)
+![](../.gitbook/assets/random%20%281%29.gif)
 
 ### Bouncy Balls
 
