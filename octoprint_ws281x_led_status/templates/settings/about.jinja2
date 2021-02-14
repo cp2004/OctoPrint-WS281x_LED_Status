@@ -1,14 +1,16 @@
+{% import "macros/docs.jinja2" as docs %}
+
 <h5>About the plugin</h5>
 
 <p><strong><i><i class="fas fa-tag text-success"></i> Version {{ plugin_ws281x_led_status_version }}</i></strong> - <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/releases" target="_blank">Release notes</a></p>
 
 <p>Some useful links for you:</p>
 <ul>
-    <li>The plugin documentation in the <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki" target="_blank">Github Wiki <i class="fa fa-external-link-alt"></i></a> </li>
+    <li>{{ docs.doc_link("", 'The plugin documentation <i class="fa fa-external-link-alt"></i>') }}/li>
     <li>Found a bug? Report it! <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues" target="_blank">Issue tracker <i class="fa fa-external-link-alt"></i></a></li>
     <li>Need support:
         <ul>
-            <li>Open an issue as a <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=type%3A+question&template=question.md&title=" target="_blank"> question on the repository <i class="fa fa-external-link-alt"></i></a></li>
+            <li>Open an issue as a <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=question&template=question.md&title=" target="_blank"> question on the repository <i class="fa fa-external-link-alt"></i></a></li>
             <li>Get in contact on the <a href="https://discord.octoprint.org" target="_blank">OctoPrint Discord server <i class="fa fa-external-link-alt"></i></a> </li>
             <li>Get in contact on the <a href="https://community.octoprint.org" target="_blank">community forums <i class="fa fa-external-link-alt"></i></a></li>
         </ul>
