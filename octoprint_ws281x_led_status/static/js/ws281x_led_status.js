@@ -199,8 +199,8 @@ $(function () {
         self.reason_id_map = {
             failed: "This test did not pass",
             error:
-                "There was an unknown error running this test, please check the log",
-            missing: "The file this check expected does not exist",
+                "Error: There was an unknown error running this test, please check the log",
+            missing: "Error: The file this check expected does not exist",
             pi4_250:
                 "It looks like core_freq_min=250 is set in your /boot/config.txt file." +
                 " This needs to be removed manually for LEDs to work on a Pi 4.",

@@ -62,8 +62,8 @@
                 <span data-bind="text: reason"></span>
             </p>
             <p>
-                <!-- ko ifnot: reason.includes("manually") -->
-                <!-- Don't include button if fix must be applied manually -->
+                <!-- ko ifnot: reason.includes("manually") || reason.includes("Error") -->
+                <!-- Don't include button if fix must be applied manually or error -->
                 <button class="btn btn-primary" data-bind="enable: !fixed(), click: function(){ $root.runFixCommand(fix_command, fixed) }">
                     <!-- ko ifnot: fixed -->
                     <i class="fa fa-arrow-right"></i> Fix this now

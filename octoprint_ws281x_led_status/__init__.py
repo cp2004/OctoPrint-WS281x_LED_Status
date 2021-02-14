@@ -250,21 +250,21 @@ class WS281xLedStatusPlugin(
             "Running OS config test ({} mode)".format("UI" if send_ui else "Log")
         )
         tests = {
-            "adduser": self.wizard.is_adduser_done,
-            "spi_enabled": self.wizard.is_spi_enabled,
-            "spi_buffer_increase": self.wizard.is_spi_buffer_increased,
-            "set_core_freq": self.wizard.is_core_freq_set,
-            "set_core_freq_min": self.wizard.is_core_freq_min_set,
+            "adduser": api.WIZ_ADDUSER,
+            "spi_enabled": api.WIZ_ENABLE_SPI,
+            "spi_buffer_increase": api.WIZ_INCREASE_BUFFER,
+            "set_core_freq": api.WIZ_SET_CORE_FREQ,
+            "set_core_freq_min": api.WIZ_SET_FREQ_MIN,
         }
         statuses = {}
 
-        for test_key, test_func in tests.items():
+        for test_key, command in tests.items():
             if send_ui:
                 self._send_UI_msg(
                     _UI_MSG_TYPE, {"test": test_key, "status": "in_progress"}
                 )
 
-            status = test_func()
+            status = self.wizard.validate(command)
             if send_ui:
                 self._send_UI_msg(_UI_MSG_TYPE, {"test": test_key, "status": status})
 
