@@ -1,80 +1,53 @@
-<h5>Printing Effects <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/Features#printing-event-tracking" target="_blank"><i class="fa fa-lg fa-info-circle text-info" aria-hidden="true"></i></a></h5>
+{% import "macros/binding.jinja2" as binding %}
+{% import "macros/docs.jinja2" as docs %}
+
+{% macro effect_checkbox(effect, name) %}
+<label class="checkbox inline">
+    <input type="checkbox" data-bind="checked: {{ binding.effect_binding(effect + ".enabled") }}">
+    Enable {{ name }} effect
+</label>
+{% endmacro %}
+
+{% macro effect_select(effect) %}
+<label class="inline">Effect </label>
+<select class="input-large" data-bind="value: {{ binding.effect_binding(effect + ".effect") }}">
+    {% for effect in plugin_ws281x_led_status_standard_names %}
+    <option value="{{ effect }}">{{ effect }}</option>
+    {% endfor %}
+</select>
+{% endmacro %}
+
+{% macro effect_color(effect) %}
+<label class="inline"> Colour </label>
+<input type="color" class="input-small" data-bind="value: {{ binding.effect_binding(effect + ".color") }}">
+{% endmacro %}
+
+{% macro effect_delay(effect) %}
+<label class="inline"> Delay </label>
+<div class="input-append">
+    <input type="number" step="0.1" class="input-small" data-bind="value: {{ binding.effect_binding(effect + ".delay") }}">
+    <span class="add-on">ms</span>
+</div>
+{% endmacro %}
+
+{% macro effect(id, name) %}
+{{ effect_checkbox(id, name) }}
+<div class="form-inline" data-bind="visible: {{ binding.effect_binding(id + ".enabled") }}">
+    {{ effect_select(id) }}
+    {{ effect_color(id) }}
+    {{ effect_delay(id) }}
+</div>
+{% endmacro %}
+
+<h5>Printing Effects {{ docs.help_icon("configuration/printing-effects") }}</h5>
 <form class="form-horizontal">
-    <label class="checkbox inline">
-    <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.startup.enabled">Enable startup effect
-    </label>
-    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.startup.enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.startup.effect">
-            {% for effect in plugin_ws281x_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.startup.color">
-        <label class="inline"> Delay </label>
-        <div class="input-append">
-            <input type="number" step="0.1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.startup.delay">
-            <span class="add-on">ms</span>
-        </div>
-    </div>
-<hr>
-    <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.idle.enabled">Enable idle effect
-    </label>
-    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.idle.enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.idle.effect">
-            {% for effect in plugin_ws281x_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.idle.color">
-        <label class="inline"> Delay </label>
-        <div class="input-append">
-            <input type="number" step="0.1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.idle.delay">
-            <span class="add-on">ms</span>
-        </div>
-    </div>
-<hr>
-    <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.disconnected.enabled">Enable disconnected effect
-    </label>
-    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.disconnected.enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.disconnected.effect">
-            {% for effect in plugin_ws281x_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.disconnected.color">
-        <label class="inline"> Delay </label>
-        <div class="input-append">
-            <input type="number" step="0.1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.disconnected.delay">
-            <span class="add-on">ms</span>
-        </div>
-    </div>
-<hr>
-    <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.enabled">Enable print success effect
-    </label>
-    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.effect">
-            {% for effect in plugin_ws281x_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.color">
-        <label class="inline"> Delay </label>
-        <div class="input-append">
-            <input type="number" step="0.1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.delay">
-            <span class="add-on">ms</span>
-        </div>
-    </div>
+    {{ effect("startup", "Startup") }}
+    <hr>
+    {{ effect("idle", "Idle") }}
+    <hr>
+    {{ effect("disconnected", "Disonnected") }}
+    <hr>
+    {{ effect("success", "Success") }}
     <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.enabled">
         <label class="inline">Return to idle after:</label>
         <div class="input-append">
@@ -83,62 +56,11 @@
         </div>
         <p class="help-block">Set this to 0 and the idle effect will not resume - it will remain 'finished'</p>
     </div>
-<hr>
-    <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.failed.enabled">Enable failed effect
-    </label>
-    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.failed.enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.failed.effect">
-            {% for effect in plugin_ws281x_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.failed.color">
-        <label class="inline"> Delay </label>
-        <div class="input-append">
-            <input type="number" step="0.1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.failed.delay">
-            <span class="add-on">ms</span>
-        </div>
-    </div>
-<hr>
-    <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.paused.enabled">Enable paused effect
-    </label>
-    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.paused.enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.paused.effect">
-            {% for effect in plugin_ws281x_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.paused.color">
-        <label class="inline"> Delay </label>
-        <div class="input-append">
-            <input type="number" step="0.1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.paused.delay">
-            <span class="add-on">ms</span>
-        </div>
-    </div>
-<hr>
-    <label class="checkbox inline">
-        <input type="checkbox" data-bind="checked: settingsViewModel.settings.plugins.ws281x_led_status.effects.printing.enabled">Enable printing effect
-    </label>
-    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.printing.enabled">
-    <label class="inline">Effect </label>
-        <select class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.printing.effect">
-            {% for effect in plugin_ws281x_led_status_standard_names %}
-                <option value="{{ effect }}">{{ effect }}</option>
-            {% endfor %}
-        </select>
-        <label class="inline"> Colour </label>
-        <input type="color" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.printing.color">
-        <label class="inline"> Delay </label>
-        <div class="input-append">
-            <input type="number" step="0.1" class="input-small" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.printing.delay">
-            <span class="add-on">ms</span>
-        </div>
-    </div>
+    <hr>
+    {{ effect("failed", "Failed") }}
+    <hr>
+    {{ effect("paused", "Paused") }}
+    <hr>
+    {{ effect("printing", "Printing") }}
     <p class="help-block"><span class="label label-warning">Warning</span> Enabling this effect takes priority over the progress efffect</p>
 </form>

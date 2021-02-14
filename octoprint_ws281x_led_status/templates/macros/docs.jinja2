@@ -1,3 +1,7 @@
 {% macro doc_link(path, content) %}
 <a href="https://cp2004.gitbook.io/ws281x-led-status/{{ path }}" target="_blank">{{ content }}</a>
 {% endmacro %}
+
+{% macro help_icon(path) %}
+{{ doc_link(path, '<i class="fa fa-lg fa-info-circle text-info" aria-hidden="true"></i>') }}
+{% endmacro %}
