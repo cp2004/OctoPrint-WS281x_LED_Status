@@ -8,6 +8,7 @@ __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the ter
 import io
 import logging
 import multiprocessing
+import os
 import re
 import time
 
@@ -134,6 +135,10 @@ class WS281xLedStatusPlugin(
             "strip_types": constants.STRIP_TYPES,
             "timezone": util.get_timezone(),
             "version": self._plugin_version,
+            "is_docker": os.path.exists(os.path.join("/bin", "s6-svscanctl"))
+            or os.path.exists(
+                os.path.join("/usr", "local", "bin", "docker-entrypoint.sh")
+            ),
         }
 
     # Wizard plugin
