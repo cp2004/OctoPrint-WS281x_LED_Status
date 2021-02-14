@@ -9,8 +9,8 @@
 {% endmacro %}
 
 {% macro effect_select(effect) %}
-<label class="inline">Effect </label>
-<select class="input-large" data-bind="value: {{ binding.effect_binding(effect + ".effect") }}">
+<label for="ws_{{ effect }}_effect" class="inline">Effect </label>
+<select id="ws_{{ effect }}_effect" class="input-large" data-bind="value: {{ binding.effect_binding(effect + ".effect") }}">
     {% for effect in plugin_ws281x_led_status_standard_names %}
     <option value="{{ effect }}">{{ effect }}</option>
     {% endfor %}
@@ -18,14 +18,14 @@
 {% endmacro %}
 
 {% macro effect_color(effect) %}
-<label class="inline"> Colour </label>
-<input type="color" class="input-small" data-bind="value: {{ binding.effect_binding(effect + ".color") }}">
+<label for="ws_{{ effect }}_color" class="inline"> Colour </label>
+<input id="ws_{{ effect }}_color" type="color" class="input-small" data-bind="value: {{ binding.effect_binding(effect + ".color") }}">
 {% endmacro %}
 
 {% macro effect_delay(effect) %}
-<label class="inline"> Delay </label>
+<label class="inline" for="ws_{{ effect }}_delay"> Delay </label>
 <div class="input-append">
-    <input type="number" step="0.1" class="input-small" data-bind="value: {{ binding.effect_binding(effect + ".delay") }}">
+    <input id="ws_{{ effect }}_delay" type="number" step="0.1" class="input-small" data-bind="value: {{ binding.effect_binding(effect + ".delay") }}">
     <span class="add-on">ms</span>
 </div>
 {% endmacro %}
@@ -49,9 +49,9 @@
     <hr>
     {{ effect("success", "Success") }}
     <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.enabled">
-        <label class="inline">Return to idle after:</label>
+        <label for="ws_success_return" class="inline">Return to idle after:</label>
         <div class="input-append">
-            <input class="input-medium" type="number" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.return_to_idle">
+            <input id="ws_success_return" class="input-medium" type="number" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.success.return_to_idle">
             <span class="add-on">secs</span>
         </div>
         <p class="help-block">Set this to 0 and the idle effect will not resume - it will remain 'finished'</p>
