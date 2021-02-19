@@ -31,7 +31,7 @@ Next up is the [troubleshooting guide](../troubleshooting-guide.md), where there
 
 Before asking for help, please ensure that your LED strip works with other devices if possible. The best thing to check is with an Arduino, since these work more reliably than Raspberry Pi & Python. 
 
-You can seek support on the [OctoPrint community forums](https://community.octoprint.org), or the[ Discord Server](https://discord.octoprint.org) as well as opening a ['Get Help'](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=question&template=question.md&title=) issue. Please note that at some point these may be disabled if the load gets too high.
+You can seek support by opening a ['Get Help'](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=question&template=question.md&title=) issue, on the [OctoPrint community forums](https://community.octoprint.org), or the[ Discord Server](https://discord.octoprint.org). Helpful people are around most of the time to get your problems solved.
 {% endhint %}
 
 ### Reporting a bug with the plugin
