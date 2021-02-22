@@ -21,11 +21,13 @@
 <p>
     The OS configuration test will help you to configure your Raspberry Pi for use with this plugin.
 </p>
+{% if plugin_ws281x_led_status_is_docker %}
 <div class="alert alert-block">
     <strong>It looks like you are running this plugin inside the OctoPrint docker container</strong>
     <p>This isn't an issue, you just have to make sure your container is configured correctly</p>
     <p>Be sure to read the {{ docs.doc_link("guides/setup-in-docker", "additional section in the docs") }} relating to docker.</p>
 </div>
+{% endif %}
 <p>
     <button class="btn btn-primary" data-toggle="modal" data-target="#WS_OSTestModal">
         <i class="fa fa-cogs"></i> Open OS Configuration test
