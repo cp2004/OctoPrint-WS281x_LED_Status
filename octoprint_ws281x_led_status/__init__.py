@@ -80,6 +80,11 @@ class WS281xLedStatusPlugin(
         if self._settings.get_boolean(["effects", "startup", "enabled"]):
             self.current_state = "startup"
 
+        if self._settings.get_boolean(["lights_on"]):
+            self.lights_on = True
+        else:
+            self.lights_on = False
+
     # Asset plugin
     def get_assets(self):
         return {
@@ -207,6 +212,7 @@ class WS281xLedStatusPlugin(
                 "transition_settings": self._settings.get(["transitions"], merged=True),
                 "previous_state": self.current_state,
                 "log_path": self._settings.get_plugin_logfile_path(postfix="debug"),
+                "saved_lights_on": self.lights_on,
             },
         )
         self.current_effect_process.daemon = True
@@ -292,12 +298,16 @@ class WS281xLedStatusPlugin(
         self._send_UI_msg("lights", {"on": True})
         self.lights_on = True
         self.update_effect("on")
+        self._settings.set(["lights_on"], True)
+        self._settings.save()
         self._logger.info("Turning lights on")
 
     def deactivate_lights(self):
         self._send_UI_msg("lights", {"on": False})
         self.lights_on = False
         self.update_effect("off")
+        self._settings.set(["lights_on"], False)
+        self._settings.save()
         self._logger.info("Turning light off")
 
     def activate_torch(self):

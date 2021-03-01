@@ -117,6 +117,7 @@ defaults = {
     "at_command_reaction": True,
     "intercept_m150": True,
     "debug_logging": False,
+    "lights_on": True,
 }
 
 

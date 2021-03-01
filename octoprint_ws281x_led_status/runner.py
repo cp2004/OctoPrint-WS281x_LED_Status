@@ -46,6 +46,7 @@ class EffectRunner:
         transition_settings,
         previous_state,
         log_path,
+        saved_lights_on,
     ):
 
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.runner")
@@ -73,7 +74,7 @@ class EffectRunner:
         }
 
         # State holders
-        self.lights_on = True
+        self.lights_on = saved_lights_on
         self.previous_state = previous_state
         self.previous_m150 = {}  # type: dict
         self.active_times_state = True
