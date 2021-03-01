@@ -71,6 +71,8 @@ class WS281xLedStatusPlugin(
 
     torch_timer = None  # Timer for torch function
     return_timer = None  # Timer object when we want to return to idle.
+    idle_timer = None
+    idle_timed_out = False
 
     # Called when injections are complete
     def initialize(self):
@@ -295,9 +297,12 @@ class WS281xLedStatusPlugin(
 
     # Lights and torch on/off handling
     def activate_lights(self):
+        # Notify the UI
         self._send_UI_msg("lights", {"on": True})
+        # Actually do the action
         self.lights_on = True
         self.update_effect("on")
+        # Store state across restart
         self._settings.set(["lights_on"], True)
         self._settings.save()
         self._logger.info("Turning lights on")
@@ -306,6 +311,7 @@ class WS281xLedStatusPlugin(
         self._send_UI_msg("lights", {"on": False})
         self.lights_on = False
         self.update_effect("off")
+        # Store state across restart
         self._settings.set(["lights_on"], False)
         self._settings.save()
         self._logger.info("Turning light off")
@@ -358,6 +364,10 @@ class WS281xLedStatusPlugin(
         if self.return_timer is not None and self.return_timer.is_alive():
             self.return_timer.cancel()
 
+        # Cancel idle timeout if active
+        if self.idle_timer is not None and self.idle_timer.is_alive():
+            self.idle_timer.cancel()
+
         # If torch is on, state is saved until torch is finished
         if self.torch_on and mode_name != "torch":
             self.next_state = mode_name
@@ -372,6 +382,18 @@ class WS281xLedStatusPlugin(
         if not self._settings.get(["effects", mode_name.split(" ")[0], "enabled"]):
             return
 
+        # Start idle timeout if necessary:
+        if mode_name == "idle":
+            timeout = self._settings.get_int(["effects", "idle", "timeout"])
+            if timeout > 0:
+                self.idle_timer = util.start_daemon_timer(
+                    interval=timeout, target=self.idle_timeout
+                )
+        elif self.idle_timed_out:
+            # Timed out previously, turn lights back on for this print
+            self.activate_lights()
+            self.idle_timed_out = False
+
         # Start return to idle timer if necessary
         if mode_name == "success":
             return_to_idle = self._settings.get_int(
@@ -379,7 +401,7 @@ class WS281xLedStatusPlugin(
             )
             if return_to_idle > 0:
                 self.return_timer = util.start_daemon_timer(
-                    return_to_idle, self.update_effect, args=("idle",)
+                    interval=return_to_idle, target=self.update_effect, args=("idle",)
                 )
 
         # Finally, start updating the effect
@@ -438,6 +460,10 @@ class WS281xLedStatusPlugin(
             self._logger.info("Previous event: {}".format(self.previous_event))
             self.update_effect(self.previous_event)
         self.previous_event = ""
+
+    def idle_timeout(self):
+        self.idle_timed_out = True
+        self.deactivate_lights()
 
     def process_gcode_q(
         self,

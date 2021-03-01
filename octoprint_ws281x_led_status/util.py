@@ -137,7 +137,7 @@ def start_daemon_thread(target, args=(), kwargs=None, name="WS281x LED Status th
     return t
 
 
-def start_daemon_timer(target, interval, args=(), kwargs=None):
+def start_daemon_timer(interval, target, args=(), kwargs=None):
     if kwargs is None:
         kwargs = {}
     t = threading.Timer(interval=interval, function=target, args=args, kwargs=kwargs)

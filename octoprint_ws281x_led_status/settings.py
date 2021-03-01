@@ -37,6 +37,7 @@ defaults = {
             "effect": "Color Wipe 2",
             "color": "#00ff00",
             "delay": "75",
+            "timeout": "0",
         },
         "disconnected": {
             "enabled": True,
