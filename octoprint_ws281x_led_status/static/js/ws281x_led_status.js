@@ -86,7 +86,7 @@ $(function () {
                 return;
             }
             if (data.type === "lights") {
-                if (data.on) {
+                if (data.payload.on) {
                     self.lights_on(true);
                 } else {
                     self.lights_on(false);
