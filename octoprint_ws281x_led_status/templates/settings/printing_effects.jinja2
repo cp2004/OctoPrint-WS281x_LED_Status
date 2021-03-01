@@ -44,6 +44,14 @@
     {{ effect("startup", "Startup") }}
     <hr>
     {{ effect("idle", "Idle") }}
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: {{ binding.effect_binding("idle.enabled") }}">
+        <label for="ws_idle_timeout" class="inline">Idle turns off after</label>
+        <div class="input-append">
+            <input id="ws_idle_timeout" class="input-medium" type="number" data-bind="value: {{ binding.effect_binding("idle.timeout") }}">
+            <span class="add-on">secs</span>
+        </div>
+        <p class="help-block">Set this to 0 to disable idle timeout.</p>
+    </div>
     <hr>
     {{ effect("disconnected", "Disonnected") }}
     <hr>
@@ -62,5 +70,5 @@
     {{ effect("paused", "Paused") }}
     <hr>
     {{ effect("printing", "Printing") }}
-    <p class="help-block"><span class="label label-warning">Warning</span> Enabling this effect takes priority over the progress efffect</p>
+    <p class="help-block"><span class="label label-warning">Warning</span> Enabling this effect takes priority over the progress effect</p>
 </form>
