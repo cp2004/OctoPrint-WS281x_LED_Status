@@ -5,9 +5,11 @@ __author__ = "Charlie Powell <cp2004.github@gmail.com"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
 
-import subprocess
+import logging
 import threading
 from time import sleep, tzname
+
+from octoprint.util.commandline import CommandlineCaller
 
 
 def hex_to_rgb(h):
@@ -97,26 +99,39 @@ def wheel(pos):
 
 
 def run_system_command(command, password=None):
-    process = subprocess.Popen(
-        command,
-        stdin=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-    )
-    if password:
-        stdout, stderr = process.communicate("{}\n".format(password).encode())
-    else:
-        stdout, stderr = process.communicate()
+    logger = logging.getLogger("octoprint.plugins.ws281x_led_status.commandline")
+    caller = CommandlineCaller()
+    try:
+        if password:
+            returncode, stdout, stderr = caller.call(command, input=password)
+        else:
+            returncode, stdout, stderr = caller.call(command)
 
-    if (
-        stderr
-        and "Sorry" in stderr.decode("utf-8")
-        or "no password" in stderr.decode("utf-8")
-    ):
-        # .decode for Python 2/3 compatibility, make sure utf-8
-        return stdout.decode("utf-8"), "password"
+    except Exception as e:
+        logger.error("Error running command `{}`".format("".join(command)))
+        logger.exception(e)
+        return None, "exception"
+
+    if returncode != 0:
+        logger.error(
+            "Command for `{}` failed with return code {}".format(
+                "".join(command), returncode
+            )
+        )
+        logger.error("STDOUT: {}".format(stdout))
+        logger.error("STDOUT: {}".format(stderr))
+        error = "command"
     else:
-        return stdout.decode("utf-8"), None
+        # Convert output to joined string instead of list
+        stdout = "\n".join(stdout)
+        stderr = "\n".join(stderr)
+
+        if stderr and "Sorry" in stderr or "no password" in stdout:
+            error = "password"
+        else:
+            error = None
+
+    return stdout, error
 
 
 def get_timezone():
