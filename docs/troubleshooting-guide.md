@@ -42,7 +42,7 @@ From the `plugin_ws281x_led_status_debug.log` then it likely means that you have
 
 \*\*\*\*[**Specific to this Elecrow 5 inch HDMI touchscreen**](https://www.elecrow.com/wiki/index.php?title=RC050_5_inch_HDMI_800_x_480_Capacitive_Touch_LCD_Display_for_Raspberry_Pi/_PC/_SONY_PS4)\*\*\*\*
 
-User reported that SPI failed to initialise with the above screen, however commenting out the lines the guide asked you to enter meant that both the screen and LEDs could work at the same time.
+A user reported that SPI failed to initialise with the above screen, however commenting out the lines the guide asked you to enter meant that both the screen and LEDs could work at the same time.
 
 ### No LED output on a Raspberry Pi 4B \(rev 1.4\), and the log says 'Unsupported board'
 
@@ -55,4 +55,8 @@ Some strips do not like 3.3V signals, and if you do use 3.3v \(**without a level
 ### Random flickering of LEDs, unstable signal
 
 Adding a 470Ω resistor in the signal line can help. Some guides recommend this, in my experience it is not always required. Worth a try if you have unstable signal to the LEDs. [Link to issue](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/72#issuecomment-775382060).
+
+### More unstable signal fixes
+
+Mixed reports that using a sacrificial LED on a short wire \(to avoid voltage drop\) can be beneficial for the LED strip. See [this Hackaday article](https://hackaday.com/2017/01/20/cheating-at-5v-ws2812-control-to-use-a-3-3v-data-line/) for more details. This solution is untested, only linked because it might be useful.
 

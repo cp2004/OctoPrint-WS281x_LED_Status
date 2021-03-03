@@ -15,7 +15,7 @@ ignored_labels:
   - up for grabs
   - upstream library
 ignored_authors:
-  - empty
+  - cp2004
   
 validation_comment: >
   Hi @@@AUTHOR@@,

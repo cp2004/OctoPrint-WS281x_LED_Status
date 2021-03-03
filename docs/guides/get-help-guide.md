@@ -6,9 +6,9 @@ description: Need help using the plugin? Read this page first.
 
 Please select the area that most describes what you need help with:
 
-* Configuration of the plugin
-* Connecting LEDs and getting them to work
-* Reporting a bug in the plugin
+* [Configuration of the plugin](get-help-guide.md#configuration-of-the-plugin)
+* [Connecting LEDs and getting them to work](get-help-guide.md#connecting-leds-and-making-them-work)
+* [Reporting a bug in the plugin](get-help-guide.md#reporting-a-bug-with-the-plugin)
 
 ### Configuration of the plugin
 
@@ -31,7 +31,7 @@ Next up is the [troubleshooting guide](../troubleshooting-guide.md), where there
 
 Before asking for help, please ensure that your LED strip works with other devices if possible. The best thing to check is with an Arduino, since these work more reliably than Raspberry Pi & Python. 
 
-You can seek support on the [OctoPrint community forums](https://community.octoprint.org), or the[ Discord Server](https://discord.octoprint.org) as well as opening a ['Get Help'](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=question&template=question.md&title=) issue. Please note that at some point these may be disabled if the load gets too high.
+You can seek support by opening a ['Get Help'](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=question&template=question.md&title=) issue, on the [OctoPrint community forums](https://community.octoprint.org), or the[ Discord Server](https://discord.octoprint.org). Helpful people are around most of the time to get your problems solved.
 {% endhint %}
 
 ### Reporting a bug with the plugin
