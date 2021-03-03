@@ -111,7 +111,7 @@ defaults = {
     "transitions": {
         "fade": {
             "enabled": True,
-            "time": 1000,
+            "time": "750",
         }
     },
     "progress_temp_start": 0,
