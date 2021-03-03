@@ -169,7 +169,7 @@ class EffectRunner:
             )
             # Set timer to turn LEDs off after fade
             self.turn_off_timer = start_daemon_timer(
-                interval=self.transition_settings["fade"]["time"] / 1000,
+                interval=float(self.transition_settings["fade"]["time"]) / 1000,
                 target=self.lights_off,
             )
         else:
@@ -457,7 +457,7 @@ class BrightnessManager:
         """
         Calculate a list of brightness values per ms, based on sine curve
         """
-        fade_time = self.transition_settings["fade"]["time"]  # Fade time in ms
+        fade_time = int(self.transition_settings["fade"]["time"])  # Fade time in ms
         step = (math.pi / 2) / (fade_time / 20)
         # Difference between steps, in radians (per 20ms)
 
