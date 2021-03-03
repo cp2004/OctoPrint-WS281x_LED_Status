@@ -24,6 +24,7 @@ from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
 from rpi_ws281x import PixelStrip
 
 from octoprint_ws281x_led_status import constants
+from octoprint_ws281x_led_status.effects import error_handled_effect
 from octoprint_ws281x_led_status.util import (
     apply_color_correction,
     clear_queue,
@@ -292,16 +293,16 @@ class EffectRunner:
         else:
             self.blank_leds()
 
-    def run_effect(self, target, args=(), kwargs=None, name="WS281x Effect"):
+    def run_effect(self, target, kwargs=None, name="WS281x Effect"):
         if kwargs is None:
             kwargs = {}
 
         self.stop_effect()
 
+        # Targets error handler, which passes off to the effect with effect_args
         self.effect_thread = start_daemon_thread(
-            target=target,
-            args=args,
-            kwargs=kwargs,
+            target=error_handled_effect,
+            kwargs={"target": target, "logger": self._logger, "effect_args": kwargs},
             name=name,
         )
 
