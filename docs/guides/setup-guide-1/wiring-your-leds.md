@@ -46,7 +46,7 @@ Make sure you have a common ground between the power supply and Pi.
 You can use a level shifting chip to convert the signals from 3.3v to 5v. Recommended one to use is a 74AHCT125, I have this and it works well.
 
 {% hint style="info" %}
- Please note that whilst the wiring below is on a breadboard, this is for illustrative purposes and is not suitable for high current installations. Test with a breadboard and few LEDs, then connect them directly.
+Please note that whilst the wiring below is on a breadboard, this is for illustrative purposes and is not suitable for high current installations. Test with a breadboard and few LEDs, then connect them directly.
 {% endhint %}
 
 Wiring of this is as follows:
@@ -70,7 +70,7 @@ Wiring of this is as follows:
 The diode method is a quick way to reduce the power supply voltage slightly, so that the LED strip can read the 3.3v.
 
 {% hint style="warning" %}
- **Make sure you have a diode that can cope with the amount of power drawn!** As a result of them running at lower voltage the LEDs may not be as bright.
+**Make sure you have a diode that can cope with the amount of power drawn!** As a result of them running at lower voltage the LEDs may not be as bright.
 {% endhint %}
 
 {% hint style="info" %}

@@ -10,21 +10,24 @@ The plugin uses the Raspberry Pi's SPI interface to push data to the LED strip, 
 
 As a result of this, there are a couple of OS level configuration items that need to be handled. Luckily for you, the plugin makes this very easy for you to do by providing a UI to run the commands.
 
-## Initial Setup Wizard
+## OS Configuration Test
 
 {% hint style="info" %}
 **Note:** You may need to reload the web UI after installing the plugin, to get the wizard to show up. **It will not display if all settings are correct** or you have dismissed the wizard once already.
 {% endhint %}
 
-The setup wizard requires root access, and therefore the password for the Pi user if you have not configured passwordless `sudo`, as is default on OctoPi. This password is not stored, and is only used for the steps below.
+The configuration test is available in the initial setup wizard for initial testing. Go ahead, open it up and hit 'run tests' for it to test your system and report the status.
 
-* **Add the `pi` user to the `gpio` group.** 
+If any tests fail, they will be reported and a password popup will be shown. Carrying out the configuration requires running commands as `sudo` and therefore the password for the Pi user \(defaults to `raspberry`\)  if you have not configured password-less `sudo`, as is default on OctoPi. This password is not stored, and is only used for the steps below.
+
+* **Add the `pi` user to the `gpio` group.**
 
   Already configured on newer images. Means the `pi` users can access the GPIO pins.
 
   * Runs `sudo adduser pi gpio`
+  * This command uses the current user, do not worry if you have setup OctoPrint as a different user.
 
-* **Enable SPI.**  The plugin uses SPI to drive the LEDs, which is disabled by default and needs to be turned on.
+* **Enable SPI.** The plugin uses SPI to drive the LEDs, which is disabled by default and needs to be turned on.
   * Adds `dtparam=spi=on` to `/boot/config.txt`
 * **Increase SPI buffer size.**  Whilst the plugin will work without this, it will only work well with a handful of LEDs.
   * Adds `spidev.bufsize=32768` to the end of `/boot/cmdline.txt`
@@ -34,13 +37,11 @@ The setup wizard requires root access, and therefore the password for the Pi use
   * Adds `core_freq_min=500` to `/boot/config.txt`
 
 {% hint style="success" %}
-**WS281x LED Status OS configuration complete!**   
+**WS281x LED Status OS configuration complete!**  
 You will need to reboot your Pi for these changes to take effect.
 {% endhint %}
 
 ## Final stage: Initial Configuration
 
 {% page-ref page="initial-configuration.md" %}
-
-
 
