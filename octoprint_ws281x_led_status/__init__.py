@@ -146,6 +146,7 @@ class WS281xLedStatusPlugin(
             or os.path.exists(
                 os.path.join("/usr", "local", "bin", "docker-entrypoint.sh")
             ),
+            "docs_url": constants.DOCS_FULL_LINK,
         }
 
     # Wizard plugin

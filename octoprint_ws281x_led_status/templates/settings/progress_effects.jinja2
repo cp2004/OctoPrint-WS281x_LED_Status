@@ -1,5 +1,5 @@
 {% import "macros/docs.jinja2" as docs %}
-{% import "macros/binding.jinja2" as binding %}
+{% import "macros/binding.jinja2" as binding with context %}
 
 {% macro labelled_checkbox(setting, label) %}
 <label class="checkbox inline">
