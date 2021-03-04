@@ -36,7 +36,7 @@ class PluginApi:
             CMD_TORCH_ON: [],
             CMD_TORCH_OFF: [],
             CMD_TEST_OS: [],
-            CMD_TEST_LED: ["red", "green", "blue"],
+            CMD_TEST_LED: ["color"],
             WIZ_ADDUSER: ["password"],
             WIZ_ENABLE_SPI: ["password"],
             WIZ_INCREASE_BUFFER: ["password"],
@@ -79,8 +79,9 @@ class PluginApi:
     def test_led(self, data):
         # We mock an M150 command here, because it is the easiest way
         # Calling update_effect skips the checking of M150 intercepting or the printer
-        self.plugin.update_effect(
-            "M150 R{} G{} B{}".format(
-                data.get("red"), data.get("green"), data.get("blue")
-            )
+        test_color = "M150 R{} G{} B{}".format(
+            util.hex_to_rgb(data.get("color"))[0],
+            util.hex_to_rgb(data.get("color"))[1],
+            util.hex_to_rgb(data.get("color"))[2]
         )
+        self.plugin.update_effect(test_color)

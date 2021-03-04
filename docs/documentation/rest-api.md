@@ -36,7 +36,7 @@ Details of the plugin's current state
 
 ```javascript
 {
-  "lights_on": false, 
+  "lights_on": false,
   "torch_on": false
 }
 ```
@@ -77,7 +77,7 @@ The command to be sent to the plugin. See commands below.
 
 ```javascript
 {
-  "lights_on": false, 
+  "lights_on": false,
   "torch_on": false
 }
 ```
@@ -99,9 +99,8 @@ See also the [SimpleApi docs](https://docs.octoprint.org/en/devel/plugins/mixins
 | `torch_on` | None | Turn the torch mode on |
 | `torch_off` | None | Turn the torch mode off. Only available if torch mode is configured as toggle. |
 | `test_os_config` | None | Begin an OS configuration test. Asynchronous, data is returned on the socket |
-| `test_led` | `red`, `green`, `blue` | Set the LEDs to the configured RGB colour |
+| `test_led` | color | Set the LEDs to the configured HTML RGB colour |
 
 {% hint style="info" %}
 There are also API commands available for OS configuration options. However, it is not recommended that these are used by anything other than the plugin itself, so they are undocumented.
 {% endhint %}
-
