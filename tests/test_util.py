@@ -3,8 +3,6 @@ from __future__ import absolute_import, division, unicode_literals
 
 import unittest
 
-import util
-
 # from octoprint.util import to_bytes
 
 
@@ -79,26 +77,26 @@ class WS281xUtilTestCase(unittest.TestCase):
     #         called_once_with=to_bytes("raspberry\n", "utf-8"),
     #     )
 
-    def check_sys_command(
-        self,
-        command,
-        expected_stdout,
-        expected_stderr,
-        expected_return,
-        password=None,
-        called_once_with=None,
-    ):
-        from octoprint_ws281x_led_status.util import run_system_command
+    # def check_sys_command(
+    #     self,
+    #     command,
+    #     expected_stdout,
+    #     expected_stderr,
+    #     expected_return,
+    #     password=None,
+    #     called_once_with=None,
+    # ):
+    #     from octoprint_ws281x_led_status.util import run_system_command
 
-        mock_popen = util.setup_mock_popen(expected_stdout, expected_stderr)
+    #     mock_popen = util.setup_mock_popen(expected_stdout, expected_stderr)
 
-        test_return = run_system_command(command, password)  # No password supplied
+    #     test_return = run_system_command(command, password)  # No password supplied
 
-        self.assertEqual(test_return, expected_return)
-        if called_once_with:
-            mock_popen.communicate.assert_called_once_with(called_once_with)
-        else:
-            mock_popen.communicate.assert_called_once_with()
+    #     self.assertEqual(test_return, expected_return)
+    #     if called_once_with:
+    #         mock_popen.communicate.assert_called_once_with(called_once_with)
+    #     else:
+    #         mock_popen.communicate.assert_called_once_with()
 
     def test_blend_colors(self):
         from octoprint_ws281x_led_status.util import blend_two_colors
