@@ -1,4 +1,4 @@
-{% import "macros/binding.jinja2" as binding %}
+{% import "macros/binding.jinja2" as binding with context %}
 
 {% macro enabled_entry(setting, name) %}
 <div data-bind="visible: {{ binding.bind_setting(setting) }}">

@@ -1,5 +1,5 @@
 {% import "macros/binding.jinja2" as binding %}
-{% import "macros/docs.jinja2" as docs %}
+{% import "macros/docs.jinja2" as docs with context %}
 
 {% macro strip_binding(setting) %}{{ binding.bind_setting("strip." + setting) }}{% endmacro %}
 

@@ -146,6 +146,7 @@ class WS281xLedStatusPlugin(
             or os.path.exists(
                 os.path.join("/usr", "local", "bin", "docker-entrypoint.sh")
             ),
+            "docs_url": constants.DOCS_FULL_LINK,
         }
 
     # Wizard plugin
@@ -629,7 +630,12 @@ class WS281xLedStatusPlugin(
                         "name": "Release Candidate",
                         "branch": "pre-release",
                         "comittish": ["pre-release", "master"],
-                    }
+                    },
+                    {
+                        "name": "Development",
+                        "branch": "devel",
+                        "comittish": ["devel", "master"],
+                    },
                 ],
                 "current": self._plugin_version,
                 # update method: pip
