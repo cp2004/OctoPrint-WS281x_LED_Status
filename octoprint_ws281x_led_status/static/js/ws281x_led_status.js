@@ -154,12 +154,8 @@ $(function () {
             self.current_req(current.toString(10) + "A");
         };
 
-        self.sendTestCommand = function (red, green, blue) {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "test_led", {
-                red: red,
-                green: green,
-                blue: blue,
-            });
+        self.sendTestCommand = function (color) {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "test_led", { color } );
         };
 
         self.advancedStripOpen = ko.observable(false);

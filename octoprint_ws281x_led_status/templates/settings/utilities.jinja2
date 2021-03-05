@@ -2,14 +2,20 @@
 <h5>Utilities {{ help_icon("utilities")  }}</h5>
 
 <h5>LED Strip test</h5>
-<p>Provided so you can test the individual colours of your LED Strip.</p>
-<p>Can help to diagnose both hardware problems (Such as specific LEDs are broken), and help to select the correct strip type.</p>
+<p>Provided so you can test the individual colours of your LED Strip, and test specific color combinations.</p>
+<p>Can help to diagnose both hardware problems (Such as specific LEDs are broken), help to select the correct strip type, and allow you to see if you like certain colors for customizations.</p>
 <p>Sets LEDs to solid colour until the next event happens.</p>
-<button class="btn btn-danger" id="led-test-red" data-bind="click: function(){ sendTestCommand(255, 0, 0) }"><i class="far-custom fa-custom-lightbulb"></i> Test red</button>
-<button class="btn btn-success" id="led-test-green" data-bind="click: function(){ sendTestCommand(0, 255, 0) }"><i class="far-custom fa-custom-lightbulb"></i> Test green</button>
-<button class="btn btn-primary" id="led-test-blue" data-bind="click: function(){ sendTestCommand(0, 0, 255)}"><i class="far-custom fa-custom-lightbulb"></i> Test blue</button>
-<button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand(255, 255, 255) }"><i class="far-custom fa-custom-lightbulb"></i> Test white</button>
-<br>
+<p>
+    <button class="btn btn-danger" id="led-test-red" data-bind="click: function(){ sendTestCommand('#ff0000') }"><i class="far-custom fa-custom-lightbulb"></i> Test red</button>
+    <button class="btn btn-success" id="led-test-green" data-bind="click: function(){ sendTestCommand('#00ff00') }"><i class="far-custom fa-custom-lightbulb"></i> Test green</button>
+    <button class="btn btn-primary" id="led-test-blue" data-bind="click: function(){ sendTestCommand('#0000ff') }"><i class="far-custom fa-custom-lightbulb"></i> Test blue</button>
+    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand('#ffffff') }"><i class="far-custom fa-custom-lightbulb"></i> Test white</button>
+</p>
+<p>Sets LEDs to specific RGB colors until the next event happens.</p>
+<p>
+    <input id="ws_test_color" type="color" class="input-small">
+    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand(document.querySelector('#ws_test_color').value) }"><i class="far-custom fa-custom-lightbulb"></i> Test Custom Color</button>
+</p>
 <hr>
 <h5>OS Config Test</h5>
 <p>Checks that the OS level configuration for SPI is correct, as per the initial setup wizard.</p>
