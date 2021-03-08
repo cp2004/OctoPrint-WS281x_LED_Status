@@ -192,7 +192,7 @@ class EffectRunner:
             self._logger.debug("Received message to update progress: {}".format(msg))
 
     def parse_m150(self, msg):
-        red = green = blue = 0  # Start at 0 - sending blank M150 turns LEDs off
+        red = green = blue = white = 0  # Start at 0 - sending blank M150 turns LEDs off
         brightness = self.max_brightness  # No 'P' param? Use set brightness
 
         msg = msg.upper()
@@ -215,12 +215,13 @@ class EffectRunner:
                 # R/G/B params take priority over white, see #33 for details
                 w = constants.regex_w_param.search(msg)
                 if w:
-                    red = green = blue = int_0_255(w.group("value"))
+                    red = green = blue = white = int_0_255(w.group("value"))
             # Save parsed to class
             self.previous_m150 = {
                 "r": red,
                 "b": blue,
                 "g": green,
+                "w": white,
                 "brightness": brightness,
             }
             self.previous_state = "M150"
@@ -233,18 +234,25 @@ class EffectRunner:
         if self.check_times() and self.lights_on:  # Respect lights on/off
             # Set brightness
             self.brightness_manager.set_brightness(self.previous_m150["brightness"])
+
+            # Work out the colour - if specified W, use that if available. Falls back on auto-detection
+            if self.color_correction["white_override"] and self.previous_m150["w"]:
+                color = (0, 0, 0, int(self.previous_m150["w"]))
+            else:
+                color = apply_color_correction(
+                    self.color_correction,
+                    self.previous_m150["r"],
+                    self.previous_m150["g"],
+                    self.previous_m150["b"],
+                )
+
             # Set the effects
             self.run_effect(
                 target=constants.EFFECTS["Solid Color"],
                 kwargs={
                     "strip": self.strip,
                     "queue": self.effect_queue,
-                    "color": apply_color_correction(
-                        self.color_correction,
-                        self.previous_m150["r"],
-                        self.previous_m150["g"],
-                        self.previous_m150["b"],
-                    ),
+                    "color": color,
                     "brightness_manager": self.brightness_manager,
                 },
                 name="Solid Color",
