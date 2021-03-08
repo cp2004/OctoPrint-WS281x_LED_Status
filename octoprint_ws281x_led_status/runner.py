@@ -224,6 +224,11 @@ class EffectRunner:
                 "brightness": brightness,
             }
             self.previous_state = "M150"
+            self._logger.debug(
+                "Parsed new M150: M150 R{red} G{green} B{blue} (brightness: {brightness}".format(
+                    **locals()
+                )
+            )
 
         if self.check_times() and self.lights_on:  # Respect lights on/off
             # Set brightness
