@@ -94,7 +94,6 @@ def both_ends(
 
     def progress(min_pixel, max_pixel, val, reverse):
         number_pixels = max_pixel - min_pixel
-        print(reverse)
         upper_bar = (val / 100) * number_pixels
         upper_remainder, upper_whole = math.modf(upper_bar)
         pixels_remaining = number_pixels
@@ -103,7 +102,6 @@ def both_ends(
             pixel = ((max_pixel - 1) - i) if reverse else i
             strip.setPixelColorRGB(pixel, *progress_color)
             pixels_remaining -= 1
-            print("bottom" + str(pixel) if not reverse else "top" + str(pixel))
 
         if upper_remainder > 0.0:
             tween_color = blend_two_colors(progress_color, base_color, upper_remainder)
@@ -112,7 +110,6 @@ def both_ends(
             )
             strip.setPixelColorRGB(pixel, *tween_color)
             pixels_remaining -= 1
-            print("bottom" + str(pixel) if not reverse else "top" + str(pixel))
 
         for i in range(pixels_remaining):
             pixel = (
@@ -121,7 +118,6 @@ def both_ends(
                 else ((number_pixels - pixels_remaining) + i)
             )
             strip.setPixelColorRGB(pixel, *base_color)
-            print("bottom" + str(pixel) if not reverse else "top" + str(pixel))
 
     # Set the progress to either end of the strip
 
