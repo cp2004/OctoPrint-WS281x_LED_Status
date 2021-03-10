@@ -16,7 +16,7 @@ SimpleAPI Get
 {% endapi-method-summary %}
 
 {% api-method-description %}
-Get current state of the plugin
+Get current state of the plugin, which includes the light status and the torch status.
 {% endapi-method-description %}
 
 {% api-method-spec %}
@@ -51,7 +51,7 @@ SimpleAPI Command
 {% endapi-method-summary %}
 
 {% api-method-description %}
-Send commands to the plugin.
+Send commands to the plugin, to make it do something. 
 {% endapi-method-description %}
 
 {% api-method-spec %}
@@ -90,7 +90,7 @@ The command to be sent to the plugin. See commands below.
 See also the [SimpleApi docs](https://docs.octoprint.org/en/devel/plugins/mixins.html#octoprint.plugin.SimpleApiPlugin) for details about how the request should be structured.
 {% endhint %}
 
-### Commands
+## Commands
 
 | Command | Parameters | Explanation |
 | :--- | :--- | :--- |
@@ -99,8 +99,9 @@ See also the [SimpleApi docs](https://docs.octoprint.org/en/devel/plugins/mixins
 | `torch_on` | None | Turn the torch mode on |
 | `torch_off` | None | Turn the torch mode off. Only available if torch mode is configured as toggle. |
 | `test_os_config` | None | Begin an OS configuration test. Asynchronous, data is returned on the socket |
-| `test_led` | color | Set the LEDs to the configured HTML RGB colour |
+| `test_led` | `color` | Set the LEDs to the configured HTML RGB colour, color should be a full 7 character hex \(eg. `#ff00ff`\) |
 
 {% hint style="info" %}
-There are also API commands available for OS configuration options. However, it is not recommended that these are used by anything other than the plugin itself, so they are undocumented.
+There are also API commands available for OS configuration options. However, it is not recommended that these are used by anything other than the plugin itself, so they are undocumented. They may be restricted further in the future.
 {% endhint %}
+

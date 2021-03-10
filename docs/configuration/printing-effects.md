@@ -17,15 +17,15 @@ Some events also have some specific settings, these are detailed alongside them.
 
 ## Events
 
-* Startup
-* Printer Connected/Idle
-  * This effect has a configurable 'Idle timeout', where the LEDs will turn off after a period of inactivity on idle. Set to 0 to disable.
-* Printer Disconnected
-* Print Success
-  * This effect has configurable 'Return to idle' time in seconds. Set to 0 to disable returning to idle.
-* Print Paused
-* Print Failed
-* Printing
+* **Startup**
+* **Printer Connected/Idle**
+  * This effect has a configurable 'Idle timeout' in seconds, where the LEDs will turn off after a period of inactivity on idle. They will turn back on when other effects resume. Set to 0 to disable.
+* **Printer Disconnected**
+* **Print Success**
+  * This effect has configurable 'Return to idle' time in seconds, where the LEDs will change back to the idle effect after a period of time. Set to 0 to disable.
+* **Print Paused**
+* **Print Failed**
+* **Printing**
   * This effect will override the print progress effect.
 
 ## Effects
@@ -36,7 +36,7 @@ All the standard effects available, with fancy visualisations!
 
 Sets all LEDs to one colour, forever.
 
-![](../.gitbook/assets/solid_colour%20%281%29.gif)
+![](../.gitbook/assets/solid_colour.gif)
 
 ### Colour Wipe
 
@@ -54,13 +54,13 @@ Wipes colour pixel by pixel, as above, but to clear it turns around and heads ba
 
 Fades brightness up and down. Looks better in real life than the visualisation below!
 
-![](../.gitbook/assets/pulse%20%282%29.gif)
+![](../.gitbook/assets/pulse%20%283%29.gif)
 
 ### Bounce
 
 Sends a pulse of light bouncing from one side of your strip to the other.
 
-![](../.gitbook/assets/bounce%20%281%29.gif)
+![](../.gitbook/assets/bounce%20%282%29.gif)
 
 ### Solo Bounce
 
@@ -78,7 +78,7 @@ Cycles all the LEDs through the rainbow together.
 
 Rainbow that cycles across the strip, so a full rainbow is across the whole strip at once.
 
-![](../.gitbook/assets/rainbow_cycle%20%281%29.gif)
+![](../.gitbook/assets/rainbow_cycle%20%282%29.gif)
 
 ### Crossover
 
@@ -90,7 +90,7 @@ Two pixels bouncing in opposite directions, crossing over in the middle.
 
 Sets all LEDs to a random colour, then changes a random pixel, to a new random colour
 
-![](../.gitbook/assets/random.gif)
+![](../.gitbook/assets/random%20%283%29.gif)
 
 ### Bouncy Balls
 

@@ -12,9 +12,7 @@ The LED strip will turn on at the start time, off at the end time. Potentially u
 
 {% hint style="warning" %}
 Make sure your system time is set on the server. If you want to change this run `sudo raspi-config` on the Pi.
-{% endhint %}
 
-{% hint style="warning" %}
 This currently does not support the end time being later than the start time, since it will end up with all the LEDs being off.
 {% endhint %}
 
@@ -26,7 +24,7 @@ Fade in and out when the lights are toggled on and off. Configurable for how lon
 
 The torch button can be turned on or off to clear up navbar space if you don't want it. It has the same settings as [standard effects](printing-effects.md) but with some added extras for a manual trigger.
 
-Using @ commands to trigger the torch can enable cool integrations with other software, such as OctoLapse.
+Using [@ commands](../documentation/host-commands.md) to trigger the torch can enable cool integrations with other software, such as OctoLapse.
 
 ### Toggle Mode
 
@@ -44,9 +42,11 @@ For documentation of the command, please see the [M150 Intercept documentation p
 
 ## @ Command Reaction
 
-See the relevant [Host @ commands docs.](../documentation/host-commands.md)
+Please see the relevant [Host @ commands docs](../documentation/host-commands.md) for more information.
 
 ## Debug Logging
 
-Debug logging logs a lot more information about the effect runner process. This will help massively when reporting issues on Github, so please enable it when reporting issues!
+Debug logging logs a lot more information about the effect runner process. This will help massively when reporting issues on GitHub, so please enable it when reporting issues!
+
+The log file is called `plugin_ws281x_led_status_debug.log` and can be downloaded from the Logging section in OctoPrint or from `~/.octoprint/logs` on the filesystem.
 

@@ -6,7 +6,7 @@ description: Detailed descriptions of the LED Strip Configuration dialog.
 
 This documentation aims to explain all of the settings in the LED Strip Configuration dialog, so you can make the most use of them.
 
-### **Strip Settings**
+## **Strip Settings**
 
 | Setting | Value Type | Explanation |
 | :--- | :--- | :--- |
@@ -15,7 +15,7 @@ This documentation aims to explain all of the settings in the LED Strip Configur
 | Max Brightness | Percentage | The maximum brightness the strip should reach in any effect. |
 | GPIO Pin | Number | The pin that the LEDs are connected to. This should be BCM [GPIO 10](https://pinout.xyz/pinout/pin19_gpio10) for normal operation, other pins are available when OctoPrint is run as root and can use PWM - though this is explicitly **not recommended** for security reasons. |
 
-### Colour Correction Settings
+## Colour Correction Settings
 
 Colour correction settings allow you to adjust the colours globally on your LED strip. If your LEDs are off colour, you can adjust them here.
 
@@ -24,50 +24,20 @@ Colour correction settings allow you to adjust the colours globally on your LED 
 | Red correction | Percentage | The amount of red that should be used in the colour. |
 | Blue correction | Percentage | See 'Red correction', but for blue |
 | Green correction | Percentage | See 'Red correction', but for green |
-| Use dedicated white | Checkbox | If you have an RGBW strip, check this to use the dedicated RGBW LEDs when the colour is 100% white. |
-| White brightness | Percentage | The brightness of the dedicated white LEDs to use. |
+| Use dedicated white | Checkbox | If you have an RGBW strip, check this to use the dedicated RGBW LEDs when the colour is 100% white. The white LED will also be used when an `M150 W<value>` command is sent with this option enabled. |
+| White brightness | Percentage | The brightness of the dedicated white LEDs to use. Only available if dedicated white is checked. |
 
-### Advanced Settings
+## Advanced Settings
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align:left">Setting</th>
-      <th style="text-align:left">Value Type</th>
-      <th style="text-align:left">Explanation</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align:left">Frequency</td>
-      <td style="text-align:left">Number</td>
-      <td style="text-align:left">Frequency to drive the LEDs at. This should be 800 000 in normal use,
-        some older strips may require different values.</td>
-    </tr>
-    <tr>
-      <td style="text-align:left">Invert Pin output</td>
-      <td style="text-align:left">Checkbox</td>
-      <td style="text-align:left">Invert the signal from the Raspberry Pi. Useful if your setup uses a level
-        shifter that inverts the signal, it can be inverted again to make it the
-        right way around in the end.</td>
-    </tr>
-    <tr>
-      <td style="text-align:left">PWM Channel</td>
-      <td style="text-align:left">Number</td>
-      <td style="text-align:left">
-        <p><em>(To be removed from the UI in a future version)</em>
-        </p>
-        <p>Internal PWM Channel. Irrelevant to the plugin since it uses SPI in most
-          cases.</p>
-      </td>
-    </tr>
-  </tbody>
-</table>
+| Setting | Value Type | Explanation |
+| :--- | :--- | :--- |
+| Frequency | Number | Frequency to drive the LEDs at. This should be 800 000 in normal use, some older strips may require different values. |
+| Invert Pin output | Checkbox | Invert the signal from the Raspberry Pi. Useful if your setup uses a level shifter that inverts the signal, it can be inverted again to make it the right way around in the end. |
 
-### Manually editable settings
+## Manually editable settings
 
 {% hint style="warning" %}
-These settings should not be edited in standard use of the plugin. They are available \*just in case\* you need to edit them. Do not touch if you do not know what you are doing, serious issues with your Pi may occur if these are set wrong.
+These settings should not be edited in standard use of the plugin. They are available _just in case_ you need to edit them. **Do not touch** if you do not know what you are doing, **serious issues with your Pi may occur** if these are set wrong.
 {% endhint %}
 
 | Setting key | Value Type |

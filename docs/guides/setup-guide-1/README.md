@@ -26,8 +26,6 @@ Using the OctoPrint Docker container? There's some [additional steps you have to
 
 ### Check you have the right hardware:
 
-{% page-ref page="supported-hardware.md" %}
-
 ### Next up: Wiring your LEDs
 
 {% page-ref page="wiring-your-leds.md" %}

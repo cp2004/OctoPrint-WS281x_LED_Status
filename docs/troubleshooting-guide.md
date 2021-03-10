@@ -16,11 +16,13 @@ Got something to contribute? You can send a PR to edit this page, just click the
 
 Check you have a common ground between an external power supply, and the Pi. See more \(including an example video\) in the [issue opened here](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/25)
 
-## The colours of my LEDs are wrong
+Flickering can also be as a result of generally poor connections, for the best connection you can solder the circuit together. Please check that the connections you choose are suitable!
+
+## The colours of the LEDs are wrong
 
 Make sure you have the correct order of RGB strip selected in the strip settings. You can use the LED Strip test to help debug this issue quickly.
 
-## Can't find the plugin after installed
+## Can't find the plugin after it's been installed
 
 Make sure you restart the OctoPrint server, and reload the web interface. You should see the wizard pop up, or the light/torch icon in the navbar.
 
@@ -30,7 +32,7 @@ Make sure you restart the OctoPrint server, and reload the web interface. You sh
 
 It is likely that the OS level config is incorrect. To fix this, please head to the OS Configuration Test section \(under 'Utilities'\) to run a test and fix the configuration.[ See the OS Configuration Test docs.](utilities.md#os-configuration-test)
 
-## Unable to initialize SPI
+## No LED output and 'Unable to initialize SPI' in the logs
 
 If you get the error:
 
@@ -47,6 +49,8 @@ A user reported that SPI failed to initialise with the above screen, however com
 ## No LED output on a Raspberry Pi 4B \(rev 1.4\), and the log says 'Unsupported board'
 
 The dependency that this plugin relies on was not updated to add support for these boards as of the last release of the plugin. Please see [this issue](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/73) for instructions of how to fix it.
+
+This also impacts the compute module 4 boards.
 
 ## Little/no LED output when not using a level shifter
 

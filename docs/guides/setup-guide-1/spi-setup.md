@@ -18,14 +18,14 @@ As a result of this, there are a couple of OS level configuration items that nee
 
 The configuration test is available in the initial setup wizard for initial testing. Go ahead, open it up and hit 'run tests' for it to test your system and report the status.
 
-If any tests fail, they will be reported and a password popup will be shown. Carrying out the configuration requires running commands as `sudo` and therefore the password for the Pi user \(defaults to `raspberry`\)  if you have not configured password-less `sudo`, as is default on OctoPi. This password is not stored, and is only used for the steps below.
+If any tests fail, they will be reported and a password popup will be shown. Carrying out the configuration requires running commands as `sudo` and therefore the password for the Pi user \(defaults to `raspberry`\) if you have not configured password-less `sudo`, as is default on OctoPi. This password is not stored, and is only used for the steps below.
 
 * **Add the `pi` user to the `gpio` group.**
 
   Already configured on newer images. Means the `pi` users can access the GPIO pins.
 
   * Runs `sudo adduser pi gpio`
-  * This command uses the current user, do not worry if you have setup OctoPrint as a different user.
+  * This command always uses the current user, do not worry if you have setup OctoPrint as a different user.
 
 * **Enable SPI.** The plugin uses SPI to drive the LEDs, which is disabled by default and needs to be turned on.
   * Adds `dtparam=spi=on` to `/boot/config.txt`
@@ -40,6 +40,12 @@ If any tests fail, they will be reported and a password popup will be shown. Car
 **WS281x LED Status OS configuration complete!**  
 You will need to reboot your Pi for these changes to take effect.
 {% endhint %}
+
+### Using a non Raspberry Pi OS distro?
+
+OctoPi is based of Raspberry Pi OS, and for the majority of users the setup guide above works fine. However, if your distro does not use the file at `/boot/config.txt`, or `/boot/cmdline.txt` then the setup will fail, because they will not have any effect. You will need to find the equivalent settings for your system
+
+Likewise, running in Docker there are [some additional steps](../setup-in-docker.md) and the OS config test will not work there either.
 
 ## Final stage: Initial Configuration
 

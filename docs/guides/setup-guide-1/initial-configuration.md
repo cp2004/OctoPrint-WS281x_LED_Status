@@ -14,8 +14,8 @@ The final step of the wizard, you should be presented with two key settings to e
 For more details on the rest of these settings, please see the [full documentation](../../configuration/led-strip-configuration.md) of the LED Strip configuration.
 
 {% hint style="success" %}
-**That's it! WS281x LED Status Setup is** _**complete!**_
+**That's it! WS281x LED Status Setup is** _**fully complete!**_
 
-If you haven't already, reboot your Pi for the changes in the previous step, OS Configuration/SPI Setup to take effect. Enjoy your LEDs 🙂✨ 
+If you haven't already, reboot your Pi for the changes in the previous step, OS Configuration/SPI Setup to take effect. Enjoy your LEDs 🙂✨
 {% endhint %}
 

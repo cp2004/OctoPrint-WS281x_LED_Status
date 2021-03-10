@@ -9,16 +9,16 @@ Each progress effect has some standard options, to customise them. Individual ef
 ## Standard Options
 
 * Enabled
-* Effect: One of the available effects
-* Progress Colour The colour to indicate the progress of whatever event is happening.
-* Base Colour
+* Effect: One of the available [effects](printing-effects.md#effects)
+* Progress Colour: The colour to indicate the progress of whatever event is happening.
+* Base Colour:
 
   The base/background colour of the progress indication.
 
 In addition, there are two global options:
 
 * Reverse the direction of the progress bar
-* Base temperature Heating/cooling progress bar will make '0' the temperature specified. Suggested value is just below room temperature, so that the progress bar starts closer to the end of the strip.
+* Base temperature: Heating/cooling progress bar will make '0' the temperature specified. Suggested value is just below room temperature, so that the progress bar starts closer to the end of the strip.
 
 ## Events
 
