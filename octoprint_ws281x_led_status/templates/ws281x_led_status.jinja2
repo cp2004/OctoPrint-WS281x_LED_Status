@@ -1,88 +1,15 @@
 <div id="generic_plugin_ws281x_led_status">
-<!-- WS281X LED STATUS Config Test modal -->
-<div id="WS_OSTestModal" class="modal hide fade">
-	<div class="modal-header">
-		<a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-		<h3>{{ _('OS Config Test') }}</h3>
-	</div>
-	<div class="modal-body">
-        <div style="min-height: 400px;">
-        <p>This runs a test of all the OS configuration required for this plugin to work. <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki/SPI-Setup" target="_blank"><i class="fa fa-lg fa-info-circle"></i></a></p>
-        <button class="btn btn-primary" id="ws_os_config_run" data-bind="click: runConfigTest, enable: !testInProgress()"><i class="fas-custom" data-bind="css: { 'fas-custom fa-custom-running': !testInProgress(), 'fa fa-spinner fa-spin': testInProgress() }"></i> Run Tests</button>
-        <div id="ws_os_config_out" style="margin-top: 10px;">
-            <div class="alert alert-info" data-bind="visible: testInProgress">
-                <strong><i class="fa fa-spinner fa-spin"></i> Test in progress</strong>
-                <br>Running test: <span data-bind="text: currentTest"></span>
-            </div>
-            <div class="alert alert-success" data-bind="visible: testSuccess">
-                <strong><i class="fa fa-check"></i> Tests completed successfully</strong>
-                <br>View the results:
-            </div>
-            <div data-bind="visible: testInProgress() || testSuccess() || testFailures()">
-                <div id="ws_pass_input" data-bind="visible: testFailures() && !testInProgress()">
-                    <div class="alert alert-error">
-                        <p><strong><i class="fa fa-times"></i> Some tests failed.</strong> This means your LEDs may not work properly.</p>
-                        <p>Please follow the steps outlined below to fix this.</p>
-                    </div>
-                    <p>To run the OS commands, we need the password for Pi, since they require root access.</p>
-                    <form class="form-inline">
-                        <label class="inline" for="cfgTestPasswordField"><strong>Password for Pi</strong></label>
-                        <input style="margin-left: 10px" type="password" class="form-control inline" data-bind="textInput: passwordForPi, click: passwdPopoverRemove" id="cfgTestPasswordField"
-                               data-toggle="popover" data-content="Since these commands require root access to run, they need the password for Pi. Please enter and try again." data-original-title="Password Required" data-placement="bottom" data-trigger="manual">
-                        <p class="help-block">If you haven't changed it, this would be <code>raspberry</code></p>
-                    </form>
-                </div>
-                <div data-bind="visible: addUserStatus() === 'passed'">
-                    <p><i class="fa fa-check text-success"></i> User <code>pi</code> is in the <code>gpio</code> group
-                </div>
-                <div data-bind="visible: addUserStatus() === 'failed'">
-                    <p><i class="fa fa-times text-error"></i> User <code>pi</code> <strong>is not in the</strong> <code>gpio</code> group</p>
-                    <p>Fix this by running <code>sudo adduser pi gpio</code>
-                        <button class="btn-primary" data-bind="click: fixAddUser"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button>
-                    </p>
-                </div>
-                <div data-bind="visible: spiEnabledStatus() === 'passed'">
-                    <p><i class="fa fa-check text-success"></i> SPI is enabled</p>
-                </div>
-                <div data-bind="visible: spiEnabledStatus() === 'failed'">
-                    <p><i class="fa fa-times text-error"></i> SPI is not enabled</p>
-                    <p>Fix this by adding <code>dtparam=spi=on</code> to <code>/boot/config.txt</code>
-                        <button class="btn-primary" data-bind="click: fixEnableSpi"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button>
-                    </p>
-                </div>
-                <div data-bind="visible: spiBufferStatus() === 'passed'">
-                    <p><i class="fa fa-check text-success"></i> SPI buffer size increased</p>
-                </div>
-                <div data-bind="visible: spiBufferStatus() === 'failed'">
-                    <p><i class="fa fa-times text-error"></i> SPI Buffer size is not correct</p>
-                    <p>Fix this by adding <code>spidev.bufsize=32768</code> to <code>/boot/cmdline.txt</code>
-                        <button class="btn-primary" data-bind="click: fixIncreaseSpiBuffer"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button>
-                    </p>
-                </div>
-                <div data-bind="visible: coreFreqStatus() === 'passed'">
-                    <p><i class="fa fa-check text-success"></i> Core Frequency is correct</p>
-                </div>
-                <div data-bind="visible: coreFreqStatus() === 'failed'">
-                    <p><i class="fa fa-times text-error"></i> Core Frequency is not correct</p>
-                    <p>Fix this by adding <code>core_freq=250</code> to <code>/boot/config.txt</code>
-                        <button class="btn-primary" data-bind="click: fixCoreFreq"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button>
-                    </p>
-                </div>
-                <div data-bind="visible: coreFreqMinStatus() === 'passed'">
-                    <p><i class="fa fa-check text-success"></i> Minimum core frequency is correct</p>
-                </div>
-                <div data-bind="visible: coreFreqMinStatus() === 'failed'">
-                    <p><i class="fa fa-times text-error"></i> Minium core frequency is not correct</p>
-                    <p>Fix this by adding <code>core_freq_min=500</code> to <code>/boot/config.txt</code>
-                        <button class="btn-primary" data-bind="click: fixCoreFreqMin"><i class="fa fa-terminal" aria-hidden="true"></i> Run</button>
-                    </p>
-                </div>
-            </div>
+    <!-- WS281x LED Status Config Test Modal -->
+    <div id="WS_OSTestModal" class="modal hide fade" style="min-height: 500px;">
+        <div class="modal-header">
+            <a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
+            <h3>{{ _("OS Configuration Test") }}</h3>
         </div>
+        <div class="modal-body">
+            {% include "sub/config_test.jinja2" %}
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">{{ _('Close') }}</a>
         </div>
     </div>
-	<div class="modal-footer">
-		<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">{{ _('Close') }}</a>
-	</div>
-</div>
 </div>

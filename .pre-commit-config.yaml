@@ -1,4 +1,4 @@
-exclude: ^(translations/|.*\.css|.*\.svg|octoprint_ws281x_led_status/static/webfonts)
+exclude: ^(docs/|translations/|.*\.css|.*\.svg|octoprint_ws281x_led_status/static/webfonts)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0

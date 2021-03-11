@@ -19,6 +19,7 @@ Some events also have some specific settings, these are detailed alongside them.
 
 * Startup
 * Printer Connected/Idle
+  * This effect has a configurable 'Idle timeout', where the LEDs will turn off after a period of inactivity on idle. Set to 0 to disable.
 * Printer Disconnected
 * Print Success
   * This effect has configurable 'Return to idle' time in seconds. Set to 0 to disable returning to idle.
@@ -35,13 +36,13 @@ All the standard effects available, with fancy visualisations!
 
 Sets all LEDs to one colour, forever.
 
-![](../.gitbook/assets/solid_colour%20%282%29.gif)
+![](../.gitbook/assets/solid_colour%20%281%29.gif)
 
 ### Colour Wipe
 
 Wipes colour across the strip pixel by pixel, then clears it pixel by pixel.
 
-![](../.gitbook/assets/color_wipe%20%281%29.gif)
+![](../.gitbook/assets/color_wipe.gif)
 
 ### Colour Wipe V2
 
@@ -53,13 +54,13 @@ Wipes colour pixel by pixel, as above, but to clear it turns around and heads ba
 
 Fades brightness up and down. Looks better in real life than the visualisation below!
 
-![](../.gitbook/assets/pulse%20%281%29.gif)
+![](../.gitbook/assets/pulse%20%282%29.gif)
 
 ### Bounce
 
 Sends a pulse of light bouncing from one side of your strip to the other.
 
-![](../.gitbook/assets/bounce%20%282%29.gif)
+![](../.gitbook/assets/bounce%20%281%29.gif)
 
 ### Solo Bounce
 
@@ -71,13 +72,13 @@ Sends just a single pixel from one side to the other, bouncing about.
 
 Cycles all the LEDs through the rainbow together.
 
-![](../.gitbook/assets/rainbow.gif)
+![](../.gitbook/assets/rainbow%20%282%29.gif)
 
 ### Rainbow Cycle
 
 Rainbow that cycles across the strip, so a full rainbow is across the whole strip at once.
 
-![](../.gitbook/assets/rainbow_cycle%20%282%29.gif)
+![](../.gitbook/assets/rainbow_cycle%20%281%29.gif)
 
 ### Crossover
 
@@ -89,17 +90,11 @@ Two pixels bouncing in opposite directions, crossing over in the middle.
 
 Sets all LEDs to a random colour, then changes a random pixel, to a new random colour
 
-![](../.gitbook/assets/random%20%281%29.gif)
+![](../.gitbook/assets/random.gif)
 
 ### Bouncy Balls
 
 A physics based effect, simulating 2 balls bouncing up and down. Looks great on longer strips \(and shorter ones too...!\).
 
 Unfortunately creating the simulation for this effect didn't work, so is unavailable for now. Sorry!
-
-
-
-
-
-
 

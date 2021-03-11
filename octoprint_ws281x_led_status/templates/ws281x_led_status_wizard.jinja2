@@ -1,56 +1,65 @@
-<h3>WS281x LED Status SPI Setup</h3>
-<span class="text-info lead">As OctoPrint should not be run as root, we need to change a few system settings to let our LEDs run without root access.</span>
-<br>
-<div id="errorContainer"></div>
-<div class="form-inline">
-    <span class="text-info">To run these commands, we need root access. Please provide the password:</span><br>
-    <label class="inline" for="wizardPasswordField"><strong>Password for Pi</strong></label>
-    <input style="margin-left: 10px" type="password" class="form-control inline" data-bind="textInput: passwordForPi, click: passwdPopoverRemove" id="wizardPasswordField"
-           data-toggle="popover" data-original-title="Password Required" data-content="Since these commands require root access to run, they need the password for Pi. Please enter and try again."  data-placement="bottom" data-trigger="manual">    <p class="help-block">If you haven't changed it, this would be <code>raspberry</code></p>
+{% import "macros/docs.jinja2" as docs %}
+<h3>WS281x LED Status Setup</h3>
+<p>Thank you for installing WS281x LED Status!</p>
+<p>This plugin requires some one-time setup before it will work properly.</p>
+<p>
+    Please make sure you follow along with the full {{ docs.doc_link("guides/setup-guide-1", "setup guide") }}
+    for each of the sections below, as they detail everything you need to do, explaining everything in detail.
+</p>
+<hr>
+<h3>
+    {{ docs.doc_link("/guides/setup-guide-1/wiring-your-leds", "1. Wiring your LEDs") }}
+</h3>
+<p>The most important part! Make sure you have them wired up correctly. </p>
+<p>
+    <i class="fa fa-arrow-right text-success"></i>
+    See {{ docs.doc_link("/guides/setup-guide-1/wiring-your-leds", "Wiring your LEDs") }} in the docs.
+</p>
+<h3>
+    {{ docs.doc_link("/guides/setup-guide-1/spi-setup", "2. SPI Setup") }}
+</h3>
+<p>
+    The OS configuration test will help you to configure your Raspberry Pi for use with this plugin.
+</p>
+{% if plugin_ws281x_led_status_is_docker %}
+<div class="alert alert-block">
+    <strong>It looks like you are running this plugin inside the OctoPrint docker container</strong>
+    <p>This isn't an issue, you just have to make sure your container is configured correctly</p>
+    <p>Be sure to read the {{ docs.doc_link("guides/setup-in-docker", "additional section in the docs") }} relating to docker.</p>
 </div>
-<ol>
-    <li id="addUser" data-bind="css: { 'text-success': addUserDone }">
-        <h4><i class="fa fa-lg" data-bind="css: { 'fa-arrow-right': !addUserDone, 'fa-check': addUserDone}"></i> Add the <code>pi</code> user to <code>gpio</code> group
-            <button style="margin-left: 10px" id="addUserBtn" data-bind="enable: !addUserDone(), click: runAddUser"class="btn btn-success"><i class="fa" data-bind="css: {'fa-terminal': !addUserDone() && !inProgressAddUser(), 'fa-check': addUserDone, 'fa-spinner fa-spin': inProgressAddUser } "aria-hidden="true"></i> Run</button></h4>
-        <p class="help-block">Runs <code>sudo adduser pi gpio</code></p>
-    </li>
-
-    <li id="spiEnable" data-bind="css: { 'text-success': enabledSPI }">
-        <h4><i class="fa fa-lg" data-bind="css: { 'fa-arrow-right': !enabledSPI, 'fa-check': enabledSPI}"></i> Enable SPI
-            <button style="margin-left: 10px" id="enableSPIBtn" data-bind="enable: !enabledSPI(), click: runEnableSPI" class="btn btn-success"><i class="fa" data-bind="css: {'fa-terminal': !enabledSPI() && !inProgressEnableSPI, 'fa-check': enabledSPI, 'fa-spinner fa-spin': inProgressEnableSPI } " aria-hidden="true"></i> Run</button></h4>
-        <p class="help-block">Sets <code>dtparam=spi=on</code> in <code>/boot/config.txt</code></p>
-    </li>
-
-    <li id="spiBufferIncrease" data-bind="css: { 'text-success': spiBufferIncreased }">
-        <h4><i class="fa fa-lg" data-bind="css: { 'fa-arrow-right': !spiBufferIncreased, 'fa-check': spiBufferIncreased}"></i> Increase SPI buffer
-            <button style="margin-left: 10px" id="spiBufferIncreaseBtn" data-bind="enable: !spiBufferIncreased(), click: runIncreaseSPIBuffer" class="btn btn-success"><i class="fa" data-bind="css: {'fa-terminal': !spiBufferIncreased() && !inProgressSpiBuffer, 'fa-check': spiBufferIncrease, 'fa-spinner fa-spin': inProgressSpiBuffer } " aria-hidden="true"></i> Run</button></h4>
-        <p class="help-block">Sets <code>spidev.bufsiz=32768</code> in <code>/boot/cmdline.txt</code></p>
-    </li>
-
-    <li id="coreFreqSet" data-bind="css: { 'text-success': coreFreqSet }">
-        <h4><i class="fa fa-lg" data-bind="css: { 'fa-arrow-right': !coreFreqSet, 'fa-check': coreFreqSet}"></i> Set core_freq=250
-            <button style="margin-left: 10px" id="coreFreqBtn" data-bind="enable: !coreFreqSet(), click: runSetCoreFreq" class="btn btn-success"><i class="fa" data-bind="css: {'fa-terminal': !coreFreqSet()  &&!inProgressCoreFreq , 'fa-check': coreFreqSet, 'fa-spinner fa-spin': inProgressCoreFreq } " aria-hidden="true"></i> Run</button></h4>
+{% endif %}
+<p>
+    <button class="btn btn-primary" data-toggle="modal" data-target="#WS_OSTestModal">
+        <i class="fa fa-cogs"></i> Open OS Configuration test
+    </button>
+</p>
+<h3>
+    {{ docs.doc_link("/guides/setup-guide-1/initial-configuration", "3. Initial Configuration") }}
+</h3>
+<form class="form-horizontal">
+    <div class="control-group">
+        <label for="wizard_stripType" class="control-label">{{ _('Strip Type') }}</label>
+        <div class="controls">
+            <select class="input-block-level" id="wizard_stripType" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.type">
+                {% for type in plugin_ws281x_led_status_strip_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <p class="help-block">
-            {% if plugin_ws281x_led_status_pi_model != '4' %}
-            Sets <code>core_freq=250</code> in <code>/boot/config.txt</code>
-            {% else %}
-            This step is not required on your Raspberry Pi model, so it is marked as completed.
-            {% endif %}</p>
-    </li>
-
-    <li id="coreFreqMinSet" data-bind="css: { 'text-success': coreFreqMinSet }">
-        <h4><i class="fa fa-lg" data-bind="css: { 'fa-arrow-right': !coreFreqMinSet, 'fa-check': coreFreqMinSet}"></i> Set core_freq_min=500
-            <button style="margin-left: 10px" id="coreFreqMinBtn" data-bind="enable: !coreFreqMinSet(), click: runSetCoreFreqMin" class="btn btn-success"><i class="fa" data-bind="css: {'fa-terminal': !coreFreqMinSet() && !inProgressCoreFreqMin(), 'fa-check': coreFreqMinSet, 'fa-spinner fa-spin': inProgressCoreFreqMin } " aria-hidden="true"></i> Run</button></h4>
-        <p class="help-block">
-            {% if plugin_ws281x_led_status_pi_model == '4' %}
-            This is required to stop the SPI clock frequency changing, which messes up the timing for LEDs<br>
-            Sets <code>core_freq_min=500</code> in <code>/boot/config.txt</code>
-            {% else %}
-            This step is not required on your Raspberry Pi model, so it is marked as completed.
-            {% endif %}
+            Don't worry if this is not right now, it can be easily changed later.
         </p>
-    </li>
-</ol>
-<div class="alert">
-    You will need to reboot your Pi for these changes to take effect
-</div>
+    </div>
+    <div class="control-group">
+        <label for="wizard_num_leds" class="control-label">{{ _('Number of LEDs') }}</label>
+        <div class="controls">
+            <input type="number" id="wizard_num_leds" class="input-medium" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.strip.count">
+        </div>
+    </div>
+</form>
+<h3>
+    4. Reboot your Pi
+</h3>
+<p>
+    Once you have made any necessary OS configuration changes, a reboot of the Pi is required. End the wizard, then hit reboot!
+</p>

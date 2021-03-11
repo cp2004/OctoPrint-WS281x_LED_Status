@@ -1,28 +1,48 @@
-### Hey there! So you've decided to contribute to the plugin. Here's what you need to know.
+# Contribution Guidelines
 
-Please take note of the few things below for contributing to the plugin, it's not extensive and designed to make contributions as smooth as possible
+First, thank you for considering contributing to this project!
 
-- Please only create pull requests against:
-  - `maintenance` for bug fixes or improvements
-  - `devel` for new features
-  - Never `master`, as this is downloaded by users so must remain untouched until release. (EXCEPTION: Documentation, like this)
-- If your changes are large or disruptive, please open an issue first to dicuss. There may be things in the pipeline that would conflict
-- Read the detail below so you understand how the plugin works!
+The guidelines here aim to make it as smooth as possible for contributors to understand how to contribute, what they can contribute
+and how the plugin works.
 
-### How does it work?
+There's a couple of things to consider before making your contribution:
 
-This plugin is currently written with 2 layers:
+- Please create pull requests against the `devel` branch unless indicated otherwise.
+  There is an exception to this rule: documentation. See more below.
 
-- The OctoPrint plugin class,
-- The effect runner class.
+- If your changes are large or disruptive, please open an issue first so that we can discuss. I don't want you to put in a lot
+  of work only for it to end up going to waste as there were already different plans.
 
-When a user starts the plugin, OctoPrint loads the plugin class. This spins off a new process of the effect runner class, which handles driving the LEDs
+- Read the additional points below for details on code style, testing and how everything fits together.
 
-Operating flow goes a bit like this:
+### Documentation
 
-- Event recieved by the plugin class (This may be an OctoPrint event, gcode command or pressing the on/off button.)
-- Evaluated, and decide what to do happens plugin side. Message constructed
-- Message put in a queue through to the effect runner class. Any active effect is stopped immediately and message is read
-- Analyse message, and decide what effect to run
+Contributing documentation changes is easy, since everything is formatted using markdown. The docs are built from
+the `docs` sub folder by GitBook, hosted at https://cp2004.gitbook.io/ws281x-led-status/.
 
-All effects are kept in the sub-module `effects`, while there are useful functions that can be called cross module in the `util.py` file
+For the documentation for the current release of the plugin, please make it against the branch labelled for the minor version. (Currently `0.7.x`)
+This means that I can keep them versioned and not break things between releases.
+
+When contributing additional features or configuration please try to document it where necessary, however do not put
+off your contribution because you are struggling to document it!
+
+### Code style
+
+The plugin has a pre-commit setup that runs black, prettier, isort and various other code-mods.
+
+You can either set this up as a file watcher [as in the PyCharm example in OctoPrint's documentation (under pre-commit)](https://docs.octoprint.org/en/master/development/environment.html#pycharm).
+
+You can also run this as a one-off using `pre-commit run --hook-stage manual --all-files`.
+
+### Testing
+
+Running the unit tests is simple, though they require additional dependencies.
+
+If you installed OctoPrint in a development environment, using `pip install octoprint[develop]` or `pip install -e .[develop]` (in the checkout)
+these are already there. Otherwise, install them using `pip install pytest mock`
+
+Run it: `pytest` (or `python -m pytest`)
+
+### Anything else?
+
+Nothing else important! Give your PR a suitable description and let me merge it :)

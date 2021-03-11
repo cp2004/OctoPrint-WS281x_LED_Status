@@ -16,11 +16,17 @@ rc/.*
 HEAD
 \(detached.*
 
-# maintenance is currently the branch for (if needed) 0.5.2
-maintenance 0.5.2 2f7cec9d462e7073c8f65530b0951b8c4cf2dd50 pep440-dev
+# staging/pre-release is for changes between pre-release RCs etc, currently at 0.7.0rc1
+staging/pre-release b06d37becf7a146f877e07c1ed81ae4433ab9b70
 
-# devel is currently the branch for work towards 0.6.0
-devel 0.6.0 2f7cec9d462e7073c8f65530b0951b8c4cf2dd50 pep440-dev
+# bugfix is currently the branch for (if needed) 0.6.1
+bugfix 0.6.1 b06d37becf7a146f877e07c1ed81ae4433ab9b70 pep440-dev
 
-# Every other branch is also development, so is resolved to 0.6.0 as well.
-.* 0.6.0 2f7cec9d462e7073c8f65530b0951b8c4cf2dd50 pep440-dev
+# as are any fix/* branches
+fix/.* 0.6.1 b06d37becf7a146f877e07c1ed81ae4433ab9b70 pep440-dev
+
+# devel is currently the branch for work towards 0.7.0
+devel 0.7.0 b06d37becf7a146f877e07c1ed81ae4433ab9b70 pep440-dev
+
+# Every other branch is also development, so is resolved to 0.7.0 as well.
+.* 0.7.0 b06d37becf7a146f877e07c1ed81ae4433ab9b70 pep440-dev

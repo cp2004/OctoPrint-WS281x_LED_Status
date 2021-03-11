@@ -20,3 +20,8 @@
 #settings_plugin_ws281x_led_status hr {
     margin: 10px 0;
 }
+
+#WS_OS_CONFIG_TEST, #LEDStripEditor .modal-body {
+    height: 500px;
+    overflow-y: auto;
+}

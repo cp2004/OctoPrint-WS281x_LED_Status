@@ -1,0 +1,62 @@
+{% import "macros/binding.jinja2" as binding with context %}
+
+{% macro enabled_entry(setting, name) %}
+<div data-bind="visible: {{ binding.bind_setting(setting) }}">
+    <span class="fa-lg" title="{{ name }} enabled">
+        <span class="fa fa-check text-success"></span>
+        <span>{{ name }}</span>
+    </span>
+</div>
+{% endmacro %}
+
+{% macro disabled_entry(setting, name) %}
+<div data-bind="visible: !{{ binding.bind_setting(setting) }}()">
+    <span class="fa-lg" title="{{ name }} enabled">
+        <span class="fa fa-times text-error"></span>
+        <span>{{ name }}</span>
+    </span>
+</div>
+{% endmacro %}
+
+<div class="row-fluid">
+    <div class="span4">
+        <h4>Enabled effects</h4>
+        {{ enabled_entry("effects.startup.enabled", "Startup") }}
+        {{ enabled_entry("effects.idle.enabled", "Idle (connected)") }}
+        {{ enabled_entry("effects.disconnected.enabled", "Disconnected") }}
+        {{ enabled_entry("effects.success.enabled", "Success") }}
+        {{ enabled_entry("effects.failed.enabled", "Failed") }}
+        {{ enabled_entry("effects.paused.enabled", "Paused") }}
+        {{ enabled_entry("effects.printing.enabled", "Printing") }}
+        {{ enabled_entry("effects.progress_print.enabled", "Print Progress") }}
+        {{ enabled_entry("effects.progress_heatup.enabled", "Heating Progress") }}
+        {{ enabled_entry("effects.progress_cooling.enabled", "Cooling Progress") }}
+        <br>
+        <h4>Disabled effects</h4>
+        {{ disabled_entry("effects.startup.enabled", "Startup") }}
+        {{ disabled_entry("effects.idle.enabled", "Idle (connected)") }}
+        {{ disabled_entry("effects.disconnected.enabled", "Disconnected") }}
+        {{ disabled_entry("effects.success.enabled", "Success") }}
+        {{ disabled_entry("effects.failed.enabled", "Failed") }}
+        {{ disabled_entry("effects.paused.enabled", "Paused") }}
+        {{ disabled_entry("effects.printing.enabled", "Printing") }}
+        {{ disabled_entry("effects.progress_print.enabled", "Print Progress") }}
+        {{ disabled_entry("effects.progress_heatup.enabled", "Heating Progress") }}
+        {{ disabled_entry("effects.progress_cooling.enabled", "Cooling Progress") }}
+    </div>
+    <div class="span4">
+        <h4>Enabled Features</h4>
+        {{ enabled_entry("active_times.enabled", "Active Times") }}
+        {{ enabled_entry("effects.torch.enabled", "Torch Mode") }}
+        {{ enabled_entry("intercept_m150", "M150 Intercept") }}
+        {{ enabled_entry("at_command_reaction", "@ Command Reaction") }}
+        {{ enabled_entry("debug_logging", "Debug Logging") }}
+        <br>
+        <h4>Disabled Features</h4>
+        {{ disabled_entry("active_times.enabled", "Active Times") }}
+        {{ disabled_entry("effects.torch.enabled", "Torch Mode") }}
+        {{ disabled_entry("intercept_m150", "M150 Intercept") }}
+        {{ disabled_entry("at_command_reaction", "@ Command Reaction") }}
+        {{ disabled_entry("debug_logging", "Debug Logging") }}
+    </div>
+</div>

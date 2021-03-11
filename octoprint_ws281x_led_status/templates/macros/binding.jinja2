@@ -1,0 +1,2 @@
+{% macro bind_setting(path) %}settingsViewModel.settings.plugins.ws281x_led_status.{{ path }}{% endmacro %}
+{% macro effect_binding(path) %}{{ bind_setting("effects." + path) }}{% endmacro %}

@@ -1,0 +1,91 @@
+{% import "macros/docs.jinja2" as docs with context %}
+{% import "macros/binding.jinja2" as binding %}
+{% import "settings/printing_effects.jinja2" as printing %}
+
+{% macro labelled_checkbox(setting, label) %}
+<label class="checkbox inline">
+    <input type="checkbox" data-bind="checked: {{ binding.bind_setting(setting) }}">
+    {{ label }}
+</label>
+{% endmacro %}
+
+<h5>Plugin features {{ docs.help_icon("configuration/features") }}</h5>
+<form class="form-horizontal">
+    {{ labelled_checkbox("active_times.enabled", "Enable active times") }}
+    <div class="form-inline" data-bind="visible: {{ binding.bind_setting("active_times.enabled") }}">
+        <label class="inline">Start time
+            <input type="time" class="input-small" data-bind="value: {{ binding.bind_setting("active_times.start") }}">
+        </label>
+        <label class="inline">End time
+            <input type="time" class="input-small" data-bind="value: {{ binding.bind_setting("active_times.stop") }}">
+        </label>
+    </div>
+    <p class="help-block">The LED strip will turn on at the start time, off at the end time. Potentially useful if you don't want them on overnight.</p>
+    <p data-bind="visible: {{ binding.bind_setting("active_times.enabled") }}" class="help-block">Note this currently doesn't support the start time being later than end time(eg. 19:00 to 13:00), your LEDs will always be off.</p>
+    <div class="alert alert-block" data-bind="visible: {{ binding.bind_setting("active_times.enabled") }}">
+        <h4>Heads up!</h4>
+        <p>The plugin uses your system time, so this depends on a correct timezone which may not have been changed from the default.
+        <br>
+        <strong>Current timezone: {{ plugin_ws281x_led_status_timezone }}</strong>
+        <br>
+        If you want to change this, please run <code>sudo raspi-config</code> then change your location.
+        </p>
+    </div>
+    <hr>
+    {{ labelled_checkbox("transitions.fade.enabled", "Enable fading on/off transition") }}
+    <div class="form-inline" data-bind="visible: {{ binding.bind_setting("transitions.fade.enabled") }}">
+        <label for="ws_fade_time" class="inline">Fade in time</label>
+        <div class="input-append">
+            <input id="ws_fade_time" type="number" step="1" class="input-small" data-bind="value: {{ binding.bind_setting("transitions.fade.time") }}">
+            <span class="add-on">ms</span>
+        </div>
+    </div>
+    <hr>
+    {{ labelled_checkbox("effects.torch.enabled", "Enable Torch mode and button") }}
+    <div class="form-inline" data-bind="visible: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled">
+        <!-- For some reason, the list of effects is empty when imported from effects ¯\_(ツ)_/¯ -->
+        <label for="ws_torch_effect" class="inline">Effect </label>
+        <select id="ws_torch_effect" class="input-large" data-bind="value: settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.effect">
+            {% for effect in plugin_ws281x_led_status_standard_names %}
+            <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+        {{ printing.effect_color("torch") }}
+        {{ printing.effect_delay("torch") }}
+    </div>
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: {{ binding.effect_binding("torch.enabled") }}">
+        <label for="ws_torch_time" class="inline">Torch lasts for</label>
+        <div class="input-append">
+            <input id="ws_torch_time" class="input-medium" type="number" data-bind="value: {{ binding.effect_binding("torch.timer") }}, enable: !{{ binding.effect_binding("torch.toggle") }}()">
+            <span class="add-on">secs</span>
+        </div>
+    </div>
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: {{ binding.effect_binding("torch.enabled") }}">
+        {{ labelled_checkbox("effects.torch.toggle", "Torch mode is a toggle") }}
+        <p class="help-block">
+            This overrides the timer, so you have to manually turn torch mode off again. Enables auto-torch when viewing the webcam stream
+        </p>
+    </div>
+    <hr>
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: {{ binding.effect_binding("torch.toggle") }}">
+        {{ labelled_checkbox("effects.torch.auto_on_webcam", "Auto activate torch when viewing webcam stream") }}
+        <p class="help-block">
+            Requires torch mode to be set to toggle
+        </p>
+    </div>
+    <hr>
+    {{ labelled_checkbox("intercept_m150", "Enable intercepting M150 commands") }}
+    <p class="help-block">
+        <i class="fa fa-info-circle text-info"></i>
+        For details on the M150 command, and how you can use it, {{ docs.doc_link("documentation/m150-intercept", "the plugin's documentation.") }}
+    </p>
+    <hr>
+    {{ labelled_checkbox("at_command_reaction", "Enable reacting to @ commands") }}
+    <p class="help-block">
+        <i class="fa fa-info-circle text-info"></i>
+        For details on what @ commands can be configured for use with this plugin, {{ docs.doc_link("documentation/host-commands", "please see the documentation.") }}
+    </p>
+    <hr>
+    {{ labelled_checkbox("debug_logging", "Enable debug logging") }}
+    <p class="help-block">This is very helpful in debugging issues with running effects, if you have a bug to report or are asking for help, please enable & upload this.</p>
+</form>

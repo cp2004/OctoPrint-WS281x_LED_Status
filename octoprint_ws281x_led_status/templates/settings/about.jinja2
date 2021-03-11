@@ -1,14 +1,16 @@
+{% import "macros/docs.jinja2" as docs with context %}
+
 <h5>About the plugin</h5>
 
 <p><strong><i><i class="fas fa-tag text-success"></i> Version {{ plugin_ws281x_led_status_version }}</i></strong> - <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/releases" target="_blank">Release notes</a></p>
 
 <p>Some useful links for you:</p>
 <ul>
-    <li>The plugin documentation in the <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/wiki" target="_blank">Github Wiki <i class="fa fa-external-link-alt"></i></a> </li>
+    <li>{{ docs.doc_link("", 'The plugin documentation <i class="fa fa-external-link-alt"></i>') }}</li>
     <li>Found a bug? Report it! <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues" target="_blank">Issue tracker <i class="fa fa-external-link-alt"></i></a></li>
     <li>Need support:
         <ul>
-            <li>Open an issue as a <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=type%3A+question&template=question.md&title=" target="_blank"> question on the repository <i class="fa fa-external-link-alt"></i></a></li>
+            <li>Open an issue as a <a href="https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=question&template=question.md&title=" target="_blank"> question on the repository <i class="fa fa-external-link-alt"></i></a></li>
             <li>Get in contact on the <a href="https://discord.octoprint.org" target="_blank">OctoPrint Discord server <i class="fa fa-external-link-alt"></i></a> </li>
             <li>Get in contact on the <a href="https://community.octoprint.org" target="_blank">community forums <i class="fa fa-external-link-alt"></i></a></li>
         </ul>
@@ -29,7 +31,16 @@
         <p>These wonderful people have sponsored development of this plugin. As a thank you, their names are here in the plugin.</p>
         <p>Want to see your name here? <a class="text-success" href="https://github.com/sponsors/cp2004" target="_blank">You can sponsor too!</a></p>
         <ul>
-        <li><a href="https://github.com/ssl-3">@ssl-3</a></li>
+            <li>ssl-3</li>
+            <li>Gina Häußge</li>
+            <li>FlynHokie</li>
+            <li>Ken Lucke</li>
+            <li>erickstryck</li>
+            <li>ReggieMDavis</li>
+            <li>otaku13</li>
+            <li>Matt Ockendon</li>
+            <li>nigelboubert</li>
+            <li>samwiseg0</li>
         </ul>
     </div>
 	<div class="modal-footer">
@@ -46,7 +57,9 @@
         <p>These wonderful people have helped out in development of this plugin. Whether it's fixing bugs, improvements to the code, or new features, all are useful!</p>
         <p>Want to see your name here? Get involved over on the repo. Any help is always appreciated!</p>
         <ul>
-        <li><a href="https://github.com/11chrisadams11">@11chrisadams11</a></li>
+            <li><a href="https://github.com/11chrisadams11">@11chrisadams11</a></li>
+            <li><a href="https://github.com/samwiseg0">@samwiseg0</a></li>
+            <li><a href="https://github.com/dchauran">@dchauran</a></li>
         </ul>
     </div>
 	<div class="modal-footer">
