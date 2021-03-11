@@ -6,7 +6,7 @@ assignees: ''
 
 ---
 
-<!-- PLEASE don't delete any of the sections below, you will more than likely be asked for extra information if you do.
+<!-- PLEASE don't delete any of the sections below, you will more than likely be asked for extra information if you do. -->
 
 **Description of the bug**
 
