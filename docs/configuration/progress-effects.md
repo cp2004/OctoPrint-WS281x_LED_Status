@@ -9,16 +9,15 @@ Each progress effect has some standard options, to customise them. Individual ef
 ## Standard Options
 
 * Enabled
-* Effect: One of the available [effects](printing-effects.md#effects)
-* Progress Colour: The colour to indicate the progress of whatever event is happening.
-* Base Colour:
+* Progress Colour The colour to indicate the progress of whatever event is happening.
+* Base Colour
 
   The base/background colour of the progress indication.
 
 In addition, there are two global options:
 
 * Reverse the direction of the progress bar
-* Base temperature: Heating/cooling progress bar will make '0' the temperature specified. Suggested value is just below room temperature, so that the progress bar starts closer to the end of the strip.
+* Base temperature Heating/cooling progress bar will make '0' the temperature specified. Suggested value is just below room temperature, so that the progress bar starts closer to the end of the strip.
 
 ## Events
 
@@ -49,21 +48,7 @@ Additional options:
 Don't set cooling tracking below room temperature, or this effect will never end!
 {% endhint %}
 
-## Effects
 
-### Progress Bar
 
-The standard progress bar that lights from one end of the strip to the other.
 
-### Gradient
-
-Fade from the base colour slowly into the progress colour. This works well for smaller numbers of LEDs or rings, where progress bar effects have low resolution.
-
-### Single Pixel
-
-Single Pixel mode lights one pixel in the progress colour, with the rest of the strip set to base colour.
-
-### Both Ends
-
-This is similar to the progress effect, but the LEDs will fill up from one end to the other.
 
