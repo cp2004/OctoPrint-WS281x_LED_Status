@@ -65,16 +65,17 @@ def color_wipe_2(strip, queue, color, delay, brightness_manager, *args, **kwargs
 
 
 def simple_pulse(strip, queue, color, delay, brightness_manager, *args, **kwargs):
+    max_brightness = brightness_manager.max_brightness
+    solid_color(
+        strip=strip,
+        queue=queue,
+        color=color,
+        brightness_manager=brightness_manager,
+        wait=False,
+    )
+
     while True:
-        max_brightness = brightness_manager.max_brightness
         brightness_manager.set_brightness(1)
-        solid_color(
-            strip=strip,
-            queue=queue,
-            color=color,
-            brightness_manager=brightness_manager,
-            wait=False,
-        )
 
         for direction in DIRECTIONS:
             for b in (
