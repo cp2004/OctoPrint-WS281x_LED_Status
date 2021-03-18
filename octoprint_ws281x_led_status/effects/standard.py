@@ -209,7 +209,7 @@ def blink(strip, queue, color, delay, brightness_manager, *args, **kwargs):
                 brightness_manager=brightness_manager,
                 wait=False,
             )
-            for _ms in range(int(delay / 2)):
+            for _ms in range(int(delay) // 2):
                 if not q_poll_milli_sleep(2, queue):
                     # We do it this way so we can check the q more often, as for blink
                     # delay may be high. Otherwise the effect may end up blocking the
