@@ -51,7 +51,7 @@ SimpleAPI Command
 {% endapi-method-summary %}
 
 {% api-method-description %}
-Send commands to the plugin, to make it do something. 
+Send commands to the plugin, to make it do something.
 {% endapi-method-description %}
 
 {% api-method-spec %}

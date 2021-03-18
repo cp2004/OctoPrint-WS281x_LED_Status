@@ -31,7 +31,7 @@ M150 W100       # Sets to white, at 100 intensity
 M150 R255 P200  # Sets LEDs to red, at 200 brightness
 ```
 
-#### What does the W parameter do?
+## What does the W parameter do?
 
 On a standard RGB WS281x strip, the W parameter sets an equal value of R, G and B on the LEDs.
 
