@@ -4,7 +4,7 @@
  * Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License
  */
 
-const ko = window.ko;
+let ko = window.ko;
 
 $(function () {
     function ws281xLedStatusNavbarViewModel(parameters) {
@@ -155,7 +155,9 @@ $(function () {
         };
 
         self.sendTestCommand = function (color) {
-            OctoPrint.simpleApiCommand("ws281x_led_status", "test_led", { color } );
+            OctoPrint.simpleApiCommand("ws281x_led_status", "test_led", {
+                color,
+            });
         };
 
         self.advancedStripOpen = ko.observable(false);
