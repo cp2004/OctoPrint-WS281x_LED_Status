@@ -65,16 +65,17 @@ def color_wipe_2(strip, queue, color, delay, brightness_manager, *args, **kwargs
 
 
 def simple_pulse(strip, queue, color, delay, brightness_manager, *args, **kwargs):
+    max_brightness = brightness_manager.max_brightness
+    solid_color(
+        strip=strip,
+        queue=queue,
+        color=color,
+        brightness_manager=brightness_manager,
+        wait=False,
+    )
+
     while True:
-        max_brightness = brightness_manager.max_brightness
         brightness_manager.set_brightness(1)
-        solid_color(
-            strip=strip,
-            queue=queue,
-            color=color,
-            brightness_manager=brightness_manager,
-            wait=False,
-        )
 
         for direction in DIRECTIONS:
             for b in (
@@ -208,7 +209,7 @@ def blink(strip, queue, color, delay, brightness_manager, *args, **kwargs):
                 brightness_manager=brightness_manager,
                 wait=False,
             )
-            for _ms in range(int(delay / 2)):
+            for _ms in range(int(delay) // 2):
                 if not q_poll_milli_sleep(2, queue):
                     # We do it this way so we can check the q more often, as for blink
                     # delay may be high. Otherwise the effect may end up blocking the
