@@ -2,6 +2,13 @@
 
 Add some RGB LEDs to your 3D printer for a quick status update!
 
+![GitHub issues](https://img.shields.io/github/issues/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
+![GitHub branch checks state](https://img.shields.io/github/checks-status/cp2004/OctoPrint-WS281x_LED_STATUS/0.7.x?style=flat-square)
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/cp2004/OctoPrint-WS281x_LED_Status/latest/total?label=New%20installs%40latest&style=flat-square)
+![GitHub Repo stars](https://img.shields.io/github/stars/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
+![GitHub](https://img.shields.io/github/license/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
+![GitHub Sponsors](https://img.shields.io/github/sponsors/cp2004?style=flat-square)
+
 ![rainbow effect](/assets/rainbow.gif)
 
 A highly configurable plugin for supporting WS2811, WS2812 and SK6812 LEDs attached to your Raspberry Pi.
