@@ -19,13 +19,14 @@ jobs:
               case 'edited': {
                 if (context.payload.issue.title.match(/\[request\]|feature request/i)) {
                   labels.push('request');
-                  if (!labels.includes("solved")) {
-                    labels.push('needs review');
-                    setLabels = true;
-                  }
                   if (labels.includes("incomplete")){
                     // Remove incomplete label
                     const index = labels.indexOf("incomplete");
+                    if (index > -1) {
+                      labels.splice(index, 1);
+                    }
+                    // Remove needs triage
+                    const index = labels.indexOf("needs triage");
                     if (index > -1) {
                       labels.splice(index, 1);
                     }
@@ -34,7 +35,6 @@ jobs:
                 if (context.payload.issue.title.match(/bug/i)) {
                   if (!labels.includes("confirmed bug")){
                     labels.push('potential bug');
-                    labels.push('needs review');
                     setLabels = true;
                   }
                   if (labels.includes("incomplete")){
@@ -43,6 +43,11 @@ jobs:
                     if (index > -1) {
                       labels.splice(index, 1);
                     }
+                  }
+                  // Remove needs triage
+                  const index = labels.indexOf("needs triage");
+                  if (index > -1) {
+                    labels.splice(index, 1);
                   }
                 }
                 if (labels.length === 0) {
