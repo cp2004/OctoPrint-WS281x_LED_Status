@@ -57,7 +57,7 @@ class PluginWizard:
         }
         try:
             result = validators[cmd]()
-        except FileNotFoundError:
+        except OSError:
             self._logger.warning("Tried to validate {} but files were missing")
             result = {"check": cmd, "passed": False, "reason": "missing"}
         except Exception as e:
