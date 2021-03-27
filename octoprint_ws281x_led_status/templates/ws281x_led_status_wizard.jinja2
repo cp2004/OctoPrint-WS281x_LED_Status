@@ -1,4 +1,4 @@
-{% import "macros/docs.jinja2" as docs %}
+{% import "macros/docs.jinja2" as docs with context %}
 <h3>WS281x LED Status Setup</h3>
 <p>Thank you for installing WS281x LED Status!</p>
 <p>This plugin requires some one-time setup before it will work properly.</p>
@@ -8,15 +8,15 @@
 </p>
 <hr>
 <h3>
-    {{ docs.doc_link("/guides/setup-guide-1/wiring-your-leds", "1. Wiring your LEDs") }}
+    {{ docs.doc_link("guides/setup-guide-1/wiring-your-leds", "1. Wiring your LEDs") }}
 </h3>
 <p>The most important part! Make sure you have them wired up correctly. </p>
 <p>
     <i class="fa fa-arrow-right text-success"></i>
-    See {{ docs.doc_link("/guides/setup-guide-1/wiring-your-leds", "Wiring your LEDs") }} in the docs.
+    See {{ docs.doc_link("guides/setup-guide-1/wiring-your-leds", "Wiring your LEDs") }} in the docs.
 </p>
 <h3>
-    {{ docs.doc_link("/guides/setup-guide-1/spi-setup", "2. SPI Setup") }}
+    {{ docs.doc_link("guides/setup-guide-1/spi-setup", "2. SPI Setup") }}
 </h3>
 <p>
     The OS configuration test will help you to configure your Raspberry Pi for use with this plugin.
@@ -34,7 +34,7 @@
     </button>
 </p>
 <h3>
-    {{ docs.doc_link("/guides/setup-guide-1/initial-configuration", "3. Initial Configuration") }}
+    {{ docs.doc_link("guides/setup-guide-1/initial-configuration", "3. Initial Configuration") }}
 </h3>
 <form class="form-horizontal">
     <div class="control-group">
