@@ -49,5 +49,3 @@ Even if your system doesn't use these files, they must exist - just skip the wiz
 You may still need to use the [SPI setup guide](setup-guide-1/spi-setup.md), adjusting the paths.
 {% endhint %}
 
-
-

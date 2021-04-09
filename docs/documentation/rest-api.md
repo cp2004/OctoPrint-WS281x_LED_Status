@@ -90,5 +90,3 @@ The command to be sent to the plugin. See commands below.
 See also the [SimpleApi docs](https://docs.octoprint.org/en/devel/plugins/mixins.html#octoprint.plugin.SimpleApiPlugin) for details about how the request should be structured.
 {% endhint %}
 
-
-

@@ -48,7 +48,3 @@ Additional options:
 Don't set cooling tracking below room temperature, or this effect will never end!
 {% endhint %}
 
-
-
-
-

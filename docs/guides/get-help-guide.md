@@ -10,7 +10,7 @@ Please select the area that most describes what you need help with:
 * [Connecting LEDs and getting them to work](get-help-guide.md#connecting-leds-and-making-them-work)
 * [Reporting a bug in the plugin](get-help-guide.md#reporting-a-bug-with-the-plugin)
 
-### Configuration of the plugin
+## Configuration of the plugin
 
 There's a lot of documentation here, that describes in detail the configuration options and the features of the plugin. Be sure to read the pages under the configuration section, such as [LED Strip Configuration](../configuration/led-strip-configuration.md)
 
@@ -18,7 +18,7 @@ There's a lot of documentation here, that describes in detail the configuration 
 **Still struggling?** Please seek help on the [OctoPrint community forums](https://community.octoprint.org), or the [Discord Server](https://discord.octoprint.org). I'm often there, or there are other users of the plugin who can help out.
 {% endhint %}
 
-### Connecting LEDs and making them work
+## Connecting LEDs and making them work
 
 Probably the step that has the most problems, you're not alone here.
 
@@ -29,12 +29,12 @@ Next up is the [troubleshooting guide](../troubleshooting-guide.md), where there
 {% hint style="info" %}
 **Still won't work?**
 
-Before asking for help, please ensure that your LED strip works with other devices if possible. The best thing to check is with an Arduino, since these work more reliably than Raspberry Pi & Python. 
+Before asking for help, please ensure that your LED strip works with other devices if possible. The best thing to check is with an Arduino, since these work more reliably than Raspberry Pi & Python.
 
 You can seek support by opening a ['Get Help'](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=question&template=question.md&title=) issue, on the [OctoPrint community forums](https://community.octoprint.org), or the[ Discord Server](https://discord.octoprint.org). Helpful people are around most of the time to get your problems solved.
 {% endhint %}
 
-### Reporting a bug with the plugin
+## Reporting a bug with the plugin
 
 Really? You found a bug? Ok then, best make sure it is fixed.
 
@@ -47,6 +47,4 @@ Please open a bug report issue providing as much information as possible, includ
 * Screenshots/video showing the problems \(if necessary - these can help quite a lot\)
 
 Please use the [bug report template!](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=&template=bug_report.md&title=%5BBug%5D)
-
-
 

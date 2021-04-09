@@ -12,11 +12,11 @@ The torch button can be turned on or off to clear up navbar space if you don't w
 
 Using @ commands to trigger the torch can enable cool integrations with other software, such as OctoLapse.
 
-#### Toggle Mode
+### Toggle Mode
 
 The torch button or [@ command](../documentation/host-commands.md) turns the torch on permanently, until it is turned off. This blocks any other effects.
 
-#### Timed Mode
+### Timed Mode
 
 The torch button starts a timer to turn off after configurable length of time.
 
@@ -41,8 +41,4 @@ For documentation of the command, please see the [M150 Intercept documentation p
 ## Debug Logging
 
 Debug logging logs a lot more information about the effect runner process. This will help massively when reporting issues on Github, so please enable it when reporting issues!
-
-
-
-
 

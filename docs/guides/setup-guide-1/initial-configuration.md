@@ -18,5 +18,3 @@ Click on the 'LED Strip Settings' button in the top right. The key settings you 
 
 For more details on the rest of these settings, please see the [full documentation](../../configuration/led-strip-configuration.md)
 
-
-

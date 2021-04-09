@@ -18,13 +18,13 @@ As a result of this, there are a couple of OS level configuration items that nee
 
 The setup wizard requires root access, and therefore the password for the Pi user if you have not configured passwordless `sudo`, as is default on OctoPi. This password is not stored, and is only used for the steps below.
 
-* **Add the `pi` user to the `gpio` group.** 
+* **Add the `pi` user to the `gpio` group.**
 
   Already configured on newer images. Means the `pi` users can access the GPIO pins.
 
   * Runs `sudo adduser pi gpio`
 
-* **Enable SPI.**  The plugin uses SPI to drive the LEDs, which is disabled by default and needs to be turned on.
+* **Enable SPI.** The plugin uses SPI to drive the LEDs, which is disabled by default and needs to be turned on.
   * Adds `dtparam=spi=on` to `/boot/config.txt`
 * **Increase SPI buffer size.**  Whilst the plugin will work without this, it will only work well with a handful of LEDs.
   * Adds `spidev.bufsize=32768` to the end of `/boot/cmdline.txt`
@@ -34,13 +34,11 @@ The setup wizard requires root access, and therefore the password for the Pi use
   * Adds `core_freq_min=500` to `/boot/config.txt`
 
 {% hint style="success" %}
-**WS281x LED Status OS configuration complete!**   
+**WS281x LED Status OS configuration complete!**  
 You will need to reboot your Pi for these changes to take effect.
 {% endhint %}
 
 ## Final stage: Initial Configuration
 
 {% page-ref page="initial-configuration.md" %}
-
-
 

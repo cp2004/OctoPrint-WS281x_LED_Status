@@ -36,7 +36,7 @@ This documentation aims to explain all of the settings in the LED Strip Configur
       <td style="text-align:left">Number</td>
       <td style="text-align:left">The pin that the LEDs are connected to. This should be BCM <a href="https://pinout.xyz/pinout/pin19_gpio10">GPIO 10</a> for
         normal operation, other pins are available when OctoPrint is run as root
-        and can use PWM - though this is explicitly <b>not recommended </b>for security
+        and can use PWM - though this is explicitly <b>not recommended</b> for security
         reasons.</td>
     </tr>
     <tr>
@@ -51,7 +51,7 @@ This documentation aims to explain all of the settings in the LED Strip Configur
       <td style="text-align:left">
         <p><em>(To be removed from the UI in a future version)</em>
         </p>
-        <p><b>Do not change the DMA channel if you do not know what you are doing.</b> 
+        <p><b>Do not change the DMA channel if you do not know what you are doing.</b>
         </p>
         <p>This should be 10 in normal use, other values can cause severe problems.</p>
       </td>
@@ -67,7 +67,7 @@ This documentation aims to explain all of the settings in the LED Strip Configur
       <td style="text-align:left">PWM Channel</td>
       <td style="text-align:left">Number</td>
       <td style="text-align:left">
-        <p><em>(To be removed from the UI in a future version)</em> 
+        <p><em>(To be removed from the UI in a future version)</em>
         </p>
         <p>Internal PWM Channel. Irrelevant to the plugin since it uses SPI in most
           cases.</p>
@@ -79,6 +79,4 @@ This documentation aims to explain all of the settings in the LED Strip Configur
 {% hint style="warning" %}
 DMA Channel and PWM channel will remain available for editing using config.yaml, just in case you need to change this. You probably won't.
 {% endhint %}
-
-
 
