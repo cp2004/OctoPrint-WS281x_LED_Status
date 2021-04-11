@@ -26,9 +26,9 @@ jobs:
                       labels.splice(index, 1);
                     }
                     // Remove needs triage
-                    const index = labels.indexOf("needs triage");
-                    if (index > -1) {
-                      labels.splice(index, 1);
+                    const triageIndex = labels.indexOf("needs triage");
+                    if (triageIndex > -1) {
+                      labels.splice(triageIndex, 1);
                     }
                   }
                 }
@@ -39,15 +39,15 @@ jobs:
                   }
                   if (labels.includes("incomplete")){
                     // Remove incomplete label
-                    const index = labels.indexOf("incomplete");
-                    if (index > -1) {
-                      labels.splice(index, 1);
+                    const icIndex = labels.indexOf("incomplete");
+                    if (icIndex > -1) {
+                      labels.splice(icIndex, 1);
                     }
                   }
                   // Remove needs triage
-                  const index = labels.indexOf("needs triage");
-                  if (index > -1) {
-                    labels.splice(index, 1);
+                  const triageIndex = labels.indexOf("needs triage");
+                  if (triageIndex > -1) {
+                    labels.splice(triageIndex, 1);
                   }
                 }
                 if (labels.length === 0) {
