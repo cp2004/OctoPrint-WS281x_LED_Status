@@ -15,9 +15,9 @@ $(function () {
         self.torch_toggle = ko.observable(true);
 
         var torch_on_src =
-            "/plugin/ws281x_led_status/static/svg/flashlight.svg";
+            "./plugin/ws281x_led_status/static/svg/flashlight.svg";
         var torch_off_src =
-            "/plugin/ws281x_led_status/static/svg/flashlight-outline.svg";
+            "./plugin/ws281x_led_status/static/svg/flashlight-outline.svg";
 
         self.lights_on = ko.observable(true);
         self.torch_on = ko.observable(false);
