@@ -182,7 +182,7 @@ class EffectRunner:
         )
 
     def lights_off(self):
-        self.blank_leds()
+        self.standard_effect("blank")
         self.lights_on = False
 
     def progress_msg(self, msg):
