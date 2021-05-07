@@ -13,7 +13,7 @@ You cannot power more than a handful of pixels direct from the Raspberry Pi - it
 {% endhint %}
 
 {% hint style="info" %}
-Using SPI to control the LEDs means you can **only use one LED strip at a time with the Raspberry Pi.** If you have more than one, you can 'chain' them together to make a longer strip.
+Using SPI to control the LEDs means you can **only use one LED strip at a time with the Raspberry Pi.** If you have more than one, you can 'chain' them together to make a longer strip. Please note that per-segment control is not currently supported, but may be in the future.
 {% endhint %}
 
 ## Raspberry Pi Wiring

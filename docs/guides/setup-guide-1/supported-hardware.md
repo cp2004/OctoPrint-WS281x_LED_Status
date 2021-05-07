@@ -6,7 +6,7 @@ description: This page lists the hardware that is officially supported to use th
 
 ## LED Strips
 
-The 3 types of LED strips that the plugin supports are:
+The 4 types of LED strips that the plugin supports are:
 
 * WS2811 \(including B variants\)
 * WS2812 \(including B variants\)
@@ -16,7 +16,7 @@ The 3 types of LED strips that the plugin supports are:
 Please note as well that 'NeoPixels' are an Adafruit brand name, I find that they are much cheaper direct from China with just as good results, they are the same thing.
 
 {% hint style="info" %}
-At this time, only the RGB LEDs are used. Thanks to [a PR from @samwiseg0](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/pull/93) this is coming soon!
+To get the most of your RGBW strips, you can enable 'Use dedicated white' in the strip settings after it is setup.
 {% endhint %}
 
 ## Power Supplies
@@ -29,7 +29,15 @@ Don't use tiny wires to connect the LEDs - these can heat up and melt if they ar
 
 I have had good results with a 74ACHT125 level shifter, which is recommended by Adafruit for their Neopixels. Please note that while WS281x LEDs work without level shifting, you may need to keep the wires as short as possible - **especially** when using 12V LEDs.
 
-## On to wiring it all up!
+### Raspberry Pi
+
+All models of Raspberry Pi are supported currently, however for new models I will have to wait for upstream support from the rpi-ws281x library first. This page will be updated if this happens!
+
+This also means that no other devices than a Raspberry Pi are supported. There are no alternative libraries for WS281x LED control \(for Python\) that could enable this, so there is nothing that can be done. Sorry!
+
+The plugin **will not load** if it is not running on a Raspberry Pi, even if it does install.
+
+## Got the necessary hardware? Wire it up!
 
 {% page-ref page="wiring-your-leds.md" %}
 
