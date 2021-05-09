@@ -14,8 +14,8 @@ body:
       required: true
   - type: textarea
     attributes:
+      label: Steps to reproduce
       placeholder: |
-        Steps to reproduce
         1. Go to '...'
         2. Scroll down, click on '...'
         3. See the error '...'
@@ -46,12 +46,12 @@ body:
   - type: input
     attributes:
       label: (if relevant) OctoPi version
-  - type: markdown
+  - type: textarea
     atrributes:
       label: Log Files & Screenshots
       description: |
         Please upload both the `octoprint.log` and the `plugin_ws281x_led_status_debug.log`, preferably with debug logging enabled.
         If they are relevant (for example issues with the UI) please upload screenshots of the issue.
-  - type: markdown
+  - type: textarea
     attributes:
       label: Anything else?
