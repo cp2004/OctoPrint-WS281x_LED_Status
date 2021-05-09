@@ -47,7 +47,7 @@ body:
     attributes:
       label: (if relevant) OctoPi version
   - type: textarea
-    atrributes:
+    attributes:
       label: Log Files & Screenshots
       description: |
         Please upload both the `octoprint.log` and the `plugin_ws281x_led_status_debug.log`, preferably with debug logging enabled.
