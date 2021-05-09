@@ -1,6 +1,7 @@
 name: Bug Report
 description: Found something wrong? Report it!
 title: "[Bug]: "
+
 body:
 - type: textarea
   attributes:
