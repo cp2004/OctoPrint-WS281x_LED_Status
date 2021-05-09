@@ -3,7 +3,8 @@ description: Found something wrong? Report it!
 title: "[Bug]: "
 body:
   - type: markdown
-    value: Reporting an issue is easy! Please fill out as much of the information below as possible, to make your experience easier.
+    attributes:
+      value: Reporting an issue is easy! Please fill out as much of the information below as possible, to make your experience easier.
   - type: textarea
     attributes:
       label: Description of the bug
