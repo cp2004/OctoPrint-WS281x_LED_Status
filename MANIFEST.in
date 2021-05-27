@@ -1,4 +1,5 @@
 include README.md
+include LICENSE.txt
 include versioneer.py
 include octoprint_ws281x_led_status/_version.py
 recursive-include octoprint_ws281x_led_status/templates *
