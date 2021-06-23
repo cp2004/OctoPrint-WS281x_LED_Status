@@ -22,7 +22,7 @@ body:
         and the ['Troubleshooting Guide'](https://cp2004.gitbook.io/ws281x-led-status/troubleshooting-guide) and tried any solutions that seem relevant.
   - type: checkboxes
     attributes:
-      label: Please confirm the following:
+      label: Please confirm the following
       options:
         - label: I have read the Get Help & Troubleshooting guide
           required: true
