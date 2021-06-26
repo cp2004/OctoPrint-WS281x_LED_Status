@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Now is your chance to convince me that this feature you want should be implemented! Go ahead, make a good case for it and I will see what can be done.
+        Now is your chance to convince me that this feature you want should be implemented! Go ahead, make a good case for it and I will see what can be done.
   - type: textarea
     attributes:
       label: What would you like implemented?
