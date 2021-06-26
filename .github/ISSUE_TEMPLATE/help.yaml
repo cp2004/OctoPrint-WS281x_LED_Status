@@ -1,0 +1,37 @@
+name: Get Help
+description: Need help using the plugin? Get help here!
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please ensure that you include **as much detail as possible** when asking for help.
+        
+        I respond to a high number of community questions across the forums and discord, you are more
+        likely to get a quick response if you include all the information available. Thanks!
+  - type: textarea
+    attributes:
+      label: Describe your problem
+      description: What have you setup, what is not working, what is working, what have you tried to do to solve it?
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Before posting this issue, please ensure that you have read the ['Get Help Guide'](https://cp2004.gitbook.io/ws281x-led-status/guides/get-help-guide)
+        and the ['Troubleshooting Guide'](https://cp2004.gitbook.io/ws281x-led-status/troubleshooting-guide) and tried any solutions that seem relevant.
+  - type: checkboxes
+    attributes:
+      label: Please confirm the following
+      options:
+        - label: I have read the Get Help & Troubleshooting guide
+          required: true
+  - type: markdown
+    attributes:
+      value: |
+        Log files are **required**. They provide me with important details about your install and what the plugin *thinks* is working.
+        Need help finding the logs? 
+  - type: textarea
+    attributes:
+      label: Log files
+      placeholder: octoprint.log and plugin_ws281x_led_status_debug.log please!
