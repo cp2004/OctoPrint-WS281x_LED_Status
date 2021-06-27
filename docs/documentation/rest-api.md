@@ -86,7 +86,6 @@ The command to be sent to the plugin. See commands below.
 {% endapi-method-spec %}
 {% endapi-method %}
 
-
 {% hint style="info" %}
 See also the [SimpleApi docs](https://docs.octoprint.org/en/devel/plugins/mixins.html#octoprint.plugin.SimpleApiPlugin) for details about how the request should be structured.
 {% endhint %}
@@ -101,5 +100,4 @@ See also the [SimpleApi docs](https://docs.octoprint.org/en/devel/plugins/mixins
 | `torch_off` | None | Turn the torch mode off. Only available if torch mode is configured as toggle. |
 | `test_os_config` | None | Begin an OS configuration test. Asynchronous, data is returned on the socket |
 | `test_led` | `color` | Set the LEDs to the configured HTML RGB colour, color should be a full 7 character hex \(eg. `#ff00ff`\) |
-
 
