@@ -14,16 +14,16 @@ import time
 try:
     # Py3
     from queue import Queue
+    from typing import Optional
 except ImportError:
     # Py2
     from Queue import Queue
-
 
 # noinspection PyPackageRequirements
 from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
 from rpi_ws281x import PixelStrip
 
-from octoprint_ws281x_led_status import constants
+from octoprint_ws281x_led_status import constants, segments
 from octoprint_ws281x_led_status.effects import error_handled_effect
 from octoprint_ws281x_led_status.util import (
     apply_color_correction,
@@ -43,8 +43,8 @@ class EffectRunner:
         queue,
         strip_settings,
         effect_settings,
-        active_times_settings,
-        transition_settings,
+        active_times_settings,  # TODO combine to 'features settings' to reduce args
+        transition_settings,  # TODO combine
         previous_state,
         log_path,
         saved_lights_on,
@@ -52,6 +52,8 @@ class EffectRunner:
 
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.runner")
         self.setup_custom_logger(log_path, debug)
+
+        self.segment_manager = None  # type Optional[segments.SegmentManager]
 
         # Save settings to class
         self.strip_settings = strip_settings
@@ -74,6 +76,21 @@ class EffectRunner:
             "white_brightness": self.strip_settings["white_brightness"],
         }
 
+        # Create segment settings
+        # Segments are EXPERIMENTAL and only enabled for certain conditions
+        self.segment_settings = []
+        # Default, full length segment
+        self.segment_settings.append(
+            {"start": 0, "end": int(self.strip_settings["count"])}
+        )
+
+        if int(self.strip_settings["count"]) < 6:
+            self._logger.info("Applying < 6 LED bug workaround")
+            # rpi_ws281x will think we want 6 LEDs, but we will only use those configured
+            # this works around issues where LEDs would show the wrong colour, flicker and more
+            # when used with less than 6 LEDs.
+            self.strip_settings["count"] = 6
+
         # State holders
         self.lights_on = saved_lights_on
         self.previous_state = previous_state
@@ -87,9 +104,12 @@ class EffectRunner:
         except StripFailedError:
             self._logger.info("No strip initialised, exiting the effect process.")
             return
+        except Exception as e:
+            self._logger.error("Unknown exception, abort abort abort")
+            self._logger.exception(e)
 
         self.effect_queue = Queue()
-        self.effect_thread = None  # type: threading.Thread
+        self.effect_thread = None  # type: Optional[threading.Thread]
 
         self.brightness_manager = BrightnessManager(
             self.strip, self.max_brightness, self.transition_settings
@@ -250,7 +270,6 @@ class EffectRunner:
             self.run_effect(
                 target=constants.EFFECTS["Solid Color"],
                 kwargs={
-                    "strip": self.strip,
                     "queue": self.effect_queue,
                     "color": color,
                     "brightness_manager": self.brightness_manager,
@@ -258,7 +277,7 @@ class EffectRunner:
                 name="Solid Color",
             )
         else:
-            self.blank_leds()
+            self.blank_leds(whole_strip=False)
 
     def progress_effect(self, mode, value):
         effect_settings = self.effect_settings[mode]
@@ -266,7 +285,6 @@ class EffectRunner:
             self.run_effect(
                 target=constants.PROGRESS_EFFECTS[effect_settings["effect"]],
                 kwargs={
-                    "strip": self.strip,
                     "queue": self.effect_queue,
                     "brightness_manager": self.brightness_manager,
                     "value": int(value),
@@ -281,7 +299,7 @@ class EffectRunner:
                 name=mode,
             )
         else:
-            self.blank_leds()
+            self.blank_leds(whole_strip=False)
 
     def standard_effect(self, mode):
         # Log if the effect is changing
@@ -293,7 +311,6 @@ class EffectRunner:
             self.run_effect(
                 target=constants.EFFECTS[effect_settings["effect"]],
                 kwargs={
-                    "strip": self.strip,
                     "queue": self.effect_queue,
                     "color": apply_color_correction(
                         self.color_correction, *hex_to_rgb(effect_settings["color"])
@@ -304,11 +321,14 @@ class EffectRunner:
                 name=mode,
             )
         else:
-            self.blank_leds()
+            self.blank_leds(whole_strip=False)
 
     def run_effect(self, target, kwargs=None, name="WS281x Effect"):
         if kwargs is None:
             kwargs = {}
+
+        if "strip" not in kwargs:
+            kwargs["strip"] = self.segment_manager.get_segment(1)
 
         self.stop_effect()
 
@@ -325,12 +345,17 @@ class EffectRunner:
             self.effect_thread.join()
             clear_queue(self.effect_queue)
 
-    def blank_leds(self):
+    def blank_leds(self, whole_strip=True):
         """Set LEDs to off, wait 0.1secs to prevent CPU burn"""
+        strip = self.strip
+        if not whole_strip:
+            # Use a segment, not whole strip
+            strip = self.segment_manager.list_segments()[0]
+
         self.run_effect(
             target=constants.EFFECTS["Solid Color"],
             kwargs={
-                "strip": self.strip,
+                "strip": strip,
                 "queue": self.effect_queue,
                 "color": (0, 0, 0),
                 "brightness_manager": self.brightness_manager,
@@ -363,7 +388,7 @@ class EffectRunner:
 
     def start_strip(self):
         """
-        Start PixelStrip object
+        Start PixelStrip and SegmentManager object
         :returns strip: (rpi_ws281x.PixelStrip) The initialised strip object
         """
         self._logger.info("Initialising LED strip")
@@ -380,11 +405,19 @@ class EffectRunner:
             )
             strip.begin()
             self._logger.info("Strip successfully initialised")
-            return strip
         except Exception as e:  # Probably wrong settings...
             self._logger.error(repr(e))
             self._logger.error("Strip failed to initialize, no effects will be run.")
             raise StripFailedError("Error intitializing strip")
+
+        # Create segments & segment manager
+        try:
+            self.segment_manager = segments.SegmentManager(strip, self.segment_settings)
+            self.segment_manager.create_segments()
+        except segments.InvalidSegmentError:
+            self._logger.error("You did something wrong...")
+            raise
+        return strip
 
     def setup_custom_logger(self, path, debug):
         # Cleaning handler will remove old logs, defined by 'backupCount'
