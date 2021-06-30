@@ -49,6 +49,7 @@ class WS281xLedStatusPlugin(
     current_effect_process = None  # type: multiprocessing.Process
     effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
 
+    # Effect states
     previous_state = ""
     current_state = "blank"
     next_state = ""
@@ -107,10 +108,7 @@ class WS281xLedStatusPlugin(
 
     # Shutdown plugin
     def on_shutdown(self):
-        if self.current_effect_process is not None:
-            self.effect_queue.put(constants.KILL_MSG)
-            self.current_effect_process.join()
-        self._logger.info("WS281x LED Status runner stopped")
+        self.stop_effect_process()
 
     # Settings plugin
     def on_settings_save(self, data):
@@ -169,8 +167,8 @@ class WS281xLedStatusPlugin(
         return 1
 
     def on_wizard_finish(self, handled):
-        self._logger.info(
-            "You will need to restart your Pi for the changes to take effect"
+        self._logger.warning(
+            "You will need to restart your Pi for OS changes to take effect"
         )
 
     # Simple API plugin
@@ -188,6 +186,31 @@ class WS281xLedStatusPlugin(
         self._plugin_manager.send_plugin_message(
             "ws281x_led_status", {"type": msg_type, "payload": payload}
         )
+
+    # Event Handler plugin
+    def on_event(self, event, payload):
+        if event == Events.PRINT_DONE:
+            self.cooling = True
+        elif event == Events.PRINT_STARTED:
+            self.cooling = False
+            self.current_progress = 0
+        elif event == Events.PRINT_RESUMED:
+            self.update_effect("progress_print {}".format(self.current_progress))
+
+        if event in constants.SUPPORTED_EVENTS.keys():
+            effect = constants.SUPPORTED_EVENTS[event]
+            self.update_effect(effect)
+            # Record the event's effect so that it can used when progress expires
+            self.previous_event = effect
+
+    # Progress plugin
+    def on_print_progress(self, storage="", path="", progress=1):
+        if (progress == 100 and self.current_state == "success") or self.heating:
+            return
+        if self._settings.get_boolean(["effects", "printing", "enabled"]):
+            self.update_effect("printing")
+        self.update_effect("progress_print {}".format(progress))
+        self.current_progress = progress
 
     # Effect runner process
     def start_effect_process(self):
@@ -415,29 +438,6 @@ class WS281xLedStatusPlugin(
         self.previous_state = self.current_state
         self.current_state = new_state
 
-    def on_event(self, event, payload):
-        if event == Events.PRINT_DONE:
-            self.cooling = True
-        elif event == Events.PRINT_STARTED:
-            self.cooling = False
-            self.current_progress = 0
-        elif event == Events.PRINT_RESUMED:
-            self.update_effect("progress_print {}".format(self.current_progress))
-
-        if event in constants.SUPPORTED_EVENTS.keys():
-            effect = constants.SUPPORTED_EVENTS[event]
-            self.update_effect(effect)
-            # Record the event's effect so that it can used when progress expires
-            self.previous_event = effect
-
-    def on_print_progress(self, storage="", path="", progress=1):
-        if (progress == 100 and self.current_state == "success") or self.heating:
-            return
-        if self._settings.get_boolean(["effects", "printing", "enabled"]):
-            self.update_effect("printing")
-        self.update_effect("progress_print {}".format(progress))
-        self.current_progress = progress
-
     def calculate_heatup_progress(self, current, target):
         # Allows for setting a baseline, so heating display doesn't start halfway down the strip.
         current = max(current - self._settings.get_int(["progress_temp_start"]), 0)
@@ -457,8 +457,6 @@ class WS281xLedStatusPlugin(
         :return: None
         """
         if self.previous_event:
-            self._logger.info("Processing previous queue")
-            self._logger.info("Previous event: {}".format(self.previous_event))
             self.update_effect(self.previous_event)
         self.previous_event = ""
 
@@ -466,6 +464,7 @@ class WS281xLedStatusPlugin(
         self.idle_timed_out = True
         self.deactivate_lights()
 
+    # Hooks
     def process_gcode_q(
         self,
         comm_instance,
@@ -652,7 +651,7 @@ _proc_dt_model = None
 
 
 # Raspberry Pi detection, borrowed from OctoPrint's Pi support plugin
-# https://github.com/OctoPrint/OctoPrint/blob/master/src/octoprint/plugins/pi_support/__init__.py
+# https://github.com/OctoPrint/OctoPrint-PiSupport/blob/158c7af065a91429cfba1b48deae183b4df8a301/octoprint_pi_support/__init__.py#L464-L472
 def get_proc_dt_model():
     global _proc_dt_model
 
@@ -689,16 +688,25 @@ def determine_pi_version():
 
 def __plugin_check__():
     logger = logging.getLogger("octoprint.plugins.ws281x_led_status")
+
+    def log_abort():
+        logger.warning("No Raspberry Pi detected, will not load plugin")
+
     try:
         proc_dt_model = get_proc_dt_model()
         if proc_dt_model is None:
-            logger.warning("No Raspberry Pi detected, will not load plugin")
+            log_abort()
+            return False
     except Exception as e:
-        logger.warning("No Raspberry Pi detected, will not load plugin")
+        log_abort()
         logger.warning("Exception suppressed: {}".format(repr(e)))
         return False
 
-    return "raspberry pi" in proc_dt_model.lower()
+    if "raspberry pi" in proc_dt_model.lower():
+        return True
+    else:
+        log_abort()
+        return False
 
 
 def __plugin_load__():

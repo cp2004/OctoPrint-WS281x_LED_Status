@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+__author__ = "Charlie Powell <cp2004.github@gmail.com"
+__license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
+__copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
+
 import subprocess
 
 import mock
@@ -25,6 +29,6 @@ def setup_mock_popen(expected_stdout, expected_stderr):
             to_bytes(expected_stderr, encoding="utf-8"),
         )
     )
-    setattr(subprocess, "Popen", lambda *args, **kwargs: mock_popen)
+    subprocess.Popen = lambda *args, **kwargs: mock_popen
 
     return mock_popen
