@@ -84,6 +84,8 @@ class WS281xLedStatusPlugin(
 
         if self._settings.get_boolean(["lights_on"]):
             self.lights_on = True
+        elif self._settings.get_boolean(["effects", "idle", "enabled"]):
+            self.lights_on = True
         else:
             self.lights_on = False
 
