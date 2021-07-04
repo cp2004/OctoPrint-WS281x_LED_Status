@@ -8,7 +8,7 @@ __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the ter
 # noinspection PyPackageRequirements
 from octoprint.util import dict_merge
 
-VERSION = 1
+VERSION = 2
 
 defaults = {
     "strip": {
@@ -103,29 +103,35 @@ defaults = {
             "effect": "Progress Bar",
         },
     },
-    "active_times": {
-        "enabled": False,
-        "start": "09:00",
-        "end": "21:00",
-    },
-    "transitions": {
-        "fade": {
-            "enabled": True,
-            "time": "750",
-        }
+    "features": {
+        "active_times": {
+            "enabled": False,
+            "start": "09:00",
+            "end": "21:00",
+        },
+        "transitions": {
+            "fade": {
+                "enabled": True,
+                "time": "750",
+            }
+        },
+        "at_command_reaction": True,
+        "intercept_m150": True,
+        "debug_logging": False,
     },
     "progress_temp_start": 0,
-    "at_command_reaction": True,
-    "intercept_m150": True,
-    "debug_logging": False,
     "lights_on": True,
 }
 
 
 def migrate_settings(target, current, settings):
-    if current is None and target is not None:
+    if current is None and target == 1:
         # None => 1
         migrate_none_to_one(settings)
+
+    if current <= 1 or current is None and target == 2:
+        # 1 => 2
+        migrate_one_to_two(settings)
 
 
 def migrate_none_to_one(settings):
@@ -226,6 +232,27 @@ def migrate_none_to_one(settings):
     result = dict_merge(defaults, filtered)
     # SAVE!
     settings.global_set(["plugins", "ws281x_led_status"], result)
+
+
+def migrate_one_to_two(settings):
+    new_features_settings = {
+        "active_times": settings.get(["active_times"], merged=True),
+        "transitions": settings.get(["transitions"], merged=True),
+        "at_command_reaction": settings.get(["at_command_reaction"]),
+        "intercept_m150": settings.get(["intercept_m150"]),
+        "debug_logging": settings.get(["debug_logging"]),
+    }
+
+    # filter out None values
+    filtered = filter_none(new_features_settings)
+    # Set the settings
+    settings.set(["features"], filtered)
+    # Remove obsolete settings
+    settings.settings.remove(["plugins", "ws281x_led_status", "active_times"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "transitions"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "at_command_reaction"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "intercept_m150"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "debug_logging"])
 
 
 def filter_none(target):

@@ -11,18 +11,18 @@
 
 <h5>Plugin features {{ docs.help_icon("configuration/features") }}</h5>
 <form class="form-horizontal">
-    {{ labelled_checkbox("active_times.enabled", "Enable active times") }}
-    <div class="form-inline" data-bind="visible: {{ binding.bind_setting("active_times.enabled") }}">
+    {{ labelled_checkbox("features.active_times.enabled", "Enable active times") }}
+    <div class="form-inline" data-bind="visible: {{ binding.bind_setting("features.active_times.enabled") }}">
         <label class="inline">Start time
-            <input type="time" class="input-small" data-bind="value: {{ binding.bind_setting("active_times.start") }}">
+            <input type="time" class="input-small" data-bind="value: {{ binding.bind_setting("features.active_times.start") }}">
         </label>
         <label class="inline">End time
-            <input type="time" class="input-small" data-bind="value: {{ binding.bind_setting("active_times.stop") }}">
+            <input type="time" class="input-small" data-bind="value: {{ binding.bind_setting("features.active_times.stop") }}">
         </label>
     </div>
     <p class="help-block">The LED strip will turn on at the start time, off at the end time. Potentially useful if you don't want them on overnight.</p>
-    <p data-bind="visible: {{ binding.bind_setting("active_times.enabled") }}" class="help-block">Note this currently doesn't support the start time being later than end time(eg. 19:00 to 13:00), your LEDs will always be off.</p>
-    <div class="alert alert-block" data-bind="visible: {{ binding.bind_setting("active_times.enabled") }}">
+    <p data-bind="visible: {{ binding.bind_setting("features.active_times.enabled") }}" class="help-block">Note this currently doesn't support the start time being later than end time(eg. 19:00 to 13:00), your LEDs will always be off.</p>
+    <div class="alert alert-block" data-bind="visible: {{ binding.bind_setting("features.active_times.enabled") }}">
         <h4>Heads up!</h4>
         <p>The plugin uses your system time, so this depends on a correct timezone which may not have been changed from the default.
         <br>
@@ -32,11 +32,11 @@
         </p>
     </div>
     <hr>
-    {{ labelled_checkbox("transitions.fade.enabled", "Enable fading on/off transition") }}
-    <div class="form-inline" data-bind="visible: {{ binding.bind_setting("transitions.fade.enabled") }}">
+    {{ labelled_checkbox("features.transitions.fade.enabled", "Enable fading on/off transition") }}
+    <div class="form-inline" data-bind="visible: {{ binding.bind_setting("features.transitions.fade.enabled") }}">
         <label for="ws_fade_time" class="inline">Fade in time</label>
         <div class="input-append">
-            <input id="ws_fade_time" type="number" step="1" class="input-small" data-bind="value: {{ binding.bind_setting("transitions.fade.time") }}">
+            <input id="ws_fade_time" type="number" step="1" class="input-small" data-bind="value: {{ binding.bind_setting("features.transitions.fade.time") }}">
             <span class="add-on">ms</span>
         </div>
     </div>
@@ -74,18 +74,18 @@
         </p>
     </div>
     <hr>
-    {{ labelled_checkbox("intercept_m150", "Enable intercepting M150 commands") }}
+    {{ labelled_checkbox("features.intercept_m150", "Enable intercepting M150 commands") }}
     <p class="help-block">
         <i class="fa fa-info-circle text-info"></i>
         For details on the M150 command, and how you can use it, {{ docs.doc_link("documentation/m150-intercept", "the plugin's documentation.") }}
     </p>
     <hr>
-    {{ labelled_checkbox("at_command_reaction", "Enable reacting to @ commands") }}
+    {{ labelled_checkbox("features.at_command_reaction", "Enable reacting to @ commands") }}
     <p class="help-block">
         <i class="fa fa-info-circle text-info"></i>
         For details on what @ commands can be configured for use with this plugin, {{ docs.doc_link("documentation/host-commands", "please see the documentation.") }}
     </p>
     <hr>
-    {{ labelled_checkbox("debug_logging", "Enable debug logging") }}
+    {{ labelled_checkbox("features.debug_logging", "Enable debug logging") }}
     <p class="help-block">This is very helpful in debugging issues with running effects, if you have a bug to report or are asking for help, please enable & upload this.</p>
 </form>

@@ -228,14 +228,11 @@ class WS281xLedStatusPlugin(
             target=EffectRunner,
             name="WS281x LED Status Effect Process",
             kwargs={
-                "debug": self._settings.get_boolean(["debug_logging"]),
+                "debug": self._settings.get_boolean(["features", "debug_logging"]),
                 "queue": self.effect_queue,
                 "strip_settings": self._settings.get(["strip"], merged=True),
                 "effect_settings": self._settings.get(["effects"], merged=True),
-                "active_times_settings": self._settings.get(
-                    ["active_times"], merged=True
-                ),
-                "transition_settings": self._settings.get(["transitions"], merged=True),
+                "features_settings": self._settings.get(["features"], merged=True),
                 "previous_state": self.current_state,
                 "log_path": self._settings.get_plugin_logfile_path(postfix="debug"),
                 "saved_lights_on": self.lights_on,
@@ -482,7 +479,9 @@ class WS281xLedStatusPlugin(
             self.heating = True
             self.current_heater_heating = constants.BLOCKING_TEMP_GCODES[gcode]
 
-        elif gcode == "M150" and self._settings.get_boolean(["intercept_m150"]):
+        elif gcode == "M150" and self._settings.get_boolean(
+            ["features", "intercept_m150"]
+        ):
             # Update effect to M150 and suppress it
             self.update_effect(cmd)
             return (None,)
@@ -589,7 +588,7 @@ class WS281xLedStatusPlugin(
     def process_at_command(
         self, comm, phase, command, parameters, tags=None, *args, **kwargs
     ):
-        if not self._settings.get(["at_command_reaction"]):
+        if not self._settings.get(["features", "at_command_reaction"]):
             return
 
         if command == constants.ON_AT_COMMAND:

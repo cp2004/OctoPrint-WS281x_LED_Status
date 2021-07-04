@@ -43,8 +43,7 @@ class EffectRunner:
         queue,
         strip_settings,
         effect_settings,
-        active_times_settings,  # TODO combine to 'features settings' to reduce args
-        transition_settings,  # TODO combine
+        features_settings,
         previous_state,
         log_path,
         saved_lights_on,
@@ -58,8 +57,8 @@ class EffectRunner:
         # Save settings to class
         self.strip_settings = strip_settings
         self.effect_settings = effect_settings
-        self.active_times_settings = active_times_settings
-        self.transition_settings = transition_settings
+        self.active_times_settings = features_settings["active_times"]
+        self.transition_settings = features_settings["transitions"]
         self.reverse = strip_settings["reverse"]
         self.max_brightness = int(
             round((float(strip_settings["brightness"]) / 100) * 255)
