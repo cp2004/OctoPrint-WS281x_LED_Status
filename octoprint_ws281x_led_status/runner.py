@@ -443,29 +443,30 @@ class EffectRunner:
         are running when they report issues. Only logged in debug mode.
         :return: None
         """
-        line = "Current settings:"
+        lines = ["Current settings:"]
 
-        # Start with strip settings
-        line = line + "\n | * STRIP SETTINGS *"
-        for key, value in self.strip_settings.items():
-            line = line + "\n | - " + str(key) + ": " + str(value)
+        lines.extend(
+            recursively_log(
+                {
+                    "STRIP SETTINGS": self.strip_settings,
+                    "EFFECT SETTINGS": self.effect_settings,
+                    "FEATURES SETTINGS": self.features_settings,
+                }
+            )
+        )
 
-        # effect settings
-        line = line + "\n | * EFFECT SETTINGS *"
-        for key, value in self.effect_settings.items():
-            if key in constants.MODES:
-                line = line + "\n | " + str(key)
-                for setting_key, setting_value in value.items():
-                    line = (
-                        line + "\n | - " + str(setting_key) + ": " + str(setting_value)
-                    )
+        self._logger.debug("\n".join(lines))
 
-        # extras
-        line = line + "\n | * ACTIVE TIMES *"
-        line = line + "\n | - enabled: " + str(self.active_times_settings["enabled"])
-        line = line + "\n | - start: " + str(self.active_times_settings["start"])
-        line = line + "\n | - end: " + str(self.active_times_settings["end"])
-        self._logger.debug(line)
+
+def recursively_log(config, prefix=""):
+    lines = []
+    for key, value in config.items():
+        if isinstance(value, dict):
+            lines.append("{prefix} {key}".format(prefix=prefix, key=key))
+            lines.extend(recursively_log(value, prefix=prefix + " | -"))
+        else:
+            lines.append("{prefix} {key}: {value}".format(**locals()))
+    return lines
 
 
 class BrightnessManager:
