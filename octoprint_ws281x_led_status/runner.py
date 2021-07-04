@@ -57,6 +57,7 @@ class EffectRunner:
         # Save settings to class
         self.strip_settings = strip_settings
         self.effect_settings = effect_settings
+        self.features_settings = features_settings
         self.active_times_settings = features_settings["active_times"]
         self.transition_settings = features_settings["transitions"]
         self.reverse = strip_settings["reverse"]
@@ -78,10 +79,13 @@ class EffectRunner:
         # Create segment settings
         # Segments are EXPERIMENTAL and only enabled for certain conditions
         self.segment_settings = []
-        # Default, full length segment
-        self.segment_settings.append(
-            {"start": 0, "end": int(self.strip_settings["count"])}
-        )
+
+        # Sacrificial pixel offsets by one
+        default_segment = {"start": 0, "end": int(self.strip_settings["count"])}
+        if self.features_settings["sacrifice_pixel"]:
+            default_segment["start"] = 1
+
+        self.segment_settings.append(default_segment)
 
         if int(self.strip_settings["count"]) < 6:
             self._logger.info("Applying < 6 LED bug workaround")
@@ -349,7 +353,7 @@ class EffectRunner:
         strip = self.strip
         if not whole_strip:
             # Use a segment, not whole strip
-            strip = self.segment_manager.list_segments()[0]
+            strip = self.segment_manager.get_segment(1)
 
         self.run_effect(
             target=constants.EFFECTS["Solid Color"],

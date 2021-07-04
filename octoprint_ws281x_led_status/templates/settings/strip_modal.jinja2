@@ -30,9 +30,9 @@
 >
 {% endmacro %}
 
-{% macro control_label(text) %}
+{% macro control_label(text, for="") %}
 <div class="span4">
-    <label class="text-right">{{ _(text) }}</label>
+    <label for="{{ for }}" class="text-right">{{ _(text) }}</label>
 </div>
 {% endmacro %}
 
@@ -133,6 +133,13 @@
                 Advanced Settings
             </h5>
             <div id="advancedStrip" class="collapse">
+                <div class="row-fluid">
+                    {{ control_label("Skip first LED", for="ws281x_sacrifice_pixel") }}
+                    <div class="span4">
+                        <input id="ws281x_sacrifice_pixel" type="checkbox" data-bind="checked: {{ binding.bind_setting("features.sacrifice_pixel") }}">
+                    </div>
+                </div>
+                <br>
                 <div class="row-fluid">
                     {{ control_label("Frequency") }}
                     <div class="span4">

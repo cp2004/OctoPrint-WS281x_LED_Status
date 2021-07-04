@@ -115,6 +115,7 @@ defaults = {
                 "time": "750",
             }
         },
+        "sacrifice_pixel": False,
         "at_command_reaction": True,
         "intercept_m150": True,
         "debug_logging": False,
