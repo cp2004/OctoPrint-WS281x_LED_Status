@@ -6,15 +6,15 @@
 <p>Can help to diagnose both hardware problems (Such as specific LEDs are broken), help to select the correct strip type, and allow you to see if you like certain colors for customizations.</p>
 <p>Sets LEDs to solid colour until the next event happens.</p>
 <p>
-    <button class="btn btn-danger" id="led-test-red" data-bind="click: function(){ sendTestCommand('#ff0000') }"><i class="far-custom fa-custom-lightbulb"></i> Test red</button>
-    <button class="btn btn-success" id="led-test-green" data-bind="click: function(){ sendTestCommand('#00ff00') }"><i class="far-custom fa-custom-lightbulb"></i> Test green</button>
-    <button class="btn btn-primary" id="led-test-blue" data-bind="click: function(){ sendTestCommand('#0000ff') }"><i class="far-custom fa-custom-lightbulb"></i> Test blue</button>
-    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand('#ffffff') }"><i class="far-custom fa-custom-lightbulb"></i> Test white</button>
+    <button class="btn btn-danger" id="led-test-red" data-bind="click: function(){ sendTestCommand('#ff0000') }"><i class="far fa-lightbulb"></i> Test red</button>
+    <button class="btn btn-success" id="led-test-green" data-bind="click: function(){ sendTestCommand('#00ff00') }"><i class="far fa-lightbulb"></i> Test green</button>
+    <button class="btn btn-primary" id="led-test-blue" data-bind="click: function(){ sendTestCommand('#0000ff') }"><i class="far fa-lightbulb"></i> Test blue</button>
+    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand('#ffffff') }"><i class="far fa-lightbulb"></i> Test white</button>
 </p>
 <p>Sets LEDs to specific RGB colors until the next event happens.</p>
 <p>
     <input id="ws_test_color" type="color" class="input-small">
-    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand(document.querySelector('#ws_test_color').value) }"><i class="far-custom fa-custom-lightbulb"></i> Test Custom Color</button>
+    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand(document.querySelector('#ws_test_color').value) }"><i class="far fa-lightbulb"></i> Test Custom Color</button>
 </p>
 <hr>
 <h5>OS Config Test</h5>
@@ -38,7 +38,7 @@ The nominal value is 40mA for 5V LEDs, as this is between their estimate of 20-6
                     <input class="inline input-medium" data-bind="value: current_input" type="number">
                     <span class="add-on">mA</span>
                 </div>
-                <button class="inline btn btn-success" data-bind="click: calculate_power"><i class="fas-custom fa-custom-calculator"></i> Calculate</button>
+                <button class="inline btn btn-success" data-bind="click: calculate_power"><i class="fas fa-calculator"></i> Calculate</button>
             </div>
         </div>
     </form>

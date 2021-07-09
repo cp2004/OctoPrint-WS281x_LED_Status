@@ -14,9 +14,8 @@ import time
 
 # noinspection PyPackageRequirements
 import octoprint.plugin
-
-# noinspection PyPackageRequirements
 from octoprint.events import Events
+from octoprint.util.version import is_octoprint_compatible
 
 from octoprint_ws281x_led_status import api, constants, settings, util, wizard
 from octoprint_ws281x_led_status.runner import EffectRunner
@@ -88,9 +87,14 @@ class WS281xLedStatusPlugin(
 
     # Asset plugin
     def get_assets(self):
+        css_assets = ["css/ws281x_led_status.css"]
+        if is_octoprint_compatible("<1.5.0"):
+            # OctoPrint 1.5.0 updated to FA5
+            css_assets.append("css/fontawesome5_stripped.css")
+
         return {
             "js": ["js/ws281x_led_status.js"],
-            "css": ["css/fontawesome5_stripped.css", "css/ws281x_led_status.css"],
+            "css": css_assets,
         }
 
     # Startup plugin
