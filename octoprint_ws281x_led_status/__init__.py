@@ -65,7 +65,7 @@ class WS281xLedStatusPlugin(
 
     previous_event = ""  # type: str # Effect here will be run when progress expires
 
-    lights_on = True  # Lights should be on by default, makes sense.  TODO #65
+    lights_on = True  # Lights should be on by default, makes sense.
     torch_on = False  # Torch is off by default, because who would want that?
 
     torch_timer = None  # Timer for torch function
@@ -462,15 +462,15 @@ class WS281xLedStatusPlugin(
     # Hooks
     def process_gcode_q(
         self,
-        comm_instance,
-        phase,
+        _comm_instance,
+        _phase,
         cmd,
-        cmd_type,
+        _cmd_type,
         gcode,
-        subcode=None,
-        tags=None,
-        *args,
-        **kwargs
+        _subcode=None,
+        _tags=None,
+        *_args,
+        **_kwargs
     ):
         if gcode in constants.BLOCKING_TEMP_GCODES.keys():
             # New M109 or M190, start tracking heating
@@ -587,7 +587,7 @@ class WS281xLedStatusPlugin(
         return parsed_temps
 
     def process_at_command(
-        self, comm, phase, command, parameters, tags=None, *args, **kwargs
+        self, _comm, _phase, command, _parameters, _tags=None, *_args, **_kwargs
     ):
         if not self._settings.get(["features", "at_command_reaction"]):
             return
@@ -646,6 +646,9 @@ class WS281xLedStatusPlugin(
 __plugin_name__ = "WS281x LED Status"
 __plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
 __plugin_version__ = __version__
+__plugin_implementation__ = None
+__plugin_hooks__ = None
+
 
 _proc_dt_model = None
 
