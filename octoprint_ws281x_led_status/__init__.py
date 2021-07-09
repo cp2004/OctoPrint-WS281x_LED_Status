@@ -683,6 +683,7 @@ def determine_pi_version():
     logger.info("Detected running on a Raspberry Pi {}".format(model_no))
     global PI_MODEL
     PI_MODEL = model_no
+    return PI_MODEL
 
 
 def __plugin_check__():
