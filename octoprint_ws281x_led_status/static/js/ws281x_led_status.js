@@ -14,15 +14,8 @@ $(function () {
         self.torch_enabled = ko.observable(true);
         self.torch_toggle = ko.observable(true);
 
-        var torch_on_src =
-            "./plugin/ws281x_led_status/static/svg/flashlight.svg";
-        var torch_off_src =
-            "./plugin/ws281x_led_status/static/svg/flashlight-outline.svg";
-
         self.lights_on = ko.observable(true);
         self.torch_on = ko.observable(false);
-
-        self.torch_icon = ko.observable(torch_off_src);
 
         function update_light_status(response) {
             if (response.lights_on) {
@@ -32,10 +25,8 @@ $(function () {
             }
             if (response.torch_on) {
                 self.torch_on(true);
-                self.torch_icon(torch_on_src);
             } else {
                 self.torch_on(false);
-                self.torch_icon(torch_off_src);
             }
         }
 
