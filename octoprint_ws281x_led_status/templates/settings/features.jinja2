@@ -61,6 +61,10 @@
         </div>
     </div>
     <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: {{ binding.effect_binding("torch.enabled") }}">
+        <label for="ws_torch_icon_color" class="inline">Torch icon colour</label>
+        <input id="ws_torch_icon_color" type="color" class="input-small" data-bind="value: {{ binding.effect_binding("torch.icon_color") }}">
+    </div>
+    <div class="form-inline" style="margin-top: 0.5rem;" data-bind="visible: {{ binding.effect_binding("torch.enabled") }}">
         {{ labelled_checkbox("effects.torch.toggle", "Torch mode is a toggle") }}
         <p class="help-block">
             This overrides the timer, so you have to manually turn torch mode off again. Enables auto-torch when viewing the webcam stream

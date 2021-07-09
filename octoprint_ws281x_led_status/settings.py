@@ -78,6 +78,7 @@ defaults = {
             "toggle": False,
             "timer": "15",
             "auto_on_webcam": True,
+            "icon_color": "#000000",
         },
         "progress_print": {
             "enabled": True,
