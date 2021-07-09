@@ -60,8 +60,6 @@ class WS281xLedStatusPlugin(
 
     current_progress = 0  # type: int
 
-    # Target temperature is stored here, for use with temp tracking.
-    target_temperature = {"tool": 0, "bed": 0}  # type: dict
     current_heater_heating = None  # type: str
     tool_to_target = 0  # type: int
 
@@ -497,55 +495,56 @@ class WS281xLedStatusPlugin(
                     # Otherwise go back to the previous effect
                     self.process_previous_event()
 
-    def temperatures_received(self, _comm, parsed_temps, *args, **kwargs):
-        tool_key = self._settings.get(["effects", "progress_heatup", "tool_key"])
+    def temperatures_received(self, _comm, parsed_temps, *_args, **_kwargs):
+        if not self.heating and not self.cooling:
+            # Don't waste time if we're not doing anything
+            return parsed_temps
 
-        # Find the tool target temperature
-        try:
-            tool_target = parsed_temps["T{}".format(tool_key)][1]
-        except KeyError:
-            # Tool number was invalid, stick to whatever saved previously
-            tool_target = self.target_temperature["tool"]
+        def abort():
+            self.process_previous_event()
+            return parsed_temps
 
-        if tool_target is None or tool_target <= 0:
-            tool_target = self.target_temperature["tool"]
+        # Find the tool target temperature from OctoPrint
+        tool_target = self._printer.get_current_temperatures()[
+            "tool{}".format(
+                self._settings.get(["effects", "progress_heatup", "tool_key"])
+            )
+        ]["target"]
 
-        # Find the bed target temperature
-        try:
-            bed_target = parsed_temps["B"][1]
-        except KeyError:
-            # Bed doesn't exist? Probably won't need bed temp
-            bed_target = self.target_temperature["tool"]
-
-        if bed_target is None or bed_target <= 0:
-            bed_target = self.target_temperature["bed"]
-
-        # Save these for later, so that they can be used on the next round
-        self.target_temperature["tool"] = tool_target
-        self.target_temperature["bed"] = bed_target
+        # Find the bed target temperature from OctoPrint
+        bed_target = self._printer.get_current_temperatures()["bed"]["target"]
 
         if self.heating:
+            # Find out current temperature from parsed
             if self.current_heater_heating == "tool":
                 heater = "T{}".format(
                     self._settings.get(["effects", "progress_heatup", "tool_key"])
                 )
+                target = tool_target
             else:
                 heater = "B"
+                target = bed_target
+
             try:
                 current_temp = parsed_temps[heater][0]
             except KeyError:
+                # Abort if that tool does not exist - maybe misconfiguration
                 self._logger.error(
-                    "Heater {} not found, can't show progress".format(heater)
+                    "Heater {} not found, can't show heating progress".format(heater)
                 )
                 self.heating = False
-                self.process_previous_event()
-                return parsed_temps
+                return abort()
+
+            # Stop if current is above target
+            if current_temp > target:
+                self.heating = False
+                return abort()
 
             self.update_effect(
                 "progress_heatup {}".format(
                     self.calculate_heatup_progress(
                         current_temp,
-                        self.target_temperature[self.current_heater_heating],
+                        target,
                     )
                 )
             )
@@ -558,28 +557,30 @@ class WS281xLedStatusPlugin(
                 heater = "T{}".format(
                     self._settings.get(["effects", "progress_heatup", "tool_key"])
                 )
+                target = tool_target
             else:
                 heater = "B"
+                target = bed_target
 
-            current = parsed_temps[heater][0]
+            try:
+                current = parsed_temps[heater][0]
+            except KeyError:
+                # Abort if that tool does not exist - maybe misconfiguration
+                self._logger.error(
+                    "Heater {} not found, can't show cooling progress".format(heater)
+                )
+                self.heating = False
+                return abort()
 
             if current < self._settings.get_int(
                 ["effects", "progress_cooling", "threshold"]
             ):
                 self.cooling = False
-                self.process_previous_event()
-                return parsed_temps
+                return abort()
 
             self.update_effect(
                 "progress_cooling {}".format(
-                    self.calculate_heatup_progress(
-                        current,
-                        self.target_temperature[
-                            self._settings.get(
-                                ["effects", "progress_cooling", "bed_or_tool"]
-                            )
-                        ],
-                    )
+                    self.calculate_heatup_progress(current, target)
                 )
             )
 
