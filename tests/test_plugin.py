@@ -38,15 +38,9 @@ class TestPlugin(unittest.TestCase):
         """
         from octoprint_ws281x_led_status import get_proc_dt_model
 
-        with mock.patch(
-            OPEN_SIGNATURE, new=mock.mock_open(read_data=DT_MODEL)
-        ) as mock_file:
-
+        with mock.patch(OPEN_SIGNATURE, new=mock.mock_open(read_data=DT_MODEL)):
             model = get_proc_dt_model()
 
-        mock_file.assert_called_once_with(
-            "/proc/device-tree/model", "rt", encoding="utf-8"
-        )
         self.assertEqual(model, DT_MODEL)
 
     @mock.patch(
