@@ -1,0 +1,21 @@
+name: Feature Request
+description: Want a new feature implemented? Request improvements here.
+title: "[Request]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Now is your chance to convince me that this feature you want should be implemented! Go ahead, make a good case for it and I will see what can be done.
+  - type: textarea
+    attributes:
+      label: What would you like implemented?
+      description: Please provide a brief description of what you want implemented.
+      placeholder: It would be great if...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why should this be implemented?
+      placeholder: This would really benefit everyone who has...
+    validations:
+      required: true

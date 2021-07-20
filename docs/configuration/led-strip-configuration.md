@@ -49,7 +49,7 @@ This documentation aims to explain all of the settings in the LED Strip Configur
       <td style="text-align:left">DMA Channel</td>
       <td style="text-align:left">Number</td>
       <td style="text-align:left">
-        <p><em>(To be removed from the UI in a future version)</em>
+        <p><em>(Not available in the UI)</em>
         </p>
         <p><b>Do not change the DMA channel if you do not know what you are doing.</b>
         </p>
@@ -67,7 +67,7 @@ This documentation aims to explain all of the settings in the LED Strip Configur
       <td style="text-align:left">PWM Channel</td>
       <td style="text-align:left">Number</td>
       <td style="text-align:left">
-        <p><em>(To be removed from the UI in a future version)</em>
+        <p><em>(Not available in the UI)</em>
         </p>
         <p>Internal PWM Channel. Irrelevant to the plugin since it uses SPI in most
           cases.</p>

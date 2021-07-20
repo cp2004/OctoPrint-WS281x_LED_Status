@@ -1,0 +1,57 @@
+name: Bug Report
+description: Found something wrong? Report it!
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Reporting an issue is easy! Please fill out as much of the information below as possible, to make your experience easier.
+  - type: textarea
+    attributes:
+      label: Description of the bug
+      description: Please provide a brief description of what you think went wrong
+      placeholder: The plugin is cool, but when I asked it to turn the LEDs red they turned blue!
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Scroll down, click on '...'
+        3. See the error '...'
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened instead?
+      placeholder: "A bug happened!"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Make sure you are up-to-date on the latest versions of all software involved.
+        **What versions are you running?**
+  - type: input
+    attributes:
+      label: Plugin version
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: OctoPrint version
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: (if relevant) OctoPi version
+  - type: textarea
+    attributes:
+      label: Log Files & Screenshots
+      description: |
+        Please upload both the `octoprint.log` and the `plugin_ws281x_led_status_debug.log`, preferably with debug logging enabled.
+        If they are relevant (for example issues with the UI) please upload screenshots of the issue.
+  - type: textarea
+    attributes:
+      label: Anything else?

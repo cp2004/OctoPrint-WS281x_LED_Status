@@ -65,7 +65,3 @@ jobs:
                 labels: labels
               })
             }
-      - uses: OctoPrint/actions/issue-validation@main
-        if: github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'edited')
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}

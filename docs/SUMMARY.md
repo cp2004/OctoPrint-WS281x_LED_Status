@@ -22,6 +22,7 @@
 
 ---
 
+* [3rd Party Apps and Integrations](3rd-party-apps-and-integrations.md)
 * [Utilities](utilities.md)
 * [Troubleshooting Guide](troubleshooting-guide.md)
 

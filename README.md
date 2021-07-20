@@ -28,6 +28,7 @@ Features include:
 - Easy to use but highly configurable settings interface, you can turn pretty much anything on or off and configure it to how you like it.
 - LED Strip test
 - Power calculator
+- Powerful intergration with OctoApp
 - ... and more!
 
 You can take a look at the [documentation](https://cp2004.gitbook.io/ws281x-led-status/) for more information about all that the plugin has to offer.

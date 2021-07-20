@@ -13,7 +13,7 @@ You cannot power more than a handful of pixels direct from the Raspberry Pi - it
 {% endhint %}
 
 {% hint style="info" %}
-Using SPI to control the LEDs means you can **only use one LED strip at a time with the Raspberry Pi.** If you have more than one, you can 'chain' them together to make a longer strip.
+Using SPI to control the LEDs means you can **only use one LED strip at a time with the Raspberry Pi.** If you have more than one, you can 'chain' them together to make a longer strip. Please note that per-segment control is not currently supported, but may be in the future.
 {% endhint %}
 
 ## Raspberry Pi Wiring
@@ -39,7 +39,7 @@ Wiring is as follows:
 Make sure you have a common ground between the power supply and Pi.
 {% endhint %}
 
-![Wiring with no shifter](../../.gitbook/assets/wiring_no_shift%20%287%29.png)
+![Wiring with no shifter](../../.gitbook/assets/wiring_no_shift%20%288%29.png)
 
 ### Level Shifting Chip
 
