@@ -187,7 +187,7 @@ class EffectRunner:
 
     def progress_msg(self, msg):
         msg_split = msg.split()
-        self.progress_effect(msg_split[0], float(msg_split[1]))
+        self.progress_effect(msg_split[0], min(max(float(msg_split[1]), 0), 100))
         if msg != self.previous_state:
             self._logger.debug("Received message to update progress: {}".format(msg))
 
