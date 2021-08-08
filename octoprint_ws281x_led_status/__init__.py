@@ -50,7 +50,7 @@ class WS281xLedStatusPlugin(
 
     # Effect states
     previous_state = ""
-    current_state = "blank"
+    current_state = {"type": "standard", "effect": "blank"}
     next_state = ""
 
     # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
@@ -78,7 +78,7 @@ class WS281xLedStatusPlugin(
         self.api = api.PluginApi(self)
         self.wizard = wizard.PluginWizard(self, PI_MODEL)
         if self._settings.get_boolean(["effects", "startup", "enabled"]):
-            self.current_state = "startup"
+            self.current_state["effect"] = "startup"
 
         if self._settings.get_boolean(["lights_on"]):
             self.lights_on = True
@@ -197,21 +197,34 @@ class WS281xLedStatusPlugin(
             self.cooling = False
             self.current_progress = 0
         elif event == Events.PRINT_RESUMED:
-            self.update_effect("progress_print {}".format(self.current_progress))
+            self.update_effect(
+                {
+                    "type": "progress",
+                    "effect": "progress_print",
+                    "value": self.current_progress,
+                }
+            )
 
         if event in constants.SUPPORTED_EVENTS.keys():
             effect = constants.SUPPORTED_EVENTS[event]
-            self.update_effect(effect)
+            self.update_effect({"type": "standard", "effect": effect})
             # Record the event's effect so that it can used when progress expires
             self.previous_event = effect
 
     # Progress plugin
     def on_print_progress(self, storage="", path="", progress=1):
-        if (progress == 100 and self.current_state == "success") or self.heating:
+        if (
+            progress == 100
+            and self.current_state["type"] == "standard"
+            and self.current_state["effect"] == "success"
+        ) or self.heating:  # TODO should this be cooling?
+            # Skip 100% if necessary, as success event usually comes before this
             return
         if self._settings.get_boolean(["effects", "printing", "enabled"]):
-            self.update_effect("printing")
-        self.update_effect("progress_print {}".format(progress))
+            self.update_effect({"type": "standard", "effect": "printing"})
+        self.update_effect(
+            {"type": "progress", "effect": "progress_print", "value": progress}
+        )
         self.current_progress = progress
 
     # Effect runner process
@@ -244,9 +257,9 @@ class WS281xLedStatusPlugin(
         self.current_effect_process.start()
         self._logger.info("WS281x LED Status runner started")
         if self.lights_on:
-            self.update_effect("on")
+            self.effect_queue.put(constants.ON_MSG)
         else:
-            self.update_effect("off")
+            self.effect_queue.put(constants.OFF_MSG)
 
     def stop_effect_process(self):
         """
@@ -324,7 +337,7 @@ class WS281xLedStatusPlugin(
         self._send_UI_msg("lights", {"on": True})
         # Actually do the action
         self.lights_on = True
-        self.update_effect("on")
+        self.effect_queue.put(constants.ON_MSG)
         # Store state across restart
         self._settings.set(["lights_on"], True)
         self._settings.save()
@@ -333,7 +346,7 @@ class WS281xLedStatusPlugin(
     def deactivate_lights(self):
         self._send_UI_msg("lights", {"on": False})
         self.lights_on = False
-        self.update_effect("off")
+        self.effect_queue.put(constants.OFF_MSG)
         # Store state across restart
         self._settings.set(["lights_on"], False)
         self._settings.save()
@@ -350,16 +363,15 @@ class WS281xLedStatusPlugin(
 
         if toggle:
             self._logger.debug("Torch toggling on")
-            self.torch_on = True
-            self.update_effect("torch")
         else:
             self._logger.debug("Torch timer started for {} secs".format(torch_time))
             self.torch_timer = util.start_daemon_timer(
                 interval=torch_time,
                 target=self.deactivate_torch,
             )
-            self.torch_on = True
-            self.update_effect("torch")
+
+        self.update_effect({"type": "standard", "effect": "torch"})
+        self.torch_on = True
 
         self._send_UI_msg("torch", {"on": True})
 
@@ -372,66 +384,75 @@ class WS281xLedStatusPlugin(
 
         self._send_UI_msg("torch", {"on": False})
 
-    def update_effect(self, mode_name):
+    def update_effect(self, mode):
         """
         Change the effect displayed, use effects.EFFECTS for the correct names!
         If progress effect, value must be specified
-        :param mode_name: (str) effect to be run
+        :param mode: (str) effect to be run
         """
-        # If mode is on or off, this doesn't affect state - send straight away
-        if mode_name in ["on", "off"]:
-            self.effect_queue.put(mode_name)
+
+        # If torch is on, state is saved until torch is finished
+        if (
+            self.torch_on
+            and mode["type"] in ["standard", "progress"]
+            and mode["effect"] != "torch"
+        ):
+            self.next_state = mode
+            return
+
+        # If the mode is an M150 command, then set state. M150 enabled has already been checked.
+        elif mode["type"] == "M150":
+            self.effect_queue.put(mode)
+            self.set_state(mode)
+
+        if mode["type"] in ["standard", "progress"]:
+            self._send_standard_effect(mode)
+
+    def _send_standard_effect(self, mode):
+        # Check the effect is enabled
+        if not self._settings.get(["effects", mode["effect"], "enabled"]):
             return
 
         # Cancel return to idle timer if active
         if self.return_timer is not None and self.return_timer.is_alive():
+            self._logger.debug("Cancelling return to idle timer, new effect")
             self.return_timer.cancel()
 
         # Cancel idle timeout if active
         if self.idle_timer is not None and self.idle_timer.is_alive():
+            self._logger.debug("Cancelling idle timeout timer, new effect")
             self.idle_timer.cancel()
 
-        # If torch is on, state is saved until torch is finished
-        if self.torch_on and mode_name != "torch":
-            self.next_state = mode_name
-            return
-
-        # If the mode is an M150 command, then send the whole command.
-        elif mode_name.startswith("M150"):
-            self.effect_queue.put(mode_name)
-            self.set_state(mode_name)
-
-        # Check the effect is enabled
-        if not self._settings.get(["effects", mode_name.split(" ")[0], "enabled"]):
-            return
-
         # Start idle timeout if necessary:
-        if mode_name == "idle":
+        if mode["effect"] == "idle":
             timeout = self._settings.get_int(["effects", "idle", "timeout"])
             if timeout > 0:
                 self.idle_timer = util.start_daemon_timer(
                     interval=timeout, target=self.idle_timeout
                 )
+
         elif self.idle_timed_out:
-            # Timed out previously, turn lights back on for this print
+            # Timed out previously, turn lights back on for this effect
             self.activate_lights()
             self.idle_timed_out = False
 
         # Start return to idle timer if necessary
-        if mode_name == "success":
+        if mode["effect"] == "success":
             return_to_idle = self._settings.get_int(
                 ["effects", "success", "return_to_idle"]
             )
             if return_to_idle > 0:
                 self.return_timer = util.start_daemon_timer(
-                    interval=return_to_idle, target=self.update_effect, args=("idle",)
+                    interval=return_to_idle,
+                    target=self.update_effect,
+                    args=({"type": "standard", "effect": "idle"},),
                 )
 
         # Finally, start updating the effect
-        self._logger.debug("Updating effect to {}".format(mode_name))
-        self.effect_queue.put(mode_name)
-        if mode_name != "torch":
-            self.set_state(mode_name)
+        self._logger.debug("Updating effect to {}".format(mode))
+        self.effect_queue.put(mode)
+        if mode["effect"] != "torch":
+            self.set_state(mode)
 
     def set_state(self, new_state):
         self.previous_state = self.current_state
@@ -456,7 +477,7 @@ class WS281xLedStatusPlugin(
         :return: None
         """
         if self.previous_event:
-            self.update_effect(self.previous_event)
+            self.update_effect({"type": "standard", "effect": self.previous_event})
         self.previous_event = ""
 
     def idle_timeout(self):
@@ -485,7 +506,7 @@ class WS281xLedStatusPlugin(
             ["features", "intercept_m150"]
         ):
             # Update effect to M150 and suppress it
-            self.update_effect(cmd)
+            self.update_effect({"type": "M150", "command": cmd})
             return (None,)
 
         else:
@@ -545,12 +566,11 @@ class WS281xLedStatusPlugin(
                 return abort()
 
             self.update_effect(
-                "progress_heatup {}".format(
-                    self.calculate_heatup_progress(
-                        current_temp,
-                        target,
-                    )
-                )
+                {
+                    "type": "progress",
+                    "effect": "progress_heatup",
+                    "value": self.calculate_heatup_progress(current_temp, target),
+                }
             )
 
         elif self.cooling:
@@ -583,9 +603,11 @@ class WS281xLedStatusPlugin(
                 return abort()
 
             self.update_effect(
-                "progress_cooling {}".format(
-                    self.calculate_heatup_progress(current, target)
-                )
+                {
+                    "type": "progress",
+                    "effect": "progress_cooling",
+                    "value": self.calculate_heatup_progress(current, target),
+                }
             )
 
         return parsed_temps

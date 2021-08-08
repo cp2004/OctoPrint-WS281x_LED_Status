@@ -127,7 +127,10 @@ class EffectRunner:
             )
 
         # Set back previous state, unless it is `blank`, then start main loop
-        if self.previous_state != "blank":
+        if not (
+            self.previous_state["type"] == "standard"
+            and self.previous_state["effect"] == "blank"
+        ):
             self.parse_q_msg(self.previous_state)
 
         self.main_loop()
@@ -157,17 +160,21 @@ class EffectRunner:
         self._logger.info("Kill message recieved, all effects stopped. Bye!")
 
     def parse_q_msg(self, msg):
-        if msg == "on":
-            self.turn_lights_on()
-        elif msg == "off":
-            self.turn_lights_off()
-        elif "progress" in msg:
-            self.progress_msg(msg)
+        if msg["type"] == "lights":
+            if msg["action"] == "on":
+                self.turn_lights_on()
+            if msg["action"] == "off":
+                self.turn_lights_off()
+
+        elif msg["type"] == "progress":
+            self.progress_msg(msg["effect"], msg["value"])
             self.previous_state = msg
-        elif "M150" in msg:
-            self.parse_m150(msg)
-        else:
-            self.standard_effect(msg)
+
+        elif msg["type"] == "M150":
+            self.parse_m150(msg["command"])
+
+        elif msg["type"] == "standard":
+            self.standard_effect(msg["effect"])
             self.previous_state = msg
 
     def turn_lights_on(self):
@@ -208,11 +215,9 @@ class EffectRunner:
         self.standard_effect("blank")
         self.lights_on = False
 
-    def progress_msg(self, msg):
-        msg_split = msg.split()
-        self.progress_effect(msg_split[0], min(max(float(msg_split[1]), 0), 100))
-        if msg != self.previous_state:
-            self._logger.debug("Received message to update progress: {}".format(msg))
+    def progress_msg(self, progress_effect, value):
+        self._logger.debug("Changing effect to {}, {}%".format(progress_effect, value))
+        self.progress_effect(progress_effect, min(max(int(value), 0), 100))
 
     def parse_m150(self, msg):
         red = green = blue = white = 0  # Start at 0 - sending blank M150 turns LEDs off
@@ -247,7 +252,10 @@ class EffectRunner:
                 "w": white,
                 "brightness": brightness,
             }
-            self.previous_state = "M150"
+            self.previous_state = {
+                "type": "M150",
+                "command": "M150",  # Chop the parameters, so it is not parsed again
+            }
             self._logger.debug(
                 "Parsed new M150: M150 R{red} G{green} B{blue} (brightness: {brightness}".format(
                     **locals()

@@ -43,7 +43,6 @@ SUPPORTED_EVENTS = {
     Events.PRINT_PAUSED: "paused",
 }
 
-KILL_MSG = "KILL"
 
 STRIP_TYPES = {
     "WS2811_STRIP_GRB": rpi_ws281x.WS2811_STRIP_GRB,
@@ -103,3 +102,8 @@ regex_g_param = re.compile(r"(^|[^A-Za-z])[GgUu](?P<value>\d{1,3})")
 regex_b_param = re.compile(r"(^|[^A-Za-z])[Bb](?P<value>\d{1,3})")
 regex_w_param = re.compile(r"(^|[^A-Za-z])[Ww](?P<value>\d{1,3})")
 regex_p_param = re.compile(r"(^|[^A-Za-z])[Pp](?P<value>\d{1,3})")
+
+# Queue message constants
+ON_MSG = {"type": "lights", "action": "on"}
+OFF_MSG = {"type": "lights", "action": "off"}
+KILL_MSG = "KILL"
