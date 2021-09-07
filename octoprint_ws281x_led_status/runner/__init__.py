@@ -23,8 +23,9 @@ except ImportError:
 from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
 from rpi_ws281x import PixelStrip
 
-from octoprint_ws281x_led_status import constants, segments
+from octoprint_ws281x_led_status import constants
 from octoprint_ws281x_led_status.effects import error_handled_effect
+from octoprint_ws281x_led_status.runner import segments
 from octoprint_ws281x_led_status.util import (
     apply_color_correction,
     clear_queue,
