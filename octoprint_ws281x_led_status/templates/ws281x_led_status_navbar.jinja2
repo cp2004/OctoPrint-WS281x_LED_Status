@@ -2,7 +2,7 @@
 
 {% macro torch_on_icon() %}
 {# https://fonts.google.com/icons flashlight_on #}
-<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="19px" viewBox="0 0 24 24" width="24px" data-bind="attr: { fill: {{ ICON_COLOR }}(), filter: 'drop-shadow( 0px -5px 2px ' + {{ ICON_COLOR }}() + '66 )' }" >
+<svg xmlns="http://www.w3.org/2000/svg" height="19px" viewBox="0 0 24 24" width="24px" data-bind="attr: { fill: {{ ICON_COLOR }}(), filter: 'drop-shadow( 0px -5px 2px ' + {{ ICON_COLOR }}() + '66 )' }" >
   <g>
       <path d="M0,0h24v24H0V0z" fill="none"></path>
   </g>
@@ -17,7 +17,7 @@
 
 {% macro torch_off_icon() %}
 {# https://fonts.google.com/icons flashlight_off #}
-<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="19px" viewBox="0 0 24 24" width="24px" data-bind="attr: { fill: {{ ICON_COLOR }}() }" >
+<svg xmlns="http://www.w3.org/2000/svg" height="19px" viewBox="0 0 24 24" width="24px" data-bind="attr: { fill: {{ ICON_COLOR }}() }" >
   <g>
     <path d="M0,0h24v24H0V0z" fill="none"></path>
   </g>
@@ -30,7 +30,7 @@
 </svg>
 {% endmacro %}
 
-<a title="Toggle lights" class="pull-right" style="float: left; font-size:20px" href="javascript:void(0)" data-bind="click: toggle_lights ">
+<a title="Toggle lights" style="font-size:20px" href="javascript:void(0)" data-bind="click: toggle_lights ">
     <i
             id="lightIcon"
             class="fa-lightbulb"
@@ -42,7 +42,7 @@
             class="fa"
             data-bind="css: { 'fa-toggle-on text-success': lights_on, 'fa-toggle-off text-error': !lights_on() }"
     ></i></a>
-<a class="pull-right" style="float: left; font-size:20px" href="javascript:void(0)" data-bind="click: toggle_torch, visible: torch_enabled(), attr: { title: torch_on() ? 'Turn torch off' : 'Turn torch on' }">
+<a style="font-size:20px" href="javascript:void(0)" data-bind="click: toggle_torch, visible: torch_enabled(), attr: { title: torch_on() ? 'Turn torch off' : 'Turn torch on' }">
     <!-- ko if: torch_on -->
     {{ torch_on_icon() }}
     <!-- /ko -->
