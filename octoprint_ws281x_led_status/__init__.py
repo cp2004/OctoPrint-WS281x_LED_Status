@@ -330,24 +330,22 @@ class WS281xLedStatusPlugin(
 
     # Lights and torch on/off handling
     def activate_lights(self):
-        # Notify the UI
-        self._send_UI_msg("lights", {"on": True})
-        # Actually do the action
-        self.lights_on = True
-        self.effect_queue.put(constants.ON_MSG)
-        # Store state across restart
-        self._settings.set(["lights_on"], True)
-        self._settings.save()
-        self._logger.info("Turning lights on")
+        self.switch_lights(True)
 
     def deactivate_lights(self):
-        self._send_UI_msg("lights", {"on": False})
-        self.lights_on = False
-        self.effect_queue.put(constants.OFF_MSG)
+        self.switch_lights(False)
+
+    def switch_lights(self, state):
+        # Notify the UI
+        self._send_UI_msg("lights", {"on": state})
+        # Actually do the action
+        self.lights_on = state
+        self.effect_queue.put(constants.ON_MSG if state else constants.OFF_MSG)
         # Store state across restart
-        self._settings.set(["lights_on"], False)
+        self._settings.set(["lights_on"], state)
         self._settings.save()
-        self._logger.info("Turning light off")
+        # Logs
+        self._logger.info("Switched lights, on: {}".format(state))
 
     def activate_torch(self):
         if self.torch_timer and self.torch_timer.is_alive():
