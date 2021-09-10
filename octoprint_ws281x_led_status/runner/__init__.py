@@ -26,12 +26,14 @@ from rpi_ws281x import PixelStrip
 from octoprint_ws281x_led_status import constants
 from octoprint_ws281x_led_status.effects import error_handled_effect
 from octoprint_ws281x_led_status.runner import segments
+from octoprint_ws281x_led_status.runner import timer as active_times
 from octoprint_ws281x_led_status.util import (
     apply_color_correction,
     clear_queue,
     hex_to_rgb,
     int_0_255,
     milli_sleep,
+    recursively_log,
     start_daemon_thread,
     start_daemon_timer,
 )
@@ -65,10 +67,6 @@ class EffectRunner:
         self.max_brightness = int(
             round((float(strip_settings["brightness"]) / 100) * 255)
         )
-        start = self.active_times_settings["start"].split(":")
-        end = self.active_times_settings["end"].split(":")
-        self.start_time = (int(start[0]) * 60) + int(start[1])
-        self.end_time = (int(end[0]) * 60) + int(end[1])
         self.color_correction = {
             "red": self.strip_settings["adjustment"]["R"],
             "green": self.strip_settings["adjustment"]["G"],
@@ -118,6 +116,12 @@ class EffectRunner:
         self.brightness_manager = BrightnessManager(
             self.strip, self.max_brightness, self.transition_settings
         )
+
+        # Create 'Active Times' background timers
+        self.active_times_timer = active_times.ActiveTimer(
+            self.active_times_settings, self.switch_lights
+        )
+        self.active_times_timer.start_timer()
 
         if debug:
             self.log_settings()
@@ -178,7 +182,23 @@ class EffectRunner:
             self.standard_effect(msg["effect"])
             self.previous_state = msg
 
+    def switch_lights(self, state):
+        # state: target state for lights
+        # Only call when current state must change, since it will interrupt the currently running effect
+        if state == self.lights_on:
+            return
+
+        if state:
+            self.turn_lights_on()
+        else:
+            self.turn_lights_off()
+
     def turn_lights_on(self):
+        if not self.active_times_timer.active:
+            # Active times are not now, don't do anything
+            self.parse_q_msg(self.previous_state)
+            return
+
         if self.turn_off_timer and self.turn_off_timer.is_alive():
             self.turn_off_timer.cancel()
 
@@ -263,7 +283,7 @@ class EffectRunner:
                 )
             )
 
-        if self.check_times() and self.lights_on:  # Respect lights on/off
+        if self.lights_on:  # Respect lights on/off
             # Set brightness
             self.brightness_manager.set_brightness(self.previous_m150["brightness"])
 
@@ -293,7 +313,7 @@ class EffectRunner:
 
     def progress_effect(self, mode, value):
         effect_settings = self.effect_settings[mode]
-        if self.check_times() and self.lights_on:
+        if self.lights_on:
             self.run_effect(
                 target=constants.PROGRESS_EFFECTS[effect_settings["effect"]],
                 kwargs={
@@ -318,7 +338,7 @@ class EffectRunner:
         if self.previous_state != mode:
             self._logger.debug("Changing effect to {}".format(mode))
 
-        if self.check_times() and self.lights_on and not mode == "blank":
+        if self.lights_on and not mode == "blank":
             effect_settings = self.effect_settings[mode]
             self.run_effect(
                 target=constants.EFFECTS[effect_settings["effect"]],
@@ -377,26 +397,6 @@ class EffectRunner:
         )
         if self.queue.empty():
             time.sleep(0.1)
-
-    def check_times(self):
-        """Check if current time is within 'active times' configuration, log if change detected"""
-        if not self.active_times_settings["enabled"]:
-            # Active times are disabled, LEDs always on
-            return True
-
-        current_time = time.ctime(time.time()).split()[3].split(":")
-        ct_mins = (int(current_time[0]) * 60) + int(current_time[1])
-
-        if self.start_time <= ct_mins < self.end_time:
-            if not self.active_times_state:
-                self._logger.debug("Active time start reached")
-                self.active_times_state = True
-            return True
-        else:
-            if self.active_times_state:
-                self._logger.debug("Active times end reached")
-                self.active_times_state = False
-            return False
 
     def start_strip(self):
         """
@@ -465,17 +465,6 @@ class EffectRunner:
         )
 
         self._logger.debug("\n".join(lines))
-
-
-def recursively_log(config, prefix=""):
-    lines = []
-    for key, value in config.items():
-        if isinstance(value, dict):
-            lines.append("{prefix} {key}".format(prefix=prefix, key=key))
-            lines.extend(recursively_log(value, prefix=prefix + " | -"))
-        else:
-            lines.append("{prefix} {key}: {value}".format(**locals()))
-    return lines
 
 
 class BrightnessManager:

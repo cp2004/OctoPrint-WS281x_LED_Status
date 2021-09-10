@@ -168,3 +168,14 @@ def int_0_255(value):
 def clear_queue(q):
     while not q.empty():
         q.get(False)
+
+
+def recursively_log(config, prefix=""):
+    lines = []
+    for key, value in config.items():
+        if isinstance(value, dict):
+            lines.append("{prefix} {key}".format(prefix=prefix, key=key))
+            lines.extend(recursively_log(value, prefix=prefix + " | -"))
+        else:
+            lines.append("{prefix} {key}: {value}".format(**locals()))
+    return lines
