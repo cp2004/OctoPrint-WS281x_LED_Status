@@ -79,9 +79,9 @@ class PluginApi:
     def test_led(self, data):
         # We mock an M150 command here, because it is the easiest way
         # Calling update_effect skips the checking of M150 intercepting or the printer
-        test_color = "M150 R{} G{} B{}".format(
+        test_cmd = "M150 R{} G{} B{}".format(
             util.hex_to_rgb(data.get("color"))[0],
             util.hex_to_rgb(data.get("color"))[1],
-            util.hex_to_rgb(data.get("color"))[2]
+            util.hex_to_rgb(data.get("color"))[2],
         )
-        self.plugin.update_effect(test_color)
+        self.plugin.update_effect({"type": "M150", "command": test_cmd})
