@@ -31,7 +31,7 @@ class ActiveTimer:
         if settings["enabled"]:
             # Only create the timer if necessary, as minimal logic as possible
             self.timer = self.timer = RepeatedTimer(
-                30,  # TODO reduce to 30
+                30,
                 self.check_times,
                 run_first=True,
             )
@@ -59,10 +59,10 @@ class ActiveTimer:
         end = datetime.now().replace(hour=self.end_time[0], minute=self.end_time[1])
 
         if not (end - start).total_seconds() > 0:
-            # If start is not before end, this is not supported & lights will always be on
-            # Don't even bother trying to calculate it..
-            self.switch(True)
-            return
+            # If end is before start,
+            # then the lights are configured to be on overnight
+            # so we will subtract one day from the start and call it yesterday
+            start = start.replace(day=start.day - 1)
 
         current = datetime.now()
 
