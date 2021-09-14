@@ -54,6 +54,7 @@ class EffectRunner:
 
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.runner")
         self.setup_custom_logger(log_path, debug)
+        self._logger.debug("Starting WS281x LED Status Effect runner")
 
         self.segment_manager = None  # type Optional[segments.SegmentManager]
 
@@ -63,7 +64,6 @@ class EffectRunner:
         self.features_settings = features_settings
         self.active_times_settings = features_settings["active_times"]
         self.transition_settings = features_settings["transitions"]
-        self.reverse = strip_settings["reverse"]
         self.max_brightness = int(
             round((float(strip_settings["brightness"]) / 100) * 255)
         )
@@ -87,10 +87,11 @@ class EffectRunner:
         self.segment_settings.append(default_segment)
 
         if int(self.strip_settings["count"]) < 6:
-            self._logger.info("Applying < 6 LED bug workaround")
+            self._logger.info("Applying < 6 LED flickering bug workaround")
             # rpi_ws281x will think we want 6 LEDs, but we will only use those configured
             # this works around issues where LEDs would show the wrong colour, flicker and more
             # when used with less than 6 LEDs.
+            # See #132 for details
             self.strip_settings["count"] = 6
 
         # State holders
@@ -103,12 +104,13 @@ class EffectRunner:
         self.queue = queue  # type: multiprocessing.Queue
         try:
             self.strip = self.start_strip()  # type: PixelStrip
-        except StripFailedError:
-            self._logger.info("No strip initialised, exiting the effect process.")
+        except (StripFailedError, segments.InvalidSegmentError):
+            self._logger.error("Exiting the effect process")
             return
         except Exception as e:
-            self._logger.error("Unknown exception, abort abort abort")
             self._logger.exception(e)
+            self._logger.error("Exiting the effect process")
+            return
 
         self.effect_queue = Queue()
         self.effect_thread = None  # type: Optional[threading.Thread]
@@ -136,14 +138,19 @@ class EffectRunner:
             self.previous_state["type"] == "standard"
             and self.previous_state["effect"] == "blank"
         ):
+            self._logger.debug(
+                "Returning to previous state: {}".format(self.previous_state)
+            )
             self.parse_q_msg(self.previous_state)
 
+        self._logger.info("Startup Complete!")
         self.main_loop()
 
     def main_loop(self):
         try:
             while True:
                 msg = self.queue.get()
+                self._logger.debug("New message: {}".format(msg))
                 if msg:
                     if msg == constants.KILL_MSG:
                         self.kill()
@@ -160,16 +167,18 @@ class EffectRunner:
             raise
 
     def kill(self):
+        self._logger.debug("Kill message received, shutting down...")
         self.blank_leds()
         self.stop_effect()
-        self._logger.info("Kill message recieved, all effects stopped. Bye!")
+        self.active_times_timer.end_timer()
+        self._logger.info("Effect runner shutdown. Bye!")
 
     def parse_q_msg(self, msg):
         if msg["type"] == "lights":
             if msg["action"] == "on":
-                self.turn_lights_on()
+                self.switch_lights(True)
             if msg["action"] == "off":
-                self.turn_lights_off()
+                self.switch_lights(False)
 
         elif msg["type"] == "progress":
             self.progress_msg(msg["effect"], msg["value"])
@@ -184,9 +193,11 @@ class EffectRunner:
 
     def switch_lights(self, state):
         # state: target state for lights
-        # Only call when current state must change, since it will interrupt the currently running effect
+        # Only run when current state must change, since it will interrupt the currently running effect
         if state == self.lights_on:
             return
+
+        self._logger.info("Switching lights {}".format("on" if state else "off"))
 
         if state:
             self.turn_lights_on()
@@ -196,6 +207,7 @@ class EffectRunner:
     def turn_lights_on(self):
         if not self.active_times_timer.active:
             # Active times are not now, don't do anything
+            self._logger.debug("LED switch on blocked by active times")
             self.parse_q_msg(self.previous_state)
             return
 
@@ -203,13 +215,11 @@ class EffectRunner:
             self.turn_off_timer.cancel()
 
         self.lights_on = True
+
         if self.transition_settings["fade"]["enabled"]:
             start_daemon_thread(
-                target=self.brightness_manager.do_fade_in, name="Fade in thread"
+                target=self.brightness_manager.do_fade_in, name="Fade in"
             )
-        self._logger.info(
-            "On message received, turning on LEDs to {}".format(self.previous_state)
-        )
         self.parse_q_msg(self.previous_state)
 
     def turn_lights_off(self):
@@ -225,12 +235,6 @@ class EffectRunner:
             )
         else:
             self.lights_off()
-
-        self._logger.info(
-            "Off message received, turning off LEDs (fade: {})".format(
-                self.transition_settings["fade"]["enabled"]
-            )
-        )
 
     def lights_off(self):
         self.standard_effect("blank")
@@ -278,7 +282,7 @@ class EffectRunner:
                 "command": "M150",  # Chop the parameters, so it is not parsed again
             }
             self._logger.debug(
-                "Parsed new M150: M150 R{red} G{green} B{blue} (brightness: {brightness}".format(
+                "Parsed new M150: M150 R{red} G{green} B{blue} (brightness: {brightness})".format(
                     **locals()
                 )
             )
@@ -326,7 +330,7 @@ class EffectRunner:
                     "base_color": apply_color_correction(
                         self.color_correction, *hex_to_rgb(effect_settings["base"])
                     ),
-                    "reverse": self.reverse,
+                    "reverse": self.strip_settings["reverse"],
                 },
                 name=mode,
             )
@@ -335,8 +339,7 @@ class EffectRunner:
 
     def standard_effect(self, mode):
         # Log if the effect is changing
-        if self.previous_state != mode:
-            self._logger.debug("Changing effect to {}".format(mode))
+        self._logger.debug("Changing effect to {}".format(mode))
 
         if self.lights_on and not mode == "blank":
             effect_settings = self.effect_settings[mode]
@@ -384,6 +387,8 @@ class EffectRunner:
             # Use a segment, not whole strip
             strip = self.segment_manager.get_segment(1)
 
+        self._logger.debug("Blanking LEDs")
+
         self.run_effect(
             target=constants.EFFECTS["Solid Color"],
             kwargs={
@@ -403,7 +408,7 @@ class EffectRunner:
         Start PixelStrip and SegmentManager object
         :returns strip: (rpi_ws281x.PixelStrip) The initialised strip object
         """
-        self._logger.info("Initialising LED strip")
+        self._logger.info("Starting up LED strip")
         try:
             strip = PixelStrip(
                 num=int(self.strip_settings["count"]),
@@ -416,18 +421,18 @@ class EffectRunner:
                 strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
             )
             strip.begin()
-            self._logger.info("Strip successfully initialised")
+            self._logger.info("Strip startup complete!")
         except Exception as e:  # Probably wrong settings...
             self._logger.error(repr(e))
-            self._logger.error("Strip failed to initialize, no effects will be run.")
-            raise StripFailedError("Error intitializing strip")
+            self._logger.error("Strip failed to startup")
+            raise StripFailedError("Error initializing strip")
 
         # Create segments & segment manager
         try:
             self.segment_manager = segments.SegmentManager(strip, self.segment_settings)
             self.segment_manager.create_segments()
         except segments.InvalidSegmentError:
-            self._logger.error("You did something wrong...")
+            self._logger.error("Segment configuration error. Please report this issue!")
             raise
         return strip
 
