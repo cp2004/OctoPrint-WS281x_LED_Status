@@ -25,3 +25,7 @@
     height: 500px;
     overflow-y: auto;
 }
+
+#settings_plugin_ws281x_led_status input[type="color"] {
+    min-height: 30px;
+}
