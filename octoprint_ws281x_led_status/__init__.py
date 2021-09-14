@@ -60,6 +60,10 @@ class WS281xLedStatusPlugin(
     current_progress = 0  # type: int
 
     current_heater_heating = None  # type: str
+    previous_target = {
+        "tool": 0,
+        "bed": 0,
+    }  # Store last non-zero target here, for cooling tracking
     tool_to_target = 0  # type: int
 
     previous_event = ""  # type: str # Effect here will be run when progress expires
@@ -534,6 +538,12 @@ class WS281xLedStatusPlugin(
         # Find the bed target temperature from OctoPrint
         bed_target = self._printer.get_current_temperatures()["bed"]["target"]
 
+        if tool_target is not None and tool_target > 0:
+            self.previous_target["tool"] = tool_target
+
+        if bed_target is not None and bed_target > 0:
+            self.previous_target["bed"] = tool_target
+
         if self.heating:
             # Find out current temperature from parsed
             if self.current_heater_heating == "tool":
@@ -576,10 +586,10 @@ class WS281xLedStatusPlugin(
                 heater = "T{}".format(
                     self._settings.get(["effects", "progress_heatup", "tool_key"])
                 )
-                target = tool_target
+                target = self.previous_target["tool"]
             else:
                 heater = "B"
-                target = bed_target
+                target = self.previous_target["bed"]
 
             try:
                 current = parsed_temps[heater][0]
