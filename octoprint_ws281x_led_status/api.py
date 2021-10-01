@@ -13,6 +13,7 @@ from octoprint_ws281x_led_status import util
 # Define API commands
 CMD_LIGHTS_ON = "lights_on"
 CMD_LIGHTS_OFF = "lights_off"
+CMD_LIGHTS_TOGGLE = "lights_toggle"
 CMD_TORCH_ON = "torch_on"
 CMD_TORCH_OFF = "torch_off"
 CMD_TEST_OS = "test_os_config"
@@ -33,6 +34,7 @@ class PluginApi:
         return {
             CMD_LIGHTS_ON: [],
             CMD_LIGHTS_OFF: [],
+            CMD_LIGHTS_TOGGLE: [],
             CMD_TORCH_ON: [],
             CMD_TORCH_OFF: [],
             CMD_TEST_OS: [],
@@ -49,6 +51,8 @@ class PluginApi:
             self.plugin.activate_lights()
         elif command == CMD_LIGHTS_OFF:
             self.plugin.deactivate_lights()
+        elif command == CMD_LIGHTS_TOGGLE:
+            self.plugin.switch_lights(not self.plugin.lights_on)
         elif command == CMD_TORCH_ON:
             self.plugin.activate_torch()
         elif command == CMD_TORCH_OFF:

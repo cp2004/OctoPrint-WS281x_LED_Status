@@ -96,6 +96,7 @@ See also the [SimpleApi docs](https://docs.octoprint.org/en/devel/plugins/mixins
 | :--- | :--- | :--- |
 | `lights_on` | None | Turn the LEDs on |
 | `lights_off` | None | Turn the LEDs off |
+| `lights_toggle` | None | Toggle the LED state |
 | `torch_on` | None | Turn the torch mode on |
 | `torch_off` | None | Turn the torch mode off. Only available if torch mode is configured as toggle. |
 | `test_os_config` | None | Begin an OS configuration test. Asynchronous, data is returned on the socket |
