@@ -16,8 +16,7 @@ from octoprint_ws281x_led_status.util import run_system_command
 
 
 class PluginWizard:
-    def __init__(self, plugin, pi_model):
-        self.plugin = plugin
+    def __init__(self, pi_model):
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.wizard")
 
         self.pi_model = pi_model

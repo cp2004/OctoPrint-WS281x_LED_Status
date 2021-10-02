@@ -9,6 +9,7 @@ import logging
 import threading
 from time import sleep, tzname
 
+from octoprint.util import ResettableTimer
 from octoprint.util.commandline import CommandlineCaller
 
 
@@ -179,3 +180,49 @@ def recursively_log(config, prefix=""):
         else:
             lines.append("{prefix} {key}: {value}".format(**locals()))
     return lines
+
+
+class RestartableTimer:
+    """
+    Class that controls creating & recreating timers if needed to restart them
+    Uses OctoPrint's Resettable timer, so timers can now be started, reset and 'restarted'
+    """
+
+    def __init__(self, interval, function, args=(), kwargs=None):
+        if kwargs is None:
+            kwargs = {}
+
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+
+        self.timer = None
+
+    def start(self):
+        """
+        If there is already a timer active, reset it, otherwise
+        create a new timer and start that
+        """
+        if self.timer and self.timer.is_alive():
+            self.timer.reset()
+        else:
+            self.create_timer()
+            self.timer.start()
+
+    def stop(self):
+        if self.timer and self.timer.is_alive():
+            self.timer.cancel()
+
+    def create_timer(self):
+        self.stop()
+
+        self.timer = ResettableTimer(
+            interval=self.interval,
+            function=self.function,
+            args=self.args,
+            kwargs=self.kwargs,
+        )
+
+    def is_alive(self):
+        return self.timer and self.timer.is_alive()

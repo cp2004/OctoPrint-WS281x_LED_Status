@@ -19,6 +19,7 @@ from octoprint.util.version import is_octoprint_compatible
 
 from octoprint_ws281x_led_status import api, constants, settings, util, wizard
 from octoprint_ws281x_led_status.runner import EffectRunner
+from octoprint_ws281x_led_status.util import RestartableTimer
 
 from ._version import get_versions
 
@@ -41,46 +42,58 @@ class WS281xLedStatusPlugin(
     octoprint.plugin.EventHandlerPlugin,
     octoprint.plugin.RestartNeedingPlugin,
 ):
-    # Submodules
-    api = None  # type: api.PluginApi
-    wizard = None  # type: wizard.PluginWizard
+    def __init__(self):
+        super(WS281xLedStatusPlugin, self).__init__()
 
-    current_effect_process = None  # type: multiprocessing.Process
-    effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
+        # Submodules
+        self.api = api.PluginApi(self)  # type: api.PluginApi
+        self.wizard = wizard.PluginWizard(PI_MODEL)  # type: wizard.PluginWizard
 
-    # Effect states
-    previous_state = ""
-    current_state = {"type": "standard", "effect": "blank"}
-    next_state = ""
+        self.current_effect_process = None  # type: multiprocessing.Process
+        self.effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
 
-    # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
-    heating = False  # type: bool
-    cooling = False  # type: bool
+        # Effect states
+        self.previous_state = ""
+        self.current_state = {"type": "standard", "effect": "blank"}
+        self.next_state = ""
 
-    current_progress = 0  # type: int
+        # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
+        self.heating = False  # type: bool
+        self.cooling = False  # type: bool
 
-    current_heater_heating = None  # type: str
-    previous_target = {
-        "tool": 0,
-        "bed": 0,
-    }  # Store last non-zero target here, for cooling tracking
-    tool_to_target = 0  # type: int
+        self.current_progress = 0  # type: int
 
-    previous_event = ""  # type: str # Effect here will be run when progress expires
+        self.current_heater_heating = None  # type: str
+        self.previous_target = {
+            "tool": 0,
+            "bed": 0,
+        }  # Store last non-zero target here, for cooling tracking
+        self.tool_to_target = 0  # type: int
 
-    lights_on = True  # Lights should be on by default, makes sense.
-    torch_on = False  # Torch is off by default, because who would want that?
+        self.previous_event = (
+            ""
+        )  # type: str # Effect here will be run when progress expires
 
-    torch_timer = None  # Timer for torch function
-    return_timer = None  # Timer object when we want to return to idle.
-    idle_timer = None
-    idle_timed_out = False
+        self.lights_on = True  # Lights should be on by default, makes sense.
+        self.torch_on = False  # Torch is off by default, because who would want that?
+
+        self.torch_timer = RestartableTimer(
+            interval=30,  # Default, overwritten on settings save TODO!
+            function=self.deactivate_torch,
+        )
+        self.return_timer = RestartableTimer(
+            interval=30,  # Default
+            function=self.update_effect,
+            args=({"type": "standard", "effect": "idle"},),
+        )
+        self.idle_timer = RestartableTimer(
+            interval=30,
+            function=self.idle_timeout,
+        )
+        self.idle_timed_out = False
 
     # Called when injections are complete
     def initialize(self):
-        global PI_MODEL
-        self.api = api.PluginApi(self)
-        self.wizard = wizard.PluginWizard(self, PI_MODEL)
         if self._settings.get_boolean(["effects", "startup", "enabled"]):
             self.current_state["effect"] = "startup"
 
@@ -119,6 +132,17 @@ class WS281xLedStatusPlugin(
     # Settings plugin
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
+
+        self.torch_timer.interval = self._settings.get_int(
+            ["effects", "torch", "timer"]
+        )
+        self.return_timer.interval = self._settings.get_int(
+            ["effects", "success", "return_to_idle"]
+        )
+        self.idle_timer.interval = self._settings.get_int(
+            ["effects", "idle", "timeout"]
+        )
+
         self.restart_strip()
 
     def get_settings_defaults(self):
@@ -352,8 +376,7 @@ class WS281xLedStatusPlugin(
         self._logger.info("Switched lights, on: {}".format(state))
 
     def activate_torch(self):
-        if self.torch_timer and self.torch_timer.is_alive():
-            self.torch_timer.cancel()
+        self.torch_timer.stop()
 
         toggle = self._settings.get_boolean(["effects", "torch", "toggle"])
         torch_time = self._settings.get_int(["effects", "torch", "timer"])
@@ -364,10 +387,7 @@ class WS281xLedStatusPlugin(
             self._logger.debug("Torch toggling on")
         else:
             self._logger.debug("Torch timer started for {} secs".format(torch_time))
-            self.torch_timer = util.start_daemon_timer(
-                interval=torch_time,
-                target=self.deactivate_torch,
-            )
+            self.torch_timer.start()
 
         self.update_effect({"type": "standard", "effect": "torch"})
         self.torch_on = True
@@ -412,42 +432,34 @@ class WS281xLedStatusPlugin(
         if not self._settings.get(["effects", mode["effect"], "enabled"]):
             return
 
-        # Cancel return to idle timer if active
-        if self.return_timer is not None and self.return_timer.is_alive():
-            self._logger.debug("Cancelling return to idle timer, new effect")
-            self.return_timer.cancel()
+        # Stop timers, new effects take priority over return to idle or idle timout
+        if self.return_timer.is_alive():
+            self._logger.debug("Stopping return to idle timer, new effect")
+            self.return_timer.stop()
+        if self.idle_timer.is_alive():
+            self._logger.debug("Stopping idle timeout timer, new effect")
+            self.idle_timer.stop()
 
-        # Cancel idle timeout if active
-        if self.idle_timer is not None and self.idle_timer.is_alive():
-            self._logger.debug("Cancelling idle timeout timer, new effect")
-            self.idle_timer.cancel()
-
-        # Start idle timeout if necessary:
-        if mode["effect"] == "idle":
-            timeout = self._settings.get_int(["effects", "idle", "timeout"])
-            if timeout > 0:
-                self.idle_timer = util.start_daemon_timer(
-                    interval=timeout, target=self.idle_timeout
-                )
+        # Start idle timeout
+        if (
+            mode["effect"] == "idle"
+            and self._settings.get_int(["effects", "idle", "timeout"]) > 0
+        ):
+            self.idle_timer.start()
 
         elif self.idle_timed_out:
             # Timed out previously, turn lights back on for this effect
             self.activate_lights()
             self.idle_timed_out = False
 
-        # Start return to idle timer if necessary
-        if mode["effect"] == "success":
-            return_to_idle = self._settings.get_int(
-                ["effects", "success", "return_to_idle"]
-            )
-            if return_to_idle > 0:
-                self.return_timer = util.start_daemon_timer(
-                    interval=return_to_idle,
-                    target=self.update_effect,
-                    args=({"type": "standard", "effect": "idle"},),
-                )
+        # Start return to idle timer
+        if (
+            mode["effect"] == "success"
+            and self._settings.get_int(["effects", "success", "return_to_idle"]) > 0
+        ):
+            self.return_timer.start()
 
-        # Finally, start updating the effect
+        # Finally, start actually updating the effect
         self._logger.debug("Updating effect to {}".format(mode))
         self.effect_queue.put(mode)
         if mode["effect"] != "torch":
