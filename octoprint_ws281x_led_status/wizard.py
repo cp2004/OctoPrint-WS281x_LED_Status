@@ -99,15 +99,20 @@ class PluginWizard:
                     }
         if not result["passed"]:
             # Check sys modules next - this is higher reliability but needs a reboot for changes
-            with io.open(
-                "/sys/module/spidev/parameters/bufsiz", encoding="utf-8", mode="rt"
-            ) as file:
-                if "32768" in file.readline().strip(" \t\r\n\0"):
-                    result = {
-                        "check": api.WIZ_INCREASE_BUFFER,
-                        "passed": True,
-                        "reason": "",
-                    }
+            # Wrapped in it's own try-catch as it might not exist if SPI is not enabled
+            # But we still want it to show as 'fixable', as the file above must have existed
+            try:
+                with io.open(
+                    "/sys/module/spidev/parameters/bufsiz", encoding="utf-8", mode="rt"
+                ) as file:
+                    if "32768" in file.readline().strip(" \t\r\n\0"):
+                        result = {
+                            "check": api.WIZ_INCREASE_BUFFER,
+                            "passed": True,
+                            "reason": "",
+                        }
+            except OSError:
+                pass
 
         return result
 
