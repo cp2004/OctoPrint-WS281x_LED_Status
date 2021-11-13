@@ -39,7 +39,9 @@ To enable access to the hardware to drive the LEDs, the container must be run pr
 privileged: true
 ```
 
-The final file should look something like this Gist: [https://gist.github.com/cp2004/5e32b021fca66e7167039a1737fd7f21](https://gist.github.com/cp2004/5e32b021fca66e7167039a1737fd7f21)
+The final file should look something like this Gist:&#x20;
+
+{% embed url="https://gist.github.com/cp2004/5e32b021fca66e7167039a1737fd7f21" %}
 
 {% hint style="warning" %}
 Version 0.6.0 of the plugin **requires these files to exist** on the system for the UI to work. When these don't exist, it crashes the web UI.
@@ -48,4 +50,3 @@ Even if your system doesn't use these files, they must exist - just skip the wiz
 
 You may still need to use the [SPI setup guide](setup-guide-1/spi-setup.md), adjusting the paths.
 {% endhint %}
-

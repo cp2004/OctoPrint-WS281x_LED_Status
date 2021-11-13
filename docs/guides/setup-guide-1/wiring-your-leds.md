@@ -26,12 +26,12 @@ All of the references to GPIO pins here are referring to the BCM Pin numbering. 
 
 ### No Level Shifting
 
-It is possible to connect the LEDs up without any kind of level shifting, however mileage varies from strip to strip. I have one setup like this, and one with the full logic shifter. This can work because the spec of the LED strips means they need 0.7 \* VDD\(5v\) which is ~3.5v. Close to the Pi's 3.3, so depending on how tight of a tolerance your strip has, this is possible.
+It is possible to connect the LEDs up without any kind of level shifting, however mileage varies from strip to strip. I have one setup like this, and one with the full logic shifter. This can work because the spec of the LED strips means they need 0.7 \* VDD(5v) which is \~3.5v. Close to the Pi's 3.3, so depending on how tight of a tolerance your strip has, this is possible.
 
 Wiring is as follows:
 
 * Pi GND to LED GND
-* Pi [GPIO 10](https://pinout.xyz/pinout/pin19_gpio10) to LED Data in
+* Pi [GPIO 10](https://pinout.xyz/pinout/pin19\_gpio10) to LED Data in
 * Power supply GND to LED GND
 * Power supply 5V to LED 5V
 
@@ -39,7 +39,7 @@ Wiring is as follows:
 Make sure you have a common ground between the power supply and Pi.
 {% endhint %}
 
-![Wiring with no shifter](../../.gitbook/assets/wiring_no_shift%20%288%29.png)
+![Wiring with no shifter](<../../.gitbook/assets/wiring\_no\_shift (8).png>)
 
 ### Level Shifting Chip
 
@@ -57,13 +57,13 @@ Wiring of this is as follows:
   * Power Supply GND
   * 74AHCT125 GND
   * 74AHCT125 pin 1OE
-* Pi [GPIO 10](https://pinout.xyz/pinout/pin19_gpio10) to 74AHCT125 pin 1A
+* Pi [GPIO 10](https://pinout.xyz/pinout/pin19\_gpio10) to 74AHCT125 pin 1A
 * 74AHCT125 pin 1Y to LED Data in
 * Power supply 5V to:
   * 74AHCT125 VCC
   * LED 5V
 
-![Wiring with a level shifter](../../.gitbook/assets/wiring_level_shifter.png)
+![Wiring with a level shifter](../../.gitbook/assets/wiring\_level\_shifter.png)
 
 ### Wiring with a Diode
 
@@ -79,15 +79,12 @@ Please note that whilst the wiring below is on a breadboard, this is for illustr
 
 Wiring is as follows:
 
-* Pi [GPIO 10](https://pinout.xyz/pinout/pin19_gpio10) to LED Data in
-* Power supply 5V to 1N4001 diode anode \(side without the stripe\)
-* 1N4001 diode cathode \(side with the stripe\) to LED 5V
+* Pi [GPIO 10](https://pinout.xyz/pinout/pin19\_gpio10) to LED Data in
+* Power supply 5V to 1N4001 diode anode (side without the stripe)
+* 1N4001 diode cathode (side with the stripe) to LED 5V
 * Power supply GND to Pi GND
 * Power supply GND to LED GND
 
-![Wiring using a diode](../../.gitbook/assets/wiring_diode.png)
+![Wiring using a diode](../../.gitbook/assets/wiring\_diode.png)
 
 ## On to the next stage: SPI setup
-
-{% page-ref page="spi-setup.md" %}
-

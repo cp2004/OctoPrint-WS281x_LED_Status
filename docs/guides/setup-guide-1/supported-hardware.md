@@ -8,8 +8,8 @@ description: This page lists the hardware that is officially supported to use th
 
 The 4 types of LED strips that the plugin supports are:
 
-* WS2811 \(including B variants\)
-* WS2812 \(including B variants\)
+* WS2811 (including B variants)
+* WS2812 (including B variants)
 * SK6812 RGB
 * SK6812 RGBW
 
@@ -33,11 +33,8 @@ I have had good results with a 74ACHT125 level shifter, which is recommended by 
 
 All models of Raspberry Pi are supported currently, however for new models I will have to wait for upstream support from the rpi-ws281x library first. This page will be updated if this happens!
 
-This also means that no other devices than a Raspberry Pi are supported. There are no alternative libraries for WS281x LED control \(for Python\) that could enable this, so there is nothing that can be done. Sorry!
+This also means that no other devices than a Raspberry Pi are supported. There are no alternative libraries for WS281x LED control (for Python) that could enable this, so there is nothing that can be done. Sorry!
 
 The plugin **will not load** if it is not running on a Raspberry Pi, even if it does install.
 
 ## Got the necessary hardware? Wire it up!
-
-{% page-ref page="wiring-your-leds.md" %}
-
