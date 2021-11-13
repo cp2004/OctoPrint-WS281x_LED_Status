@@ -12,11 +12,12 @@ The plugin reacts to some different @ commands, listed below:
 
 | Command | Explanation |
 | :--- | :--- |
-| `@WS_LIGHTSON` | Turns lights on, same as pressing switch in navbar. |
-| `@WS_LIGHTSOFF` | Turns lights off. |
-| `@WS_TORCH` | Activates the torch mode, for timer mode |
-| `@WS_TORCH_ON` | Turn torch on, for toggle mode |
-| `@WS_TORCH_OFF` | Turn torch off, for toggle mode |
+| `@WS LIGHTS_ON` | Turns lights on, same as pressing switch in navbar. |
+| `@WS LIGHTS_OFF` | Turns lights off. |
+| `@WS LIGHTS_TOGGLE` | Toggles lights on/off. |
+| `@WS TORCH` | Activates the torch mode, for timer mode |
+| `@WS TORCH_ON` | Turn torch on, for toggle mode |
+| `@WS TORCH_OFF` | Turn torch off, for toggle mode |
 
 These commands can be used in g-code scripts, or in custom controls in apps - see here for [instructions for OctoRemote](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/6#issuecomment-668110507), or the guide on how to create a [timelapse flash in OctoLapse](../guides/octolapse-flash.md) which also uses @ commands.
 

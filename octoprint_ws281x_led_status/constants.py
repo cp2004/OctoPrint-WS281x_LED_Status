@@ -28,11 +28,40 @@ BLOCKING_TEMP_GCODES = {
     "M190": "bed",
 }
 
-ON_AT_COMMAND = "WS_LIGHTSON"
-OFF_AT_COMMAND = "WS_LIGHTSOFF"
-TORCH_AT_COMMAND = "WS_TORCH"
-TORCH_ON_AT_COMMAND = "WS_TORCH_ON"
-TORCH_OFF_AT_COMMAND = "WS_TORCH_OFF"
+
+class AtCommands:
+    """
+    All commands should be used like:
+    ```
+    @WS <command>
+    ```
+    """
+
+    LIGHTS_ON = "LIGHTS_ON"
+    LIGHTS_OFF = "LIGHTS_OFF"
+    LIGHTS_TOGGLE = "LIGHTS_TOGGLE"
+
+    TORCH = "TORCH"
+    TORCH_ON = "TORCH_ON"
+    TORCH_OFF = "TORCH_OFF"
+
+
+class DeprecatedAtCommands:
+    """
+    These commands will log a warning and show a notification in the UI
+    When they are used that they should be changed
+    They are used like:
+    ```
+    @<command>
+    ```
+    """
+
+    LIGHTS_ON = "WS_LIGHTSON"
+    LIGHTS_OFF = "WS_LIGHTSOFF"
+
+    TORCH = "WS_TORCH"
+    TORCH_ON = "WS_TORCH_ON"
+    TORCH_OFF = "WS_TORCH_OFF"
 
 
 SUPPORTED_EVENTS = {

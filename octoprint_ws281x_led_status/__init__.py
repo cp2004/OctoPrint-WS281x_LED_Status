@@ -18,6 +18,10 @@ from octoprint.events import Events
 from octoprint.util.version import is_octoprint_compatible
 
 from octoprint_ws281x_led_status import api, constants, settings, util, wizard
+from octoprint_ws281x_led_status.constants import (
+    AtCommands,
+    DeprecatedAtCommands,
+)
 from octoprint_ws281x_led_status.runner import EffectRunner
 from octoprint_ws281x_led_status.util import RestartableTimer
 
@@ -357,12 +361,6 @@ class WS281xLedStatusPlugin(
         self._logger.info(log_content)
 
     # Lights and torch on/off handling
-    def activate_lights(self):
-        self.switch_lights(True)
-
-    def deactivate_lights(self):
-        self.switch_lights(False)
-
     def switch_lights(self, state):
         # Notify the UI
         self._send_UI_msg("lights", {"on": state})
@@ -449,7 +447,7 @@ class WS281xLedStatusPlugin(
 
         elif self.idle_timed_out:
             # Timed out previously, turn lights back on for this effect
-            self.activate_lights()
+            self.switch_lights(True)
             self.idle_timed_out = False
 
         # Start return to idle timer
@@ -493,7 +491,7 @@ class WS281xLedStatusPlugin(
 
     def idle_timeout(self):
         self.idle_timed_out = True
-        self.deactivate_lights()
+        self.switch_lights(False)
 
     # Hooks
     def process_gcode_q(
@@ -630,24 +628,61 @@ class WS281xLedStatusPlugin(
         return parsed_temps
 
     def process_at_command(
-        self, _comm, _phase, command, _parameters, _tags=None, *_args, **_kwargs
+        self, _comm, _phase, cmd, params, _tags=None, *_args, **_kwargs
     ):
         if not self._settings.get(["features", "at_command_reaction"]):
             return
 
-        if command == constants.ON_AT_COMMAND:
-            self.activate_lights()
-        elif command == constants.OFF_AT_COMMAND:
-            self.deactivate_lights()
-        elif (
-            command == constants.TORCH_AT_COMMAND
-            or command == constants.TORCH_ON_AT_COMMAND
-        ):
-            self.activate_torch()
-        elif command == constants.TORCH_OFF_AT_COMMAND and self._settings.get_boolean(
-            ["effects", "torch", "toggle"]
-        ):
-            self.deactivate_torch()
+        cmd = cmd.upper()
+
+        if cmd == "WS":
+            params = params.upper()
+
+            if params == AtCommands.LIGHTS_ON:
+                self.switch_lights(True)
+            elif params == AtCommands.LIGHTS_OFF:
+                self.switch_lights(False)
+            elif params == AtCommands.LIGHTS_TOGGLE:
+                self.switch_lights(not self.lights_on)
+            elif params in [AtCommands.TORCH, AtCommands.TORCH_ON]:
+                self.activate_torch()
+            elif params == AtCommands.TORCH_OFF and self._settings.get_boolean(
+                ["effects", "torch", "toggle"]
+            ):
+                self.deactivate_torch()
+
+        elif cmd[0:3] == "WS_":
+            if cmd == DeprecatedAtCommands.LIGHTS_ON:
+                self.switch_lights(True)
+                self.deprecated_at_command(cmd)
+            elif cmd == DeprecatedAtCommands.LIGHTS_OFF:
+                self.switch_lights(False)
+                self.deprecated_at_command(cmd)
+            elif cmd in [
+                DeprecatedAtCommands.TORCH,
+                DeprecatedAtCommands.TORCH_ON,
+            ]:
+                self.activate_torch()
+                self.deprecated_at_command(cmd)
+            elif cmd == DeprecatedAtCommands.TORCH_OFF and self._settings.get_boolean(
+                ["effects", "torch", "toggle"]
+            ):
+                self.deactivate_torch()
+                self.deprecated_at_command(cmd)
+
+    def deprecated_at_command(self, cmd):
+        # These styles of commands are deprecated, and raise a warning
+        self._logger.warning(
+            "!! Deprecated @ command used, please use the newer alternatives."
+            " Support will be removed in a future version"
+        )
+        self._logger.warning("!! Command used: {}".format(cmd))
+        self._logger.warning(
+            "!! See https://cp2004.gitbook.io/ws281x-led-status/documentation/host-commands"
+            " for more info"
+        )
+
+        self._send_UI_msg("at_cmd_deprecation", cmd)
 
     # Software update hook
     def get_update_information(self):

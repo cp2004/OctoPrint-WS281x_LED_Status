@@ -90,6 +90,19 @@ $(function () {
                     self.torch_on(false);
                     self.torch_icon(torch_off_src);
                 }
+            } else if (data.type === "at_cmd_deprecation") {
+                new PNotify.singleButtonNotify({
+                    title: "WS281X LED Status: Deprecated @ command used",
+                    text:
+                        "<p>You are using a deprecated @ command. Switch to the newer style commands" +
+                        ", find out more at the documentation link below.</p>" +
+                        "<p>Used command: " +
+                        data.payload +
+                        "</p>" +
+                        "<p><a href='https://cp2004.gitbook.io/ws281x-led-status/documentation/host-commands'>Documentation</a> </p>",
+                    type: "warning",
+                    hide: false,
+                });
             }
         };
 

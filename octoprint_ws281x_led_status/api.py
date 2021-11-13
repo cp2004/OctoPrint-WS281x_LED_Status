@@ -48,9 +48,9 @@ class PluginApi:
 
     def on_api_command(self, command, data):
         if command == CMD_LIGHTS_ON:
-            self.plugin.activate_lights()
+            self.plugin.switch_lights(True)
         elif command == CMD_LIGHTS_OFF:
-            self.plugin.deactivate_lights()
+            self.plugin.switch_lights(False)
         elif command == CMD_LIGHTS_TOGGLE:
             self.plugin.switch_lights(not self.plugin.lights_on)
         elif command == CMD_TORCH_ON:

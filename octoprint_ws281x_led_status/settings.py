@@ -79,6 +79,7 @@ defaults = {
             "timer": "15",
             "auto_on_webcam": True,
             "icon_color": "#000000",
+            "override_timer": False,
         },
         "progress_print": {
             "enabled": True,
@@ -131,7 +132,7 @@ def migrate_settings(target, current, settings):
         # None => 1
         migrate_none_to_one(settings)
 
-    if current <= 1 or current is None and target == 2:
+    if (current is None or current <= 1) and target == 2:
         # 1 => 2
         migrate_one_to_two(settings)
 
