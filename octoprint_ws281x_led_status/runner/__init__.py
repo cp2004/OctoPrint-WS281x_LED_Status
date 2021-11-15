@@ -341,7 +341,9 @@ class EffectRunner:
         # Log if the effect is changing
         self._logger.debug("Changing effect to {}".format(mode))
 
-        if self.lights_on and not mode == "blank":
+        if (self.lights_on and not mode == "blank") or (
+            mode == "torch" and self.effect_settings["torch"]["override_timer"]
+        ):
             effect_settings = self.effect_settings[mode]
             self.run_effect(
                 target=constants.EFFECTS[effect_settings["effect"]],

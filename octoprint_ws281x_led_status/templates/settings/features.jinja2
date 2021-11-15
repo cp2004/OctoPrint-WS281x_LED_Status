@@ -77,6 +77,13 @@
         </p>
     </div>
     <hr>
+    <div class="form-inline" style="margin-top: 0.5rem" data-bind="visible: {{ binding.effect_binding("torch.enabled") }}">
+        {{ labelled_checkbox("effects.torch.override_timer", "Override active times") }}
+        <p class="help-block">
+            The torch will activate regardless of the current time settings.
+        </p>
+    </div>
+    <hr>
     {{ labelled_checkbox("features.intercept_m150", "Enable intercepting M150 commands") }}
     <p class="help-block">
         <i class="fa fa-info-circle text-info"></i>
