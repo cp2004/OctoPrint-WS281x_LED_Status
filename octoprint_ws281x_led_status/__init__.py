@@ -243,17 +243,34 @@ class WS281xLedStatusPlugin(
     # Progress plugin
     def on_print_progress(self, storage="", path="", progress=1):
         if (
-            progress == 100
-            and self.current_state["type"] == "standard"
-            and self.current_state["effect"] == "success"
-        ) or self.heating:  # TODO should this be cooling?
+            (
+                progress == 100
+                and self.current_state["type"] == "standard"
+                and self.current_state["effect"] == "success"
+            )
+            or (
+                self.heating
+                and self._settings.get_boolean(
+                    ["effects", "progress_heatup", "enabled"]
+                )
+            )
+            or (
+                self.cooling
+                and self._settings.get_boolean(
+                    ["effects", "progress_cooling", "enabled"]
+                )
+            )
+        ):
             # Skip 100% if necessary, as success event usually comes before this
             return
+
         if self._settings.get_boolean(["effects", "printing", "enabled"]):
             self.update_effect({"type": "standard", "effect": "printing"})
-        self.update_effect(
-            {"type": "progress", "effect": "progress_print", "value": progress}
-        )
+        else:
+            self.update_effect(
+                {"type": "progress", "effect": "progress_print", "value": progress}
+            )
+
         self.current_progress = progress
 
     # Effect runner process
