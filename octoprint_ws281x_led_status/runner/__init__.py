@@ -410,7 +410,6 @@ class EffectRunner:
         Start PixelStrip and SegmentManager object
         :returns strip: (rpi_ws281x.PixelStrip) The initialised strip object
         """
-        self._logger.info("Starting up LED strip")
         try:
             strip = PixelStrip(
                 num=int(self.strip_settings["count"]),
@@ -423,7 +422,6 @@ class EffectRunner:
                 strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
             )
             strip.begin()
-            self._logger.info("Strip startup complete!")
         except Exception as e:  # Probably wrong settings...
             self._logger.error(repr(e))
             self._logger.error("Strip failed to startup")
