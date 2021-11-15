@@ -17,7 +17,14 @@ import octoprint.plugin
 from octoprint.events import Events
 from octoprint.util.version import is_octoprint_compatible
 
-from octoprint_ws281x_led_status import api, constants, settings, util, wizard
+from octoprint_ws281x_led_status import (
+    api,
+    constants,
+    settings,
+    triggers,
+    util,
+    wizard,
+)
 from octoprint_ws281x_led_status.constants import (
     AtCommands,
     DeprecatedAtCommands,
@@ -55,6 +62,10 @@ class WS281xLedStatusPlugin(
 
         self.current_effect_process = None  # type: multiprocessing.Process
         self.effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
+
+        self.custom_triggers = triggers.Trigger(
+            self.effect_queue
+        )  # type: triggers.Trigger
 
         # Effect states
         self.previous_state = ""
@@ -120,6 +131,7 @@ class WS281xLedStatusPlugin(
 
     # Startup plugin
     def on_startup(self, host, port):
+        self.custom_triggers.process_settings(self._settings.get(["custom"]))
         util.start_daemon_thread(
             target=self.run_os_config_check,
             kwargs={"send_ui": False},
@@ -136,6 +148,8 @@ class WS281xLedStatusPlugin(
     # Settings plugin
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
+
+        self.custom_triggers.process_settings(self._settings.get(["custom"]))
 
         self.torch_timer.interval = self._settings.get_int(
             ["effects", "torch", "timer"]
@@ -239,6 +253,8 @@ class WS281xLedStatusPlugin(
             self.update_effect({"type": "standard", "effect": effect})
             # Record the event's effect so that it can used when progress expires
             self.previous_event = effect
+
+        self.custom_triggers.on_event(event)
 
     # Progress plugin
     def on_print_progress(self, storage="", path="", progress=1):
@@ -546,6 +562,8 @@ class WS281xLedStatusPlugin(
                     # Otherwise go back to the previous effect
                     self.process_previous_event()
 
+        self.custom_triggers.on_gcode_command(gcode, cmd)
+
     def temperatures_received(self, _comm, parsed_temps, *_args, **_kwargs):
         if not self.heating and not self.cooling:
             # Don't waste time if we're not doing anything
@@ -667,6 +685,8 @@ class WS281xLedStatusPlugin(
                 ["effects", "torch", "toggle"]
             ):
                 self.deactivate_torch()
+            elif params[0:6] == AtCommands.CUSTOM:
+                self.custom_triggers.on_at_command(params[7:])  # Strip off "CUSTOM"
 
         elif cmd[0:3] == "WS_":
             if cmd == DeprecatedAtCommands.LIGHTS_ON:

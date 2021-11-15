@@ -122,6 +122,12 @@ defaults = {
         "intercept_m150": True,
         "debug_logging": False,
     },
+    "custom": {
+        # Holds custom settings. For data structure see triggers.py
+        "atcommand": [],
+        "gcode": [],
+        "event": [],
+    },
     "progress_temp_start": 0,
     "lights_on": True,
 }

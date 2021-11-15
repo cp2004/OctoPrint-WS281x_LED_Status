@@ -191,6 +191,9 @@ class EffectRunner:
             self.standard_effect(msg["effect"])
             self.previous_state = msg
 
+        elif msg["type"] == "custom":
+            self.custom_effect(msg["effect"], msg["color"], msg["delay"])
+
     def switch_lights(self, state):
         # state: target state for lights
         # Only run when current state must change, since it will interrupt the currently running effect
@@ -356,6 +359,25 @@ class EffectRunner:
                     "brightness_manager": self.brightness_manager,
                 },
                 name=mode,
+            )
+        else:
+            self.blank_leds(whole_strip=False)
+
+    def custom_effect(self, effect, color, delay):
+        self._logger.debug("Changing effect to {}".format(effect))
+
+        if self.lights_on:
+            self.run_effect(
+                target=constants.EFFECTS[effect],
+                kwargs={
+                    "queue": self.effect_queue,
+                    "color": apply_color_correction(
+                        self.color_correction, *hex_to_rgb(color)
+                    ),
+                    "delay": delay,
+                    "brightness_manager": self.brightness_manager,
+                },
+                name=effect,
             )
         else:
             self.blank_leds(whole_strip=False)

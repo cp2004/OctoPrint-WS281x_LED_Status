@@ -45,6 +45,8 @@ class AtCommands:
     TORCH_ON = "TORCH_ON"
     TORCH_OFF = "TORCH_OFF"
 
+    CUSTOM = "CUSTOM"
+
 
 class DeprecatedAtCommands:
     """
