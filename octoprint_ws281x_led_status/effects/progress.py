@@ -91,6 +91,8 @@ def both_ends(
     num_pixels = strip.numPixels()
     if num_pixels % 2 != 0:
         num_pixels -= 1
+        # Set the unused pixel to off
+        strip.setPixelColorRGB(num_pixels, 0, 0, 0)
 
     def progress(min_pixel, max_pixel, val, reverse):
         number_pixels = max_pixel - min_pixel
