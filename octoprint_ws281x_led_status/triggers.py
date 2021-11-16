@@ -35,7 +35,7 @@ class Trigger:
 
         self.effect_queue = effect_queue
 
-    def register_atcommand_handler(self, command, effect, color, delay):
+    def register_atcommand_handler(self, match, effect, color, delay):
         """
         command: @WS CUSTOM <command> TODO keep this concise, does it need 'CUSTOM' or is there something shorter?
         effect: Name from constants.EFFECTS
@@ -44,42 +44,42 @@ class Trigger:
         """
         self.at_command_subscriptions.append(
             {
-                "command": command,
+                "match": match,
                 "effect": effect,
                 "color": color,
                 "delay": delay,
             }
         )
 
-    def register_event_handler(self, event, effect, color, delay):
+    def register_event_handler(self, match, effect, color, delay):
         """
         event: event from `octoprint.events.Events`
         effect: Name from constants.EFFECTS
         color: Hex colour
         delay: ms between frames
         """
-        if event not in list_available_events():
-            self._logger.warning("Event ({}) not available, ignoring".format(event))
+        if match not in list_available_events():
+            self._logger.warning("Event ({}) not available, ignoring".format(match))
             return
         self.at_command_subscriptions.append(
             {
-                "event": event,
+                "match": match,
                 "effect": effect,
                 "color": color,
                 "delay": delay,
             }
         )
 
-    def register_gcode_handler(self, match_type, match_pattern, effect, color, delay):
+    def register_gcode_handler(self, match_type, match, effect, color, delay):
         """
         match_type: 'gcode', 'exact', 'regex'
-        match_pattern: string to match command against
+        match: string to match command against
         effect: Name from constants.EFFECTS
         color: Hex colour
         delay: ms between frames
         """
         subscription = {
-            "pattern": match_pattern,
+            "match": match,
             "effect": effect,
             "color": color,
             "delay": delay,
@@ -102,34 +102,52 @@ class Trigger:
         # Convert the settings into subscriptions
         self.reset_subscriptions()
         for entry in settings["atcommand"]:
-            self.register_atcommand_handler(
-                entry["command"],
-                entry["effect"],
-                entry["color"],
-                entry["delay"],
-            )
+            try:
+                self.register_atcommand_handler(
+                    entry["match"],
+                    entry["effect"],
+                    entry["color"],
+                    entry["delay"],
+                )
+            except Exception as e:
+                self._logger.warning(
+                    "Failed to add atcommand entry to subscriptions, ignoring"
+                )
+                self._logger.exception(e)
 
         for entry in settings["event"]:
-            self.register_event_handler(
-                entry["event"],
-                entry["effect"],
-                entry["color"],
-                entry["delay"],
-            )
+            try:
+                self.register_event_handler(
+                    entry["match"],
+                    entry["effect"],
+                    entry["color"],
+                    entry["delay"],
+                )
+            except Exception as e:
+                self._logger.warning(
+                    "Failed to add event entry to subscriptions, ignoring"
+                )
+                self._logger.exception(e)
 
         for entry in settings["gcode"]:
-            self.register_gcode_handler(
-                entry["match_type"],
-                entry["match_pattern"],
-                entry["effect"],
-                entry["color"],
-                entry["delay"],
-            )
+            try:
+                self.register_gcode_handler(
+                    entry["match_type"],
+                    entry["match"],
+                    entry["effect"],
+                    entry["color"],
+                    entry["delay"],
+                )
+            except Exception as e:
+                self._logger.warning(
+                    "Failed to add gcode entry to subscriptions, ignoring"
+                )
+                self._logger.exception(e)
 
     def on_event(self, event):
         if len(self.event_subscriptions):
             for e in self.event_subscriptions:
-                if e["event"] == event:
+                if e["match"] == event:
                     self.effect_queue.put(
                         {
                             "type": "custom",
@@ -145,7 +163,7 @@ class Trigger:
         """
         if len(self.at_command_subscriptions):
             for at_command in self.at_command_subscriptions:
-                if at_command["command"].upper() == command:
+                if at_command["match"].upper() == command:
                     self.effect_queue.put(
                         {
                             "type": "custom",
@@ -160,7 +178,7 @@ class Trigger:
         if len(self.gcode_command_subscriptions):
             for gcode_command in self.gcode_command_subscriptions:
                 # Match only G/M code
-                if gcode_command["match_pattern"] == gcode:
+                if gcode_command["match"] == gcode:
                     self.effect_queue.put(
                         {
                             "type": "custom",
@@ -172,7 +190,7 @@ class Trigger:
         if len(self.gcode_exact_subscriptions):
             for gcode_exact in self.gcode_exact_subscriptions:
                 # Match whole line sent to printer
-                if gcode_exact["match_pattern"] == cmd:
+                if gcode_exact["match"] == cmd:
                     self.effect_queue.put(
                         {
                             "type": "custom",
@@ -185,7 +203,7 @@ class Trigger:
         if len(self.gcode_regex_subscriptions):
             for gcode_regex in self.gcode_regex_subscriptions:
                 # Match cmd by regex
-                if re.match(gcode_regex["match_pattern"], cmd):
+                if re.match(gcode_regex["match"], cmd):
                     self.effect_queue.put(
                         {
                             "type": "custom",
