@@ -131,7 +131,9 @@ class WS281xLedStatusPlugin(
 
     # Startup plugin
     def on_startup(self, host, port):
-        self.custom_triggers.process_settings(self._settings.get(["custom"]))
+        self.custom_triggers.process_settings(
+            self._settings.get(["custom"], merged=True)
+        )
         util.start_daemon_thread(
             target=self.run_os_config_check,
             kwargs={"send_ui": False},
@@ -149,7 +151,9 @@ class WS281xLedStatusPlugin(
     def on_settings_save(self, data):
         octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
 
-        self.custom_triggers.process_settings(self._settings.get(["custom"]))
+        self.custom_triggers.process_settings(
+            self._settings.get(["custom"], merged=True)
+        )
 
         self.torch_timer.interval = self._settings.get_int(
             ["effects", "torch", "timer"]

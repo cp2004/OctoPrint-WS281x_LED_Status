@@ -2,7 +2,7 @@
 import logging
 import re
 
-from octoprint.events import Events
+from octoprint.events import all_events
 
 """
 TODOs
@@ -13,14 +13,6 @@ TODOs
 * Custom @ commands
 * Custom gcode commands
 """
-
-
-def list_available_events():
-    """
-    List all available events to listen to. This should include plugins as well.
-    """
-    events = [x for x in Events.__dict__ if x.isupper()]
-    return events
 
 
 class Trigger:
@@ -58,10 +50,10 @@ class Trigger:
         color: Hex colour
         delay: ms between frames
         """
-        if match not in list_available_events():
+        if match not in all_events():
             self._logger.warning("Event ({}) not available, ignoring".format(match))
             return
-        self.at_command_subscriptions.append(
+        self.event_subscriptions.append(
             {
                 "match": match,
                 "effect": effect,
