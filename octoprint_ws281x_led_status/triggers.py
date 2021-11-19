@@ -137,70 +137,71 @@ class Trigger:
                 self._logger.exception(e)
 
     def on_event(self, event):
-        if len(self.event_subscriptions):
-            for e in self.event_subscriptions:
-                if e["match"] == event:
-                    self.effect_queue.put(
-                        {
-                            "type": "custom",
-                            "effect": e["effect"],
-                            "color": e["color"],
-                            "delay": e["delay"],
-                        }
-                    )
+        for e in self.event_subscriptions:
+            if e["match"] == event:
+                self.effect_queue.put(
+                    {
+                        "type": "custom",
+                        "effect": e["effect"],
+                        "color": e["color"],
+                        "delay": e["delay"],
+                    }
+                )
 
     def on_at_command(self, command):
         """
         Command should be pre-stripped of @WS CUSTOM <command>, to just be command
         """
-        if len(self.at_command_subscriptions):
-            for at_command in self.at_command_subscriptions:
-                if at_command["match"].upper() == command:
-                    self.effect_queue.put(
-                        {
-                            "type": "custom",
-                            "effect": at_command["effect"],
-                            "color": at_command["color"],
-                            "delay": at_command["delay"],
-                        }
-                    )
+        for at_command in self.at_command_subscriptions:
+            if at_command["match"].upper() == command:
+                self.effect_queue.put(
+                    {
+                        "type": "custom",
+                        "effect": at_command["effect"],
+                        "color": at_command["color"],
+                        "delay": at_command["delay"],
+                    }
+                )
 
     def on_gcode_command(self, gcode, cmd):
         # TODO any performance optimisations?
-        if len(self.gcode_command_subscriptions):
-            for gcode_command in self.gcode_command_subscriptions:
-                # Match only G/M code
-                if gcode_command["match"] == gcode:
-                    self.effect_queue.put(
-                        {
-                            "type": "custom",
-                            "effect": gcode_command["effect"],
-                            "color": gcode_command["color"],
-                            "delay": gcode_command["delay"],
-                        }
-                    )
-        if len(self.gcode_exact_subscriptions):
-            for gcode_exact in self.gcode_exact_subscriptions:
-                # Match whole line sent to printer
-                if gcode_exact["match"] == cmd:
-                    self.effect_queue.put(
-                        {
-                            "type": "custom",
-                            "effect": gcode_exact["effect"],
-                            "color": gcode_exact["color"],
-                            "delay": gcode_exact["delay"],
-                        }
-                    )
+        for gcode_command in self.gcode_command_subscriptions:
+            # Match only G/M code
+            if gcode_command["match"] == gcode:
+                self.effect_queue.put(
+                    {
+                        "type": "custom",
+                        "effect": gcode_command["effect"],
+                        "color": gcode_command["color"],
+                        "delay": gcode_command["delay"],
+                    }
+                )
+                # Once we have a match, we can stop looking
+                break
+        for gcode_exact in self.gcode_exact_subscriptions:
+            # Match whole line sent to printer
+            if gcode_exact["match"] == cmd:
+                self.effect_queue.put(
+                    {
+                        "type": "custom",
+                        "effect": gcode_exact["effect"],
+                        "color": gcode_exact["color"],
+                        "delay": gcode_exact["delay"],
+                    }
+                )
+                # Once we have a match, we can stop looking
+                break
 
-        if len(self.gcode_regex_subscriptions):
-            for gcode_regex in self.gcode_regex_subscriptions:
-                # Match cmd by regex
-                if re.match(gcode_regex["match"], cmd):
-                    self.effect_queue.put(
-                        {
-                            "type": "custom",
-                            "effect": gcode_regex["effect"],
-                            "color": gcode_regex["color"],
-                            "delay": gcode_regex["delay"],
-                        }
-                    )
+        for gcode_regex in self.gcode_regex_subscriptions:
+            # Match cmd by regex
+            if re.match(gcode_regex["match"], cmd):
+                self.effect_queue.put(
+                    {
+                        "type": "custom",
+                        "effect": gcode_regex["effect"],
+                        "color": gcode_regex["color"],
+                        "delay": gcode_regex["delay"],
+                    }
+                )
+                # Once we have a match, we can stop looking
+                break
