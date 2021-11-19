@@ -1,0 +1,156 @@
+{% import "macros/binding.jinja2" as binding %}
+{% import "settings/printing_effects.jinja2" as printing_effects with context %}
+
+<h5>Custom Effects</h5>
+<p>
+    This section allows you to create your own triggers to change the effect on your LEDs reacting to @ commands,
+    events and gcode commands.
+</p>
+
+{% macro custom_command_table(type, label="") %}
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th>{{ label }}</th>
+        <th>Effect</th>
+        <th><button class="btn btn-primary" data-bind="click: new_{{ type }}" title="New {{ label }}"><i class="fas fa-plus"></i></button> </th>
+    </tr>
+    </thead>
+    <tbody data-bind="foreach: custom_{{ type }}">
+    <tr>
+        {% if type == "atcommand" %}
+        <td data-bind="text: '@WS custom ' + match()"></td>
+        {% else %}
+        <td data-bind="text: match"></td>
+        {% endif %}
+        <td>
+            <svg class="gap-left text-align-center" width="15" height="15">
+                <rect rx="2" ry="2" width="15" height="15" style="stroke: black;stroke-width: 1px" data-bind="attr: {fill: color}"></rect>
+            </svg>
+            <span data-bind="text: effect"></span>
+        </td>
+        <td>
+            <button class="btn btn-primary" data-bind="click: $root.edit_{{ type }}" title="Edit {{ label }}"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-danger" data-bind="click: $root.delete_{{ type }}" title="Delete {{ label }}"><i class="fas fa-trash"></i></button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+{% endmacro %}
+
+{{ custom_command_table("atcommand", "@ Command") }}
+
+{{ custom_command_table("event", "Event") }}
+
+{{ custom_command_table("gcode", "Gcode") }}
+
+{% macro effect_configuration(name) %}
+    <div class="ws-config-row form-inline">
+        <label for="ws_custom_{{ name }}_effect" class="inline">Effect </label>
+        <select id="ws_custom_{{ name }}_effect" class="input-large" data-bind="value: effect">
+            {% for effect in plugin_ws281x_led_status_standard_names %}
+            <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ws-config-row form-inline">
+        <label for="ws_custom_{{ name }}_color" class="inline"> Colour </label>
+        <input id="ws_custom_{{ name }}_color" type="color" class="input-small" data-bind="value: color">
+    </div>
+    <div class="ws-config-row form-inline">
+        <label class="inline" for="ws_custom_{{ name }}_delay"> Delay </label>
+        <div class="input-append">
+            <input id="ws_custom_{{ name }}_delay" type="number" step="0.1" class="input-small" data-bind="value: delay">
+            <span class="add-on">ms</span>
+        </div>
+    </div>
+{% endmacro %}
+
+<div class="modal hide fade-in" id="WSAtCommandEdit" data-bind="with: editing_atcommand">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal" aria-hidden="true" title="Close">&times;</button>
+        <h3>Editing Custom @ Command Configuration</h3>
+    </div>
+    <div class="modal-body">
+        <div class="ws-config-flex">
+            <div class="ws-config-row form-inline">
+                <label for="ws_custom_atcommand_command" class="inline">{{ _("Command") }}</label>
+                <div class="input-prepend">
+                    <span class="add-on">@WS custom</span>
+                    <input id="ws_custom_atcommand_command" type="text" data-bind="value: match">
+                </div>
+                <div class="help-block">
+                    <i class="fas fa-info-circle text-info"></i> Not case sensitive
+                </div>
+            </div>
+            {{ effect_configuration("atcommand") }}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+</div>
+
+<div class="modal hide fade-in" id="WSGcodeEdit" data-bind="with: editing_gcode">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal" aria-hidden="true" title="close">&times;</button>
+        <h3>Editing Custom Gcode Effect Configuration</h3>
+    </div>
+    <div class="modal-body">
+        <div class="ws-config-flex">
+            <div class="ws-config-row form-inline">
+                <label for="ws_custom_atcommand_command" class="inline">{{ _("Match") }}</label>
+                <input id="ws_custom_atcommand_command" type="text" data-bind="value: match">
+            </div>
+            <div class="ws-config-row form-inline">
+                <label for="ws_custom_gcode_type">Match Type</label>
+                <select id="ws_custom_gcode_type" data-bind="value: match_type">
+                    <option value="gcode">GCode match</option>
+                    <option value="exact">Exact match</option>
+                    <option value="regex">Regex match</option>
+                </select>
+
+                <p class="help-block">
+                   <!-- ko if: match_type() == "gcode" -->
+                    Match just the G or M command, eg. <code>G28</code>
+                    <!-- /ko -->
+                    <!-- ko if: match_type() == "exact" -->
+                    Match the entire line sent, eg. <code>M104 S200</code>
+                    <!-- /ko -->
+                    <!-- ko if: match_type() == "regex" -->
+                    Match the line with a regex, eg. <code>M[0-9]+</code><br>
+                    <span class="label label-warning">Warning</span> This option could impact performance in some situations.
+                    <!-- /ko -->
+                </p>
+            </div>
+
+            {{ effect_configuration("gcode") }}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+</div>
+
+<div class="modal hide fade-in" id="WSEventEdit" data-bind="with: editing_event">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal" aria-hidden="true" title="Close">&times;</button>
+        <h3>Editing Custom Event Effect Configuration</h3>
+    </div>
+    <div class="modal-body">
+        <div class="ws-config-flex">
+            <div class="ws-config-row form-inline">
+                <label for="ws_custom_event" class="inline">{{ _("Event") }}</label>
+                <select id="ws_custom_event" data-bind="value: match">
+                    {% for event in plugin_ws281x_led_status_all_events %}
+                        <option value="{{ event }}">{{ event }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {{ effect_configuration("event") }}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+</div>

@@ -8,6 +8,7 @@
             <li><a href="#tabPrinting" data-toggle="tab">Printing effects</a></li>
             <li><a href="#tabProgress" data-toggle="tab">Progress effects</a></li>
             <li><a href="#tabFeatures" data-toggle="tab">Features</a></li>
+            <li><a href="#tabCustomize" data-toggle="tab">Customize</a></li>
             <li><a href="#tabUtilities" data-toggle="tab">Utilities</a></li>
             <li><a href="#tabAbout" data-toggle="tab">About</a></li>
         </ul>
@@ -23,6 +24,9 @@
             </div>
             <div class="tab-pane" id="tabFeatures">
                 {%  include "settings/features.jinja2" %}
+            </div>
+            <div class="tab-pane" id="tabCustomize">
+                {%  include "settings/customize.jinja2" %}
             </div>
             <div class="tab-pane" id="tabUtilities">
                 {% include "settings/utilities.jinja2" %}

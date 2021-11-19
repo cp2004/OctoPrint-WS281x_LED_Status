@@ -26,6 +26,20 @@
     overflow-y: auto;
 }
 
-#settings_plugin_ws281x_led_status input[type="color"] {
+#settings_plugin_ws281x_led_status input[type="color"], #WSAtCommandEdit input[type="color"], #WSEventEdit input[type="color"], #WSGcodeEdit input[type="color"] {
     min-height: 30px;
+}
+
+.ws-config-flex {
+    display: flex;
+    flex-direction: column;
+}
+
+.ws-config-flex > .ws-config-row {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.ws-config-row > * {
+    margin-right: 5px;
 }

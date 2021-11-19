@@ -14,7 +14,7 @@ import time
 
 # noinspection PyPackageRequirements
 import octoprint.plugin
-from octoprint.events import Events
+from octoprint.events import Events, all_events
 from octoprint.util.version import is_octoprint_compatible
 
 from octoprint_ws281x_led_status import (
@@ -194,6 +194,7 @@ class WS281xLedStatusPlugin(
                 os.path.join("/usr", "local", "bin", "docker-entrypoint.sh")
             ),
             "docs_url": constants.DOCS_FULL_LINK,
+            "all_events": all_events(),
         }
 
     # Wizard plugin

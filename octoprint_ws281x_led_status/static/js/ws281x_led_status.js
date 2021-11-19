@@ -85,10 +85,8 @@ $(function () {
             } else if (data.type === "torch") {
                 if (data.payload.on) {
                     self.torch_on(true);
-                    self.torch_icon(torch_on_src);
                 } else {
                     self.torch_on(false);
-                    self.torch_icon(torch_off_src);
                 }
             } else if (data.type === "at_cmd_deprecation") {
                 new PNotify.singleButtonNotify({
@@ -168,6 +166,99 @@ $(function () {
         self.toggleAdvancedStrip = function () {
             $("#advancedStrip").collapse("toggle");
             self.advancedStripOpen(!self.advancedStripOpen());
+        };
+
+        /* Customise tab stuff */
+
+        self.createDefaultValues = function () {
+            return {
+                match: ko.observable(""),
+                effect: ko.observable("Color Wipe"),
+                color: ko.observable("#00ff00"),
+                delay: ko.observable(25),
+            };
+        };
+
+        self.gcodeDefaultValues = function () {
+            var obj = self.createDefaultValues();
+            obj.match_type = ko.observable("gcode");
+            return obj;
+        };
+
+        self.custom_atcommand = ko.observableArray([]);
+        self.editing_atcommand = ko.observable(self.createDefaultValues());
+        self.custom_gcode = ko.observableArray([]);
+        self.editing_gcode = ko.observable(self.gcodeDefaultValues());
+        self.custom_event = ko.observableArray([]);
+        self.editing_event = ko.observable(self.createDefaultValues());
+
+        self.onAfterBinding = function () {
+            self.custom_atcommand(
+                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.atcommand()
+            );
+            self.custom_gcode(
+                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.gcode()
+            );
+            self.custom_event(
+                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.event()
+            );
+        };
+
+        self.onSettingsBeforeSave = function () {
+            self.settingsViewModel.settings.plugins.ws281x_led_status.custom.atcommand(
+                self.custom_atcommand()
+            );
+            self.settingsViewModel.settings.plugins.ws281x_led_status.custom.gcode(
+                self.custom_gcode()
+            );
+            self.settingsViewModel.settings.plugins.ws281x_led_status.custom.event(
+                self.custom_event()
+            );
+        };
+
+        self.edit_atcommand = function (data) {
+            self.editing_atcommand(data);
+            $("#WSAtCommandEdit").modal("show");
+        };
+
+        self.new_atcommand = function () {
+            var entry = self.createDefaultValues();
+            self.custom_atcommand.unshift(entry);
+            self.edit_atcommand(entry);
+        };
+
+        self.delete_atcommand = function (data) {
+            self.custom_atcommand.remove(data);
+        };
+
+        self.edit_gcode = function (data) {
+            self.editing_gcode(data);
+            $("#WSGcodeEdit").modal("show");
+        };
+
+        self.new_gcode = function () {
+            var entry = self.gcodeDefaultValues();
+            self.custom_gcode.unshift(entry);
+            self.edit_gcode(entry);
+        };
+
+        self.delete_gcode = function (data) {
+            self.custom_gcode.remove(data);
+        };
+
+        self.edit_event = function (data) {
+            self.editing_event(data);
+            $("#WSEventEdit").modal("show");
+        };
+
+        self.new_event = function () {
+            var entry = self.createDefaultValues();
+            self.custom_event.unshift(entry);
+            self.edit_event(entry);
+        };
+
+        self.delete_event = function (data) {
+            self.custom_event.remove(data);
         };
     }
     OCTOPRINT_VIEWMODELS.push({
