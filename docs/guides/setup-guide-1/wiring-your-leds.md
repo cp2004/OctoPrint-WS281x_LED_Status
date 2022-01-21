@@ -39,7 +39,7 @@ Wiring is as follows:
 Make sure you have a common ground between the power supply and Pi.
 {% endhint %}
 
-![Wiring with no shifter](<../../.gitbook/assets/wiring\_no\_shift (8).png>)
+![Wiring with no shifter](<../../.gitbook/assets/wiring\_no\_shift (8) (1).png>)
 
 ### Level Shifting Chip
 

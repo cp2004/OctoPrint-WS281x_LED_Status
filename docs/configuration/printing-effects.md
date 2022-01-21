@@ -10,7 +10,7 @@ The plugin reacts to several events to display printing effects. For each of the
 
 * **Enable** Whether the effect will run or not
 * **Effect** One of the available [effects](printing-effects.md#effects)
-* **Colour**  The primary colour to run the effect. Note this is ignored in some effects.
+* **Colour** The primary colour to run the effect. Note this is ignored in some effects.
 * **Delay** The length of time to wait between each frame of the effect.
 
 Some events also have some specific settings, these are detailed alongside them.
@@ -35,49 +35,49 @@ All the standard effects available, with fancy visualisations!
 
 Sets all LEDs to one colour, forever.
 
-![](../.gitbook/assets/solid_colour.gif)
+![](<../.gitbook/assets/solid\_colour (10).gif>)
 
 ### Colour Wipe
 
 Wipes colour across the strip pixel by pixel, then clears it pixel by pixel.
 
-![](../.gitbook/assets/color_wipe.gif)
+![](<../.gitbook/assets/color\_wipe (10).gif>)
 
 ### Colour Wipe V2
 
 Wipes colour pixel by pixel, as above, but to clear it turns around and heads backwards.
 
-![](../.gitbook/assets/color_wipe_2.gif)
+![](../.gitbook/assets/color\_wipe\_2.gif)
 
 ### Pulse
 
 Fades brightness up and down. Looks better in real life than the visualisation below!
 
-![](../.gitbook/assets/pulse.gif)
+![](<../.gitbook/assets/pulse (10).gif>)
 
 ### Bounce
 
 Sends a pulse of light bouncing from one side of your strip to the other.
 
-![](../.gitbook/assets/bounce.gif)
+![](<../.gitbook/assets/bounce (10).gif>)
 
 ### Solo Bounce
 
 Sends just a single pixel from one side to the other, bouncing about.
 
-![](../.gitbook/assets/solo_bounce.gif)
+![](../.gitbook/assets/solo\_bounce.gif)
 
 ### Rainbow
 
 Cycles all the LEDs through the rainbow together.
 
-![](../.gitbook/assets/rainbow.gif)
+![](<../.gitbook/assets/rainbow (12).gif>)
 
 ### Rainbow Cycle
 
 Rainbow that cycles across the strip, so a full rainbow is across the whole strip at once.
 
-![](../.gitbook/assets/rainbow_cycle.gif)
+![](<../.gitbook/assets/rainbow\_cycle (10).gif>)
 
 ### Crossover
 
@@ -89,11 +89,10 @@ Two pixels bouncing in opposite directions, crossing over in the middle.
 
 Sets all LEDs to a random colour, then changes a random pixel, to a new random colour
 
-![](../.gitbook/assets/random.gif)
+![](<../.gitbook/assets/random (10).gif>)
 
 ### Bouncy Balls
 
-A physics based effect, simulating 2 balls bouncing up and down. Looks great on longer strips \(and shorter ones too...!\).
+A physics based effect, simulating 2 balls bouncing up and down. Looks great on longer strips (and shorter ones too...!).
 
 Unfortunately creating the simulation for this effect didn't work, so is unavailable for now. Sorry!
-
