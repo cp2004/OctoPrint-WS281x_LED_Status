@@ -124,9 +124,49 @@ defaults = {
     },
     "custom": {
         # Holds custom settings. For data structure see triggers.py
-        "atcommand": [],
-        "gcode": [],
-        "event": [],
+        "atcommand": [
+            {
+                "match": "test",
+                "effect": "Color Wipe",
+                "color": "#00ff00",
+                "delay": "25",
+            },
+            {
+                "match": "test2",
+                "effect": "Color Wipe",
+                "color": "#00ff00",
+                "delay": "25",
+            },
+            {
+                "match": "test3",
+                "effect": "Color Wipe",
+                "color": "#00ff00",
+                "delay": "25",
+            },
+            {
+                "match": "test4",
+                "effect": "Color Wipe",
+                "color": "#00ff00",
+                "delay": "25",
+            },
+        ],
+        "gcode": [
+            {
+                "match": "G28",
+                "effect": "Pulse",
+                "color": "#ff0000",
+                "delay": "25",
+                "match_type": "gcode",
+            }
+        ],
+        "event": [
+            {
+                "match": "ClientAuthed",
+                "effect": "Color Wipe 2",
+                "color": "#ffff00",
+                "delay": "25",
+            }
+        ],
     },
     "progress_temp_start": 0,
     "lights_on": True,
