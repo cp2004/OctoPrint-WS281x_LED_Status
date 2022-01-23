@@ -6,16 +6,35 @@
 <p>Can help to diagnose both hardware problems (Such as specific LEDs are broken), help to select the correct strip type, and allow you to see if you like certain colors for customizations.</p>
 <p>Sets LEDs to solid colour until the next event happens.</p>
 <p>
-    <button class="btn btn-danger" id="led-test-red" data-bind="click: function(){ sendTestCommand('#ff0000') }"><i class="far fa-lightbulb"></i> Test red</button>
-    <button class="btn btn-success" id="led-test-green" data-bind="click: function(){ sendTestCommand('#00ff00') }"><i class="far fa-lightbulb"></i> Test green</button>
-    <button class="btn btn-primary" id="led-test-blue" data-bind="click: function(){ sendTestCommand('#0000ff') }"><i class="far fa-lightbulb"></i> Test blue</button>
-    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand('#ffffff') }"><i class="far fa-lightbulb"></i> Test white</button>
+    <button class="btn btn-danger" id="led-test-red" data-bind="click: function(){ sendTestColor('#ff0000') }"><i class="far fa-lightbulb"></i> Test red</button>
+    <button class="btn btn-success" id="led-test-green" data-bind="click: function(){ sendTestColor('#00ff00') }"><i class="far fa-lightbulb"></i> Test green</button>
+    <button class="btn btn-primary" id="led-test-blue" data-bind="click: function(){ sendTestColor('#0000ff') }"><i class="far fa-lightbulb"></i> Test blue</button>
+    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestColor('#ffffff') }"><i class="far fa-lightbulb"></i> Test white</button>
 </p>
 <p>Sets LEDs to specific RGB colors until the next event happens.</p>
 <p>
     <input id="ws_test_color" type="color" class="input-small">
-    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestCommand(document.querySelector('#ws_test_color').value) }"><i class="far fa-lightbulb"></i> Test Custom Color</button>
+    <button class="btn" id="led-test-white" data-bind="click: function(){ sendTestColor(document.querySelector('#ws_test_color').value) }"><i class="far fa-lightbulb"></i> Test Custom Color</button>
 </p>
+<p>
+    Sets LEDs to a custom effect until the next event happens.
+</p>
+<div class="form-inline">
+    <label for="ws_test_effect" class="inline">Effect </label>
+    <select id="ws_test_effect" class="input-large" data-bind="value: test_effect">
+        {% for effect in plugin_ws281x_led_status_standard_names %}
+        <option value="{{ effect }}">{{ effect }}</option>
+        {% endfor %}
+    </select>
+    <label for="ws_test_color" class="inline"> Colour </label>
+    <input id="ws_test_color" type="color" class="input-small" data-bind="value: test_color">
+    <label class="inline" for="ws_test_delay"> Delay </label>
+    <div class="input-append">
+        <input id="ws_test_delay" type="number" step="0.1" class="input-small" data-bind="value: test_delay">
+        <span class="add-on">ms</span>
+    </div>
+    <button class="btn btn-primary" data-bind="click: sendTestCommand">Test</button>
+</div>
 <hr>
 <h5>OS Config Test</h5>
 <p>Checks that the OS level configuration for SPI is correct, as per the initial setup wizard.</p>

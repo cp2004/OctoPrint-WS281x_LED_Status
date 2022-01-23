@@ -81,11 +81,12 @@ class PluginApi:
         )
 
     def test_led(self, data):
-        # We mock an M150 command here, because it is the easiest way
-        # Calling update_effect skips the checking of M150 intercepting or the printer
-        test_cmd = "M150 R{} G{} B{}".format(
-            util.hex_to_rgb(data.get("color"))[0],
-            util.hex_to_rgb(data.get("color"))[1],
-            util.hex_to_rgb(data.get("color"))[2],
-        )
-        self.plugin.update_effect({"type": "M150", "command": test_cmd})
+        # Use the custom effect config originally setup for custom triggers
+
+        test_config = {
+            "effect": data.get("effect", "Solid Color"),
+            "color": data.get("color", "#ff0000"),
+            "delay": data.get("delay", 10),
+        }
+
+        self.plugin.update_effect({"type": "custom", "data": test_config})

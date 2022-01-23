@@ -460,8 +460,11 @@ class WS281xLedStatusPlugin(
             self.effect_queue.put(mode)
             self.set_state(mode)
 
-        if mode["type"] in ["standard", "progress"]:
+        elif mode["type"] in ["standard", "progress"]:
             self._send_standard_effect(mode)
+
+        elif mode["type"] == "custom":
+            self._send_custom_effect(mode)
 
     def _send_standard_effect(self, mode):
         # Check the effect is enabled
@@ -500,6 +503,17 @@ class WS281xLedStatusPlugin(
         self.effect_queue.put(mode)
         if mode["effect"] != "torch":
             self.set_state(mode)
+
+    def _send_custom_effect(self, data):
+        self._logger.debug("Updating custom effect, parameters: {}".format(data))
+
+        # Saved so that lights on/off returns to custom effect
+        self.set_state(data)
+
+        parameters = data["data"]
+        parameters["type"] = "custom"
+
+        self.effect_queue.put(parameters)
 
     def set_state(self, new_state):
         self.previous_state = self.current_state

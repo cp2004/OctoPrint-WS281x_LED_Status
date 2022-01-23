@@ -138,6 +138,8 @@ $(function () {
 
         self.settingsViewModel = parameters[0];
 
+        /* Power calculation utility */
+
         self.current_input = ko.observable(40);
         self.power_req = ko.observable("--W");
         self.power_req_12v = ko.observable("--W");
@@ -156,11 +158,27 @@ $(function () {
             self.current_req(current.toString(10) + "A");
         };
 
-        self.sendTestCommand = function (color) {
+        /* Test commands */
+
+        self.test_effect = ko.observable("Solid Color");
+        self.test_color = ko.observable("#ff0000");
+        self.test_delay = ko.observable(10);
+
+        self.sendTestCommand = function () {
+            OctoPrint.simpleApiCommand("ws281x_led_status", "test_led", {
+                effect: self.test_effect(),
+                color: self.test_color(),
+                delay: self.test_delay(),
+            });
+        };
+
+        self.sendTestColor = function (color) {
             OctoPrint.simpleApiCommand("ws281x_led_status", "test_led", {
                 color,
             });
         };
+
+        /* LED config editor */
 
         self.advancedStripOpen = ko.observable(false);
         self.toggleAdvancedStrip = function () {
