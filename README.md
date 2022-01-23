@@ -63,12 +63,16 @@ I accept many forms of contribution, from fixing bugs, documentation and new fea
 Please see the [Contributing Guidelines](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/blob/master/CONTRIBUTING.md) for more details or get
 in touch if you don't know where to start.
 
-## Support my work!
+## Sponsors
 
-I created this plugin in my spare time, so if you have enjoyed using it then please [support it's development!](https://github.com/sponsors/cp2004)
+* [@iFrostizz](https://github.com/iFrostizz)
+* [@KenLucke](https://github.com/KenLucke)
 
-<a href="https://www.jetbrains.com/?from=cp2004"><img align="left" width="100" height="100" src="jetbrains-variant-2.png" alt="JetBrains Logo"></a> Thanks to JetBrains for supporting an open source license for their brilliant IDEs!
+As well as 7 others supporting me through [GitHub Sponsors](https://github.com/sponsors/cp2004)!
 
+## Supporting my efforts
+
+I created this project in my spare time, so if you have found it useful or enjoyed using it then please consider [supporting it's development!](https://github.com/sponsors/cp2004). You can sponsor monthly or one time, for any amount you choose.
 ## Thanks
 
 This was my first plugin and still my favourite, I have to say thanks for helping me develop it:
@@ -78,3 +82,5 @@ This was my first plugin and still my favourite, I have to say thanks for helpin
 Andreas C. for jumping at the opportunity to beta-test, and providing great feedback as I was creating this!
 
 And, of course, [Gina Häußge](https://github.com/foosel) for creating OctoPrint and such a great community around it.
+
+# 💡
