@@ -39,7 +39,7 @@ Wiring is as follows:
 Make sure you have a common ground between the power supply and Pi.
 {% endhint %}
 
-![Wiring with no shifter](<../../.gitbook/assets/wiring\_no\_shift (8) (1).png>)
+![Wiring with no shifter](<../../.gitbook/assets/wiringnoshift.png>)
 
 ### Level Shifting Chip
 
@@ -63,7 +63,7 @@ Wiring of this is as follows:
   * 74AHCT125 VCC
   * LED 5V
 
-![Wiring with a level shifter](../../.gitbook/assets/wiring\_level\_shifter.png)
+![Wiring with a level shifter](../../.gitbook/assets/wiringlevelshifter.png)
 
 ### Wiring with a Diode
 
@@ -85,6 +85,6 @@ Wiring is as follows:
 * Power supply GND to Pi GND
 * Power supply GND to LED GND
 
-![Wiring using a diode](../../.gitbook/assets/wiring\_diode.png)
+![Wiring using a diode](../../.gitbook/assets/wiringdiode.png)
 
 ## On to the next stage: SPI setup
