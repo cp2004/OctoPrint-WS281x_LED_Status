@@ -17,7 +17,7 @@ from octoprint_ws281x_led_status.effects import progress, standard
 # ~~ Documentation
 
 DOCS_URL = "https://cp2004.gitbook.io/ws281x-led-status"
-DOCS_BRANCH = "0.7.x"
+DOCS_BRANCH = "0.8.x"
 DOCS_FULL_LINK = "{}/v/{}/".format(DOCS_URL, DOCS_BRANCH)
 
 PI_REGEX = r"Raspberry Pi (\w*)"
