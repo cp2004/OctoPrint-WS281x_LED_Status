@@ -5,16 +5,20 @@ description: There are various utilities available to help with using the plugin
 # Utilities
 
 {% hint style="info" %}
-**These utilities are provided for convenience,** I make no claim they are 100% accurate.
+**These utilities are mostly provided for convenience,** I make no claim they are 100% accurate.
 {% endhint %}
 
 ## LED Strip Test
 
-{% hint style="warning" %}
-**Requires M150 intercept to be enabled & printer to be connected.** This is due to a small shortcut, which is adjusted in a future version.
-{% endhint %}
+### Solid colour buttons
 
-Press the 4 buttons to check that each segment of your LEDs are working. Useful if the colours are showing wrong, some LEDs don't work or anything hardware related. Each button sets that colour to maximum intensity, to isolate the individual colours.
+These are helpful to test the individual colours of the LED strip, to make sure the hardware and software are configured correctly. Helpful to identify if you might have selected the wrong colour order in the LED strip configuration. Each button sets that colour to maximum intensity, to isolate the individual colours.
+
+You can also set a custom colour to be sent to the LEDs.
+
+### Effect test
+
+This section allows for testing a configuration for an effect instantly, without needing to wait for the relevant event to occur. Configure the effect, colour and delay and then press 'Test'!
 
 ## OS Configuration Test
 
@@ -29,4 +33,3 @@ This data is also logged to `octoprint.log` on startup, to help me with diagnosi
 Calculates the approximate power consumption of the LED strip. Useful to work out if your power supply is up-to-the task.
 
 The nominal value included by default is 40mA, since this is what I have found to be most common. Brighter LEDs take more power, so adjust to what you think is right for your strips.
-

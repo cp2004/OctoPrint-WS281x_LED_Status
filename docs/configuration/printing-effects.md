@@ -22,8 +22,8 @@ Some events also have some specific settings, these are detailed alongside them.
 * Printer Disconnected
 * Print Success
   * This effect has configurable 'Return to idle' time in seconds. Set to 0 to disable returning to idle.
-* Print Paused
 * Print Failed
+* Print Paused
 * Printing
   * This effect will override the print progress effect.
 

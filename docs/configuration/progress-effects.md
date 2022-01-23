@@ -1,5 +1,5 @@
 ---
-description: 'Progress can be tracked as well, to display more detailed status'
+description: Progress can be tracked as well, to display more detailed status
 ---
 
 # Progress Effects
@@ -10,9 +10,9 @@ Each progress effect has some standard options, to customise them. Individual ef
 
 * Enabled
 * Progress Colour The colour to indicate the progress of whatever event is happening.
-* Base Colour
+*   Base Colour
 
-  The base/background colour of the progress indication.
+    The base/background colour of the progress indication.
 
 In addition, there are two global options:
 
@@ -27,7 +27,7 @@ Matches the progress bar in OctoPrint's UI, on your LED strip.
 
 ### Heating Progress
 
-Triggered when a blocking heating command \(`M109` or `M190`\) sent to the printer.
+Triggered when a blocking heating command (`M109` or `M190`) sent to the printer.
 
 Additional options:
 
@@ -37,14 +37,13 @@ Additional options:
 
 ### Cooling Progress
 
-Triggered on print success, this will display the progress of the printer while it is still cooling.
+Triggered only on print success, this will display the progress of the printer while it is still cooling, until the threshold is reached, and then the 'Print Success' effect would run.
 
 Additional options:
 
-* Track cooling on bed or tool Select one, since they usually cool down at the same time.
-* Cooling temperature threshold The temperature when cooling tracking should stop
+* **Track cooling on bed or tool** - **** select one, since they usually cool down at the same time.
+* **Cooling temperature threshold** - the temperature when cooling tracking should stop.
 
 {% hint style="warning" %}
 Don't set cooling tracking below room temperature, or this effect will never end!
 {% endhint %}
-
