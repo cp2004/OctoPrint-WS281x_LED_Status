@@ -1,7 +1,7 @@
 {% import "macros/binding.jinja2" as binding %}
-{% import "settings/printing_effects.jinja2" as printing_effects with context %}
+{% import "macros/docs.jinja2" as docs with context %}
 
-<h5>Custom Effects</h5>
+<h5>Custom Effects {{ docs.help_icon("configuration/features") }}</h5>
 <p>
     This section allows you to create your own triggers to change the effect on your LEDs reacting to @ commands,
     events and gcode commands.
