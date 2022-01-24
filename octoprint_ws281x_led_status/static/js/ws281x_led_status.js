@@ -97,7 +97,7 @@ $(function () {
                         "<p>Used command: " +
                         data.payload +
                         "</p>" +
-                        "<p><a href='https://cp2004.gitbook.io/ws281x-led-status/documentation/host-commands'>Documentation</a> </p>",
+                        "<p><a href='https://cp2004.gitbook.io/ws281x-led-status/v/0.8.x/documentation/host-commands'>Documentation</a> </p>",
                     type: "warning",
                     hide: false,
                 });
