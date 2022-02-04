@@ -3,33 +3,29 @@
 Add some RGB LEDs to your 3D printer for a quick status update!
 
 ![GitHub issues](https://img.shields.io/github/issues/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
-![GitHub branch checks state](https://img.shields.io/github/checks-status/cp2004/OctoPrint-WS281x_LED_STATUS/0.7.x?style=flat-square)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cp2004/OctoPrint-WS281x_LED_Status?label=latest%20release&sort=semver&style=flat-square)
 ![GitHub release installs (latest by date)](https://img.shields.io/github/downloads/cp2004/OctoPrint-WS281x_LED_Status/latest/total?label=New%20installs%40latest&style=flat-square)
-![GitHub Release Date](https://img.shields.io/github/release-date/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
 ![GitHub Repo stars](https://img.shields.io/github/stars/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/cp2004?style=flat-square)
 
 ![rainbow effect](/assets/rainbow.gif)
 
-A highly configurable plugin for supporting WS2811, WS2812 and SK6812 LEDs attached to your Raspberry Pi.
+A highly configurable yet easy to use plugin for attaching WS2811, WS2812 and SK6812 or LEDs to your Raspberry Pi for a printer status update!
 
-With lots of effects to choose from, you can customise the plugin to do things _exactly_ as you want them, to display the status from your 3D printer from a simple strip of LEDs.
+With lots of options effects and integrations to choose from, you can customise the plugin to do things _exactly_ as you want them.
 
-Features include:
+Most prominent features include:
 
-- Reacting to printing events
-- Tracking heating & printing progress
-- Intercepting M150 commands
-- Quick on/off button from the navbar
-- 'Torch' function, to light up your printer
-- A timer to turn the LEDs on or off at certain times of day
-- Easy to use but highly configurable settings interface, you can turn pretty much anything on or off and configure it to how you like it.
-- LED Strip test
-- Power calculator
-- Powerful intergration with OctoApp
-- ... and more!
+- Printer status effects
+- Tracking heating, printing and cooling progress
+- Intercepting M150 commands & controlling with @ commands
+- Easy controls for turning lights on and off from the navbar
+- Theme-friendly torch button to temporarily light up your printer
+- Timers to turn the LEDs off at certain times of day or after a print is done.
+- Custom Triggers - add your own events, @ commands or gcode matching to trigger effects
+- Powerful integration with OctoApp for Android
+- ...and more!
 
 You can take a look at the [documentation](https://cp2004.gitbook.io/ws281x-led-status/) for more information about all that the plugin has to offer.
 
@@ -37,7 +33,7 @@ You can take a look at the [documentation](https://cp2004.gitbook.io/ws281x-led-
 
 ## Setup
 
-Setting up the plugin couldn't be easier! There are 3 main steps, with the heavy lifting done for you via a configuration wizard:
+Setting up the plugin couldn't be easier! There are 3 main steps, with configuration made easy with the setup wizard.
 
 - Wiring your LEDs
 - Configuring SPI
@@ -75,7 +71,7 @@ As well as 7 others supporting me through [GitHub Sponsors](https://github.com/s
 I created this project in my spare time, so if you have found it useful or enjoyed using it then please consider [supporting it's development!](https://github.com/sponsors/cp2004). You can sponsor monthly or one time, for any amount you choose.
 ## Thanks
 
-This was my first plugin and still my favourite, I have to say thanks for helping me develop it:
+This was my first plugin and is still my favourite, so I have to say thanks for helping me develop it:
 
 [jneilliii](https://github.com/jneilliii) for always answering my questions on discord, and making great plugins I could use as examples.
 
