@@ -309,8 +309,7 @@ $(function () {
         };
         self.reason_id_map = {
             failed: "This test did not pass",
-            error:
-                "Error: There was an unknown error running this test, please check the log",
+            error: "Error: There was an unknown error running this test, please check the log",
             missing: "Error: The file this check expected does not exist",
             pi4_250:
                 "It looks like core_freq_min=250 is set in your /boot/config.txt file." +
@@ -396,16 +395,14 @@ $(function () {
             ) {
                 new PNotify({
                     title: "WS281X LED Status: Incomplete config",
-                    text:
-                        "Your configuration is not complete! Please head to the utilities tab in the settings page to fix this.",
+                    text: "Your configuration is not complete! Please head to the utilities tab in the settings page to fix this.",
                     type: "error",
                     hide: false,
                 });
             } else {
                 new PNotify({
                     title: "Restart needed!",
-                    text:
-                        "WS281x LED Status configuration complete. You will need to restart your Pi for the changes to take effect.",
+                    text: "WS281x LED Status configuration complete. You will need to restart your Pi for the changes to take effect.",
                     type: "success",
                     hide: false,
                 });
