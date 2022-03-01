@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, unicode_literals
-
 __author__ = "Charlie Powell <cp2004.github@gmail.com"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
@@ -18,7 +15,7 @@ from octoprint_ws281x_led_status.effects import progress, standard
 
 DOCS_URL = "https://cp2004.gitbook.io/ws281x-led-status"
 DOCS_BRANCH = "0.8.x"
-DOCS_FULL_LINK = "{}/v/{}/".format(DOCS_URL, DOCS_BRANCH)
+DOCS_FULL_LINK = f"{DOCS_URL}/v/{DOCS_BRANCH}/"
 
 PI_REGEX = r"Raspberry Pi (\w*)"
 PROC_DT_MODEL_PATH = "/proc/device-tree/model"

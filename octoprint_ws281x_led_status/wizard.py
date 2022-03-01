@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, unicode_literals
-
 __author__ = "Charlie Powell <cp2004.github@gmail.com"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
 
 import getpass
 import grp
-import io
 import logging
 import os
 
@@ -79,7 +75,7 @@ class PluginWizard:
     @staticmethod
     def is_spi_enabled():
         result = {"check": api.WIZ_ENABLE_SPI, "passed": False, "reason": "failed"}
-        with io.open("/boot/config.txt") as file:
+        with open("/boot/config.txt") as file:
             for line in file:
                 if line.startswith("dtparam=spi=on"):
                     result = {"check": api.WIZ_ENABLE_SPI, "passed": True, "reason": ""}
@@ -89,7 +85,7 @@ class PluginWizard:
     def is_spi_buffer_increased():
         result = {"check": api.WIZ_INCREASE_BUFFER, "passed": False, "reason": "failed"}
         # Check `/boot/cmdline.txt` first
-        with io.open("/boot/cmdline.txt") as file:
+        with open("/boot/cmdline.txt") as file:
             for line in file:
                 if "spidev.bufsiz=32768" in line:
                     return {
@@ -102,8 +98,8 @@ class PluginWizard:
             # Wrapped in it's own try-catch as it might not exist if SPI is not enabled
             # But we still want it to show as 'fixable', as the file above must have existed
             try:
-                with io.open(
-                    "/sys/module/spidev/parameters/bufsiz", encoding="utf-8", mode="rt"
+                with open(
+                    "/sys/module/spidev/parameters/bufsiz", encoding="utf-8"
                 ) as file:
                     if "32768" in file.readline().strip(" \t\r\n\0"):
                         result = {
@@ -123,7 +119,7 @@ class PluginWizard:
             "reason": "not_required" if self.pi_model == "4" else "failed",
         }
 
-        with io.open("/boot/config.txt") as file:
+        with open("/boot/config.txt") as file:
             for line in file:
                 if line.startswith("core_freq=250"):
                     if self.pi_model == "4":
@@ -145,7 +141,7 @@ class PluginWizard:
 
         if self.pi_model == "4":
             # Pi 4 has a variable clock speed, which messes up SPI timing
-            with io.open("/boot/config.txt") as file:
+            with open("/boot/config.txt") as file:
                 for line in file:
                     if line.startswith("core_freq_min=500"):
                         result = {
@@ -200,7 +196,7 @@ class PluginWizard:
             ],
         }
         sys_command = command_to_system[cmd]
-        self._logger.info("Running system command for {}:{}".format(cmd, sys_command))
+        self._logger.info(f"Running system command for {cmd}:{sys_command}")
         stdout, error = run_system_command(sys_command, data.get("password"))
         api_get = self.on_api_get()
         api_get.update({"errors": error})

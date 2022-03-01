@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, unicode_literals
-
 __author__ = "Charlie Powell <cp2004.github@gmail.com"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
 
-import io
 import logging
 import multiprocessing
 import os
@@ -57,7 +53,7 @@ class WS281xLedStatusPlugin(
     octoprint.plugin.RestartNeedingPlugin,
 ):
     def __init__(self):
-        super(WS281xLedStatusPlugin, self).__init__()
+        super().__init__()
 
         # Submodules
         self.api = api.PluginApi(self)  # type: api.PluginApi
@@ -413,7 +409,7 @@ class WS281xLedStatusPlugin(
         self._settings.set(["lights_on"], state)
         self._settings.save()
         # Logs
-        self._logger.info("Switched lights, on: {}".format(state))
+        self._logger.info(f"Switched lights, on: {state}")
 
     def activate_torch(self):
         self.torch_timer.stop()
@@ -426,7 +422,7 @@ class WS281xLedStatusPlugin(
         if toggle:
             self._logger.debug("Torch toggling on")
         else:
-            self._logger.debug("Torch timer started for {} secs".format(torch_time))
+            self._logger.debug(f"Torch timer started for {torch_time} secs")
             self.torch_timer.start()
 
         self.update_effect({"type": "standard", "effect": "torch"})
@@ -503,13 +499,13 @@ class WS281xLedStatusPlugin(
             self.return_timer.start()
 
         # Finally, start actually updating the effect
-        self._logger.debug("Updating effect to {}".format(mode))
+        self._logger.debug(f"Updating effect to {mode}")
         self.effect_queue.put(mode)
         if mode["effect"] != "torch":
             self.set_state(mode)
 
     def _send_custom_effect(self, data):
-        self._logger.debug("Updating custom effect, parameters: {}".format(data))
+        self._logger.debug(f"Updating custom effect, parameters: {data}")
 
         # Saved so that lights on/off returns to custom effect
         self.set_state(data)
@@ -560,7 +556,7 @@ class WS281xLedStatusPlugin(
         _subcode=None,
         _tags=None,
         *_args,
-        **_kwargs
+        **_kwargs,
     ):
         if gcode in constants.BLOCKING_TEMP_GCODES.keys():
             # New M109 or M190, start tracking heating
@@ -628,7 +624,7 @@ class WS281xLedStatusPlugin(
             except KeyError:
                 # Abort if that tool does not exist - maybe misconfiguration
                 self._logger.error(
-                    "Heater {} not found, can't show heating progress".format(heater)
+                    f"Heater {heater} not found, can't show heating progress"
                 )
                 self.heating = False
                 return abort()
@@ -664,7 +660,7 @@ class WS281xLedStatusPlugin(
             except KeyError:
                 # Abort if that tool does not exist - maybe misconfiguration
                 self._logger.error(
-                    "Heater {} not found, can't show cooling progress".format(heater)
+                    f"Heater {heater} not found, can't show cooling progress"
                 )
                 self.heating = False
                 return abort()
@@ -736,7 +732,7 @@ class WS281xLedStatusPlugin(
             "!! Deprecated @ command used, please use the newer alternatives."
             " Support will be removed in a future version"
         )
-        self._logger.warning("!! Command used: {}".format(cmd))
+        self._logger.warning(f"!! Command used: {cmd}")
         self._logger.warning(
             "!! See https://cp2004.gitbook.io/ws281x-led-status/documentation/host-commands"
             " for more info"
@@ -797,7 +793,7 @@ def get_proc_dt_model():
     global _proc_dt_model
 
     if _proc_dt_model is None:
-        with io.open(constants.PROC_DT_MODEL_PATH, "rt", encoding="utf-8") as f:
+        with open(constants.PROC_DT_MODEL_PATH, encoding="utf-8") as f:
             _proc_dt_model = f.readline().strip(" \t\r\n\0")
 
     return _proc_dt_model
@@ -822,7 +818,7 @@ def determine_pi_version():
             )
         )
         raise
-    logger.info("Detected running on a Raspberry Pi {}".format(model_no))
+    logger.info(f"Detected running on a Raspberry Pi {model_no}")
     global PI_MODEL
     PI_MODEL = model_no
     return PI_MODEL
@@ -841,7 +837,7 @@ def __plugin_check__():
             return False
     except Exception as e:
         log_abort()
-        logger.warning("Exception suppressed: {}".format(repr(e)))
+        logger.warning(f"Exception suppressed: {repr(e)}")
         return False
 
     if "raspberry pi" in proc_dt_model.lower():

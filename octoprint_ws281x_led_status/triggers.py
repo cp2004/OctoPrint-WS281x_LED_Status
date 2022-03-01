@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import re
 
@@ -51,7 +50,7 @@ class Trigger:
         delay: ms between frames
         """
         if match not in all_events():
-            self._logger.warning("Event ({}) not available, ignoring".format(match))
+            self._logger.warning(f"Event ({match}) not available, ignoring")
             return
         self.event_subscriptions.append(
             {

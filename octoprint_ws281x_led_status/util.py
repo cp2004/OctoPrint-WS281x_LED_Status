@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, unicode_literals
-
 __author__ = "Charlie Powell <cp2004.github@gmail.com"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
@@ -119,8 +116,8 @@ def run_system_command(command, password=None):
                 "".join(command), returncode
             )
         )
-        logger.error("STDOUT: {}".format(stdout))
-        logger.error("STDOUT: {}".format(stderr))
+        logger.error(f"STDOUT: {stdout}")
+        logger.error(f"STDOUT: {stderr}")
         error = "command"
     else:
         # Convert output to joined string instead of list
@@ -175,10 +172,10 @@ def recursively_log(config, prefix=""):
     lines = []
     for key, value in config.items():
         if isinstance(value, dict):
-            lines.append("{prefix} {key}".format(prefix=prefix, key=key))
+            lines.append(f"{prefix} {key}")
             lines.extend(recursively_log(value, prefix=prefix + " | -"))
         else:
-            lines.append("{prefix} {key}: {value}".format(**locals()))
+            lines.append(f"{prefix} {key}: {value}")
     return lines
 
 

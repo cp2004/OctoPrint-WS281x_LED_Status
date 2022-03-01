@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, unicode_literals
-
 __author__ = "Charlie Powell <cp2004.github@gmail.com"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the terms of the AGPLv3 License"
@@ -138,9 +135,7 @@ class EffectRunner:
             self.previous_state["type"] == "standard"
             and self.previous_state["effect"] == "blank"
         ):
-            self._logger.debug(
-                "Returning to previous state: {}".format(self.previous_state)
-            )
+            self._logger.debug(f"Returning to previous state: {self.previous_state}")
             self.parse_q_msg(self.previous_state)
 
         self._logger.info("Startup Complete!")
@@ -150,7 +145,7 @@ class EffectRunner:
         try:
             while True:
                 msg = self.queue.get()
-                self._logger.debug("New message: {}".format(msg))
+                self._logger.debug(f"New message: {msg}")
                 if msg:
                     if msg == constants.KILL_MSG:
                         self.kill()
@@ -244,7 +239,7 @@ class EffectRunner:
         self.lights_on = False
 
     def progress_msg(self, progress_effect, value):
-        self._logger.debug("Changing effect to {}, {}%".format(progress_effect, value))
+        self._logger.debug(f"Changing effect to {progress_effect}, {value}%")
         self.progress_effect(progress_effect, min(max(int(value), 0), 100))
 
     def parse_m150(self, msg):
@@ -285,9 +280,7 @@ class EffectRunner:
                 "command": "M150",  # Chop the parameters, so it is not parsed again
             }
             self._logger.debug(
-                "Parsed new M150: M150 R{red} G{green} B{blue} (brightness: {brightness})".format(
-                    **locals()
-                )
+                f"Parsed new M150: M150 R{red} G{green} B{blue} (brightness: {brightness})"
             )
 
         if self.lights_on:  # Respect lights on/off
@@ -342,7 +335,7 @@ class EffectRunner:
 
     def standard_effect(self, mode):
         # Log if the effect is changing
-        self._logger.debug("Changing effect to {}".format(mode))
+        self._logger.debug(f"Changing effect to {mode}")
 
         if (self.lights_on and not mode == "blank") or (
             mode == "torch" and self.effect_settings["torch"]["override_timer"]
@@ -364,7 +357,7 @@ class EffectRunner:
             self.blank_leds(whole_strip=False)
 
     def custom_effect(self, effect, color, delay):
-        self._logger.debug("Changing effect to {}".format(effect))
+        self._logger.debug(f"Changing effect to {effect}")
 
         if self.lights_on:
             self.run_effect(
