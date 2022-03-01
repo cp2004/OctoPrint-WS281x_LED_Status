@@ -511,12 +511,10 @@ class WS281xLedStatusPlugin(
     def _send_custom_effect(self, data):
         self._logger.debug("Updating custom effect, parameters: {}".format(data))
 
-        # Saved so that lights on/off returns to custom effect
-        self.set_state(data)
-
         parameters = data["data"]
         parameters["type"] = "custom"
 
+        self.set_state(parameters)
         self.effect_queue.put(parameters)
 
     def set_state(self, new_state):
