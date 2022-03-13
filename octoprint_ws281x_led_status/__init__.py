@@ -706,6 +706,13 @@ class WS281xLedStatusPlugin(
                 ["effects", "torch", "toggle"]
             ):
                 self.deactivate_torch()
+            elif params == AtCommands.TORCH_TOGGLE and self._settings.get_boolean(
+                ["effects", "torch", "toggle"]
+            ):
+                if self.torch_on:
+                    self.deactivate_torch()
+                else:
+                    self.activate_torch()
             elif params[0:6] == AtCommands.CUSTOM:
                 self.custom_triggers.on_at_command(params[7:])  # Strip off "CUSTOM"
 
