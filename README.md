@@ -61,15 +61,16 @@ in touch if you don't know where to start.
 
 ## Sponsors
 
-* [@KenLucke](https://github.com/KenLucke)
-* [@iFrostizz](https://github.com/iFrostizz)
-* [@CmdrCody51](https://github.com/CmdrCody51)
+- [@KenLucke](https://github.com/KenLucke)
+- [@iFrostizz](https://github.com/iFrostizz)
+- [@CmdrCody51](https://github.com/CmdrCody51)
 
 As well as 5 others supporting me regularly through [GitHub Sponsors](https://github.com/sponsors/cp2004)!
 
 ## Supporting my efforts
 
 I created this project in my spare time, so if you have found it useful or enjoyed using it then please consider [supporting it's development!](https://github.com/sponsors/cp2004). You can sponsor monthly or one time, for any amount you choose.
+
 ## Thanks
 
 This was my first plugin and is still my favourite, so I have to say thanks for helping me develop it:
