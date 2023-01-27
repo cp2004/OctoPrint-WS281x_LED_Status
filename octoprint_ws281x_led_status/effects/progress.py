@@ -89,10 +89,9 @@ def both_ends(
 ):
     brightness_manager.reset_brightness()
     num_pixels = strip.numPixels()
+    odd_pixel = 0
     if num_pixels % 2 != 0:
-        num_pixels -= 1
-        # Set the unused pixel to off
-        strip.setPixelColorRGB(num_pixels, 0, 0, 0)
+        odd_pixel = 1
 
     def progress(min_pixel, max_pixel, val, reverse):
         number_pixels = max_pixel - min_pixel
@@ -123,8 +122,8 @@ def both_ends(
 
     # Set the progress to either end of the strip
 
-    progress(0, num_pixels // 2, value, False)
-    progress(num_pixels // 2, num_pixels, value, True)
+    progress(0, math.floor(num_pixels / 2) + odd_pixel, value, False)
+    progress(math.ceil(num_pixels / 2) - odd_pixel, num_pixels, value, True)
 
     strip.show()
     if not q_poll_sleep(0.1, queue):
