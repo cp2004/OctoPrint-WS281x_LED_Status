@@ -21,34 +21,7 @@ def progress_bar(
     *args,
     **kwargs
 ):
-    brightness_manager.reset_brightness()
-    num_pixels = strip.numPixels()
-    upper_bar = (value / 100) * num_pixels
-    upper_remainder, upper_whole = math.modf(upper_bar)
-    pixels_remaining = num_pixels
-
-    for i in range(int(upper_whole)):
-        pixel = ((num_pixels - 1) - i) if reverse else i
-        strip.setPixelColorRGB(pixel, *progress_color)
-        pixels_remaining -= 1
-
-    if upper_remainder > 0.0:
-        tween_color = blend_two_colors(progress_color, base_color, upper_remainder)
-        pixel = ((num_pixels - int(upper_whole)) - 1) if reverse else int(upper_whole)
-        strip.setPixelColorRGB(pixel, *tween_color)
-        pixels_remaining -= 1
-
-    for i in range(pixels_remaining):
-        pixel = (
-            ((pixels_remaining - 1) - i)
-            if reverse
-            else ((num_pixels - pixels_remaining) + i)
-        )
-        strip.setPixelColorRGB(pixel, *base_color)
-
-    strip.show()
-    if not q_poll_sleep(0.1, queue):
-        return
+    progress_bar_impl(strip, queue, brightness_manager, value, progress_color, base_color, reverse, False)
 
 
 def gradient(
@@ -78,6 +51,64 @@ def single_pixel(
         strip.setPixelColorRGB(i, *base_color)
 
     strip.setPixelColorRGB(pixel_number, *progress_color)
+
+    strip.show()
+    if not q_poll_sleep(0.1, queue):
+        return
+
+
+def progress_bar_impl(
+    strip,
+    queue,
+    brightness_manager,
+    value,
+    progress_color,
+    base_color,
+    reverse,
+    half_strip,
+    *args,
+    **kwargs
+):
+    brightness_manager.reset_brightness()
+    num_pixels = strip.numPixels()
+    odd_pixel = 0
+    if num_pixels % 2 != 0:
+        odd_pixel = 1
+
+    def progress(min_pixel, max_pixel, val, reverse_progress):
+        number_pixels = max_pixel - min_pixel
+        upper_bar = (val / 100) * number_pixels
+        upper_remainder, upper_whole = math.modf(upper_bar)
+        pixels_remaining = number_pixels
+
+        for i in range(int(upper_whole)):
+            pixel = ((max_pixel - 1) - i) if reverse_progress else (min_pixel + i)
+            strip.setPixelColorRGB(pixel, *progress_color)
+            pixels_remaining -= 1
+
+        if upper_remainder > 0.0:
+            tween_color = blend_two_colors(progress_color, base_color, upper_remainder)
+            pixel = (
+                ((max_pixel - int(upper_whole)) - 1) if reverse_progress else (int(upper_whole) + min_pixel)
+            )
+            strip.setPixelColorRGB(pixel, *tween_color)
+            pixels_remaining -= 1
+
+        for i in range(pixels_remaining):
+            pixel = (
+                ((min_pixel + pixels_remaining - 1) - i)
+                if reverse_progress
+                else (min_pixel + (number_pixels - pixels_remaining) + i)
+            )
+            strip.setPixelColorRGB(pixel, *base_color)
+
+    if half_strip:
+        # Set the progress to either end of the strip
+        progress(0, math.floor(num_pixels / 2) + odd_pixel, value, True if reverse else False)
+        progress(math.ceil(num_pixels / 2) - odd_pixel, num_pixels, value, False if reverse else True)
+    else:
+        # Set the progress for the entire strip
+        progress(0, num_pixels, value, True if reverse else False)
 
     strip.show()
     if not q_poll_sleep(0.1, queue):
