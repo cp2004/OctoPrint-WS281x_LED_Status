@@ -15,7 +15,6 @@ defaults = {
         "dma": 10,
         "invert": False,
         "channel": 0,
-        "reverse": False,
         "type": "WS2811_STRIP_GRB",
         "brightness": 50,
         "adjustment": {"R": 100, "G": 100, "B": 100},
@@ -139,6 +138,10 @@ def migrate_settings(target, current, settings):
         # 1 => 2
         migrate_one_to_two(settings)
 
+    if (current is None or current <= 2) and target == 3:
+        # 2 => 3
+        migrate_two_to_three(settings)
+
 
 def migrate_none_to_one(settings):
     new_settings = {
@@ -259,6 +262,22 @@ def migrate_one_to_two(settings):
     settings.settings.remove(["plugins", "ws281x_led_status", "at_command_reaction"])
     settings.settings.remove(["plugins", "ws281x_led_status", "intercept_m150"])
     settings.settings.remove(["plugins", "ws281x_led_status", "debug_logging"])
+
+
+def migrate_two_to_three(settings):
+    # See PR #212 for changes
+    reverse = settings.get(["strip", "reverse"])
+
+    if reverse and settings.get(["effects", "progress_print", "effect"]) == "Progress Bar":
+        settings.set(["effects", "progress_print", "effect"], "Progress Bar Reversed")
+
+    if reverse and settings.get(["effects", "progress_heatup", "effect"]) == "Progress Bar":
+        settings.set(["effects", "progress_heatup", "effect"], "Progress Bar Reversed")
+
+    if reverse and settings.get(["effects", "progress_cooling", "effect"]) == "Progress Bar":
+        settings.set(["effects", "progress_cooling", "effect"], "Progress Bar Reversed")
+
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "reverse"])
 
 
 def filter_none(target):
