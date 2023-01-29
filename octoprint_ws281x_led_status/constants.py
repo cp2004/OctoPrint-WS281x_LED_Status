@@ -41,6 +41,7 @@ class AtCommands:
     TORCH = "TORCH"
     TORCH_ON = "TORCH_ON"
     TORCH_OFF = "TORCH_OFF"
+    TORCH_TOGGLE = "TORCH_TOGGLE"
 
     CUSTOM = "CUSTOM"
 

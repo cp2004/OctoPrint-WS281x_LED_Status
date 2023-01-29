@@ -507,12 +507,10 @@ class WS281xLedStatusPlugin(
     def _send_custom_effect(self, data):
         self._logger.debug(f"Updating custom effect, parameters: {data}")
 
-        # Saved so that lights on/off returns to custom effect
-        self.set_state(data)
-
         parameters = data["data"]
         parameters["type"] = "custom"
 
+        self.set_state(parameters)
         self.effect_queue.put(parameters)
 
     def set_state(self, new_state):
@@ -704,6 +702,13 @@ class WS281xLedStatusPlugin(
                 ["effects", "torch", "toggle"]
             ):
                 self.deactivate_torch()
+            elif params == AtCommands.TORCH_TOGGLE and self._settings.get_boolean(
+                ["effects", "torch", "toggle"]
+            ):
+                if self.torch_on:
+                    self.deactivate_torch()
+                else:
+                    self.activate_torch()
             elif params[0:6] == AtCommands.CUSTOM:
                 self.custom_triggers.on_at_command(params[7:])  # Strip off "CUSTOM"
 

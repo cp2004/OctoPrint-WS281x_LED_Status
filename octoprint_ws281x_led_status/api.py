@@ -84,6 +84,7 @@ class PluginApi:
             "effect": data.get("effect", "Solid Color"),
             "color": data.get("color", "#ff0000"),
             "delay": data.get("delay", 10),
+            "trigger": "test",
         }
 
         self.plugin.update_effect({"type": "custom", "data": test_config})

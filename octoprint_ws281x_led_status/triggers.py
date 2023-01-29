@@ -136,14 +136,15 @@ class Trigger:
                 self._logger.exception(e)
 
     def on_event(self, event):
-        for e in self.event_subscriptions:
-            if e["match"] == event:
+        for event in self.event_subscriptions:
+            if event["match"] == event:
                 self.effect_queue.put(
                     {
                         "type": "custom",
-                        "effect": e["effect"],
-                        "color": e["color"],
-                        "delay": e["delay"],
+                        "effect": event["effect"],
+                        "color": event["color"],
+                        "delay": event["delay"],
+                        "trigger": "event: {}".format(event["match"]),
                     }
                 )
 
@@ -159,6 +160,7 @@ class Trigger:
                         "effect": at_command["effect"],
                         "color": at_command["color"],
                         "delay": at_command["delay"],
+                        "trigger": "at command: {}".format(at_command["match"]),
                     }
                 )
 
@@ -173,6 +175,7 @@ class Trigger:
                         "effect": gcode_command["effect"],
                         "color": gcode_command["color"],
                         "delay": gcode_command["delay"],
+                        "trigger": "gcode match: {}".format(gcode_command["match"]),
                     }
                 )
                 # Once we have a match, we can stop looking
@@ -186,6 +189,7 @@ class Trigger:
                         "effect": gcode_exact["effect"],
                         "color": gcode_exact["color"],
                         "delay": gcode_exact["delay"],
+                        "trigger": "gcode exact: {}".format(gcode_exact["match"]),
                     }
                 )
                 # Once we have a match, we can stop looking
@@ -200,6 +204,7 @@ class Trigger:
                         "effect": gcode_regex["effect"],
                         "color": gcode_regex["color"],
                         "delay": gcode_regex["delay"],
+                        "trigger": "gcode regex: {}".format(gcode_regex["match"]),
                     }
                 )
                 # Once we have a match, we can stop looking
