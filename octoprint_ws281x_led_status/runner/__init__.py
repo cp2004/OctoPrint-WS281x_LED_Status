@@ -341,7 +341,6 @@ class EffectRunner:
                     "base_color": apply_color_correction(
                         self.color_correction, *hex_to_rgb(effect_settings["base"])
                     ),
-                    "reverse": self.strip_settings["reverse"],
                 },
                 name=mode,
             )

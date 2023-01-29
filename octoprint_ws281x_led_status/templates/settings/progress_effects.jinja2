@@ -27,8 +27,6 @@
 
 <h5>Progress effects {{ docs.help_icon("configuration/progress-effects") }}</h5>
 <form class="form-horizontal">
-    {{ labelled_checkbox("strip.reverse", "Reverse progress bar direction") }}
-    <hr>
     {{ labelled_checkbox("effects.progress_print.enabled", "Enable Printing Progress") }}
     <div class="form-inline" data-bind="visible: {{ binding.effect_binding("progress_print.enabled") }}">
         {{ effect_select("progress_print") }}
