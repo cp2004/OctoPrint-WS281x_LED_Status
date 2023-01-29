@@ -142,11 +142,11 @@ def progress_bar_impl(
 
     if half_strip:
         # Set the progress to either end of the strip
-        progress(0, math.floor(num_pixels / 2) + odd_pixel, value, True if reverse else False)
-        progress(math.ceil(num_pixels / 2) - odd_pixel, num_pixels, value, False if reverse else True)
+        progress(0, math.floor(num_pixels / 2) + odd_pixel, value, reverse)
+        progress(math.ceil(num_pixels / 2) - odd_pixel, num_pixels, value, not reverse)
     else:
         # Set the progress for the entire strip
-        progress(0, num_pixels, value, True if reverse else False)
+        progress(0, num_pixels, value, reverse)
 
     strip.show()
     if not q_poll_sleep(0.1, queue):
