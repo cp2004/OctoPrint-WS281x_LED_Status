@@ -111,7 +111,7 @@ PROGRESS_EFFECTS = {
     "Progress Bar": progress.progress_bar,
     "Gradient": progress.gradient,
     "Single Pixel": progress.single_pixel,
-    "Both Ends": progress.both_ends,
+    "Both Ends": progress.progress_bar_from_both_ends(),
 }
 MODES = [
     "startup",
