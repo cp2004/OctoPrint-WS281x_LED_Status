@@ -38,6 +38,19 @@ def progress_bar_from_both_ends(
     progress_bar_impl(strip, queue, brightness_manager, value, progress_color, base_color, reverse, True)
 
 
+def progress_bar_from_center(
+    strip,
+    queue,
+    brightness_manager,
+    value,
+    progress_color,
+    base_color,
+    *args,
+    **kwargs
+):
+    progress_bar_impl(strip, queue, brightness_manager, value, progress_color, base_color, True, True)
+
+
 def gradient(
     strip, queue, value, brightness_manager, progress_color, base_color, *args, **kwargs
 ):
