@@ -109,6 +109,7 @@ EFFECTS = {
 }
 PROGRESS_EFFECTS = {
     "Progress Bar": progress.progress_bar,
+    "Reversed Progress Bar": progress.progress_bar_reversed,
     "Gradient": progress.gradient,
     "Single Pixel": progress.single_pixel,
     "Both Ends": progress.progress_bar_from_both_ends,
