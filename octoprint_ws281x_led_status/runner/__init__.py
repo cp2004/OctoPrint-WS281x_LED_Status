@@ -4,17 +4,8 @@ __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the ter
 
 import logging
 import math
-import multiprocessing
-import threading
 import time
-
-try:
-    # Py3
-    from queue import Queue
-    from typing import Optional
-except ImportError:
-    # Py2
-    from Queue import Queue
+from queue import Queue
 
 # noinspection PyPackageRequirements
 from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
@@ -148,7 +139,7 @@ class EffectRunner:
                 and self.previous_state["effect"] == "blank"
             ):
                 self._logger.debug(
-                    "Returning to previous state: {}".format(self.previous_state)
+                    f"Returning to previous state: {self.previous_state}"
                 )
                 self.parse_q_msg(self.previous_state)
 
@@ -450,7 +441,7 @@ class EffectRunner:
         except Exception as e:  # Probably wrong settings...
             self._logger.error(repr(e))
             self._logger.error("Strip failed to startup")
-            raise StripFailedError("Error initializing strip")
+            raise StripFailedError("Error initializing strip") from e
 
         # Create segments & segment manager
         try:

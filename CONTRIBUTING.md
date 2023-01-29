@@ -7,13 +7,13 @@ and how the plugin works.
 
 There's a couple of things to consider before making your contribution:
 
-- Please create pull requests against the `devel` branch unless indicated otherwise.
-  There is an exception to this rule: documentation. See more below.
+-   Please create pull requests against the `devel` branch unless indicated otherwise.
+    There is an exception to this rule: documentation. See more below.
 
-- If your changes are large or disruptive, please open an issue first so that we can discuss. I don't want you to put in a lot
-  of work only for it to end up going to waste as there were already different plans.
+-   If your changes are large or disruptive, please open an issue first so that we can discuss. I don't want you to put in a lot
+    of work only for it to end up going to waste as there were already different plans.
 
-- Read the additional points below for details on code style, testing and how everything fits together.
+-   Read the additional points below for details on code style, testing and how everything fits together.
 
 ### Documentation
 

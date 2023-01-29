@@ -1,67 +1,67 @@
 name: "Issue Labeler"
 on:
-  issues:
-    types: [opened, edited, closed, reopened]
+    issues:
+        types: [opened, edited, closed, reopened]
 
 jobs:
-  label-opened-and-edited:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            let labels = [];
-            let setLabels = false;
-            context.payload.issue.labels.forEach(label => { labels.push(label.name) });
-            switch (context.payload.action) {
-              case 'opened':
-              case 'edited': {
-                if (context.payload.issue.title.match(/\[request\]|feature request/i)) {
-                  labels.push('request');
-                  if (labels.includes("incomplete")){
-                    // Remove incomplete label
-                    const index = labels.indexOf("incomplete");
-                    if (index > -1) {
-                      labels.splice(index, 1);
-                    }
-                    // Remove needs triage
-                    const triageIndex = labels.indexOf("needs triage");
-                    if (triageIndex > -1) {
-                      labels.splice(triageIndex, 1);
-                    }
-                  }
-                }
-                if (context.payload.issue.title.match(/bug/i)) {
-                  if (!labels.includes("confirmed bug")){
-                    labels.push('potential bug');
-                    setLabels = true;
-                  }
-                  if (labels.includes("incomplete")){
-                    // Remove incomplete label
-                    const icIndex = labels.indexOf("incomplete");
-                    if (icIndex > -1) {
-                      labels.splice(icIndex, 1);
-                    }
-                  }
-                  // Remove needs triage
-                  const triageIndex = labels.indexOf("needs triage");
-                  if (triageIndex > -1) {
-                    labels.splice(triageIndex, 1);
-                  }
-                }
-                if (labels.length === 0) {
-                  labels.push('needs triage');
-                  setLabels = true;
-                }
-                break;
-              }
-            }
-            if (setLabels) {
-              github.issues.setLabels({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: labels
-              })
-            }
+    label-opened-and-edited:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/github-script@v2
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      let labels = [];
+                      let setLabels = false;
+                      context.payload.issue.labels.forEach(label => { labels.push(label.name) });
+                      switch (context.payload.action) {
+                        case 'opened':
+                        case 'edited': {
+                          if (context.payload.issue.title.match(/\[request\]|feature request/i)) {
+                            labels.push('request');
+                            if (labels.includes("incomplete")){
+                              // Remove incomplete label
+                              const index = labels.indexOf("incomplete");
+                              if (index > -1) {
+                                labels.splice(index, 1);
+                              }
+                              // Remove needs triage
+                              const triageIndex = labels.indexOf("needs triage");
+                              if (triageIndex > -1) {
+                                labels.splice(triageIndex, 1);
+                              }
+                            }
+                          }
+                          if (context.payload.issue.title.match(/bug/i)) {
+                            if (!labels.includes("confirmed bug")){
+                              labels.push('potential bug');
+                              setLabels = true;
+                            }
+                            if (labels.includes("incomplete")){
+                              // Remove incomplete label
+                              const icIndex = labels.indexOf("incomplete");
+                              if (icIndex > -1) {
+                                labels.splice(icIndex, 1);
+                              }
+                            }
+                            // Remove needs triage
+                            const triageIndex = labels.indexOf("needs triage");
+                            if (triageIndex > -1) {
+                              labels.splice(triageIndex, 1);
+                            }
+                          }
+                          if (labels.length === 0) {
+                            labels.push('needs triage');
+                            setLabels = true;
+                          }
+                          break;
+                        }
+                      }
+                      if (setLabels) {
+                        github.issues.setLabels({
+                          issue_number: context.issue.number,
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          labels: labels
+                        })
+                      }

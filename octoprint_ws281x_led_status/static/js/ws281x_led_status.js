@@ -33,7 +33,7 @@ $(function () {
         self.toggle_lights = function () {
             OctoPrint.simpleApiCommand(
                 "ws281x_led_status",
-                self.lights_on() ? "lights_off" : "lights_on"
+                self.lights_on() ? "lights_off" : "lights_on",
             ).done(update_light_status);
         };
 
@@ -41,34 +41,34 @@ $(function () {
             if (self.torch_toggle()) {
                 OctoPrint.simpleApiCommand(
                     "ws281x_led_status",
-                    self.torch_on() ? "torch_off" : "torch_on"
+                    self.torch_on() ? "torch_off" : "torch_on",
                 );
             } else {
                 OctoPrint.simpleApiCommand(
                     "ws281x_led_status",
-                    "torch_on"
+                    "torch_on",
                 ).done(update_light_status);
             }
         };
 
         self.onBeforeBinding = function () {
             OctoPrint.simpleApiGet("ws281x_led_status").done(
-                update_light_status
+                update_light_status,
             );
             self.torch_enabled(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled(),
             );
             self.torch_toggle(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle(),
             );
         };
 
         self.onSettingsBeforeSave = function () {
             self.torch_enabled(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.enabled(),
             );
             self.torch_toggle(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.effects.torch.toggle(),
             );
         };
 
@@ -149,7 +149,7 @@ $(function () {
             var current_ma = parseInt(self.current_input(), 10);
             var num_pixels = parseInt(
                 self.settingsViewModel.settings.plugins.ws281x_led_status.strip.count(),
-                10
+                10,
             );
 
             var current = (num_pixels * current_ma) / 1000;
@@ -212,25 +212,25 @@ $(function () {
 
         self.onAfterBinding = function () {
             self.custom_atcommand(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.atcommand()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.atcommand(),
             );
             self.custom_gcode(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.gcode()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.gcode(),
             );
             self.custom_event(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.event()
+                self.settingsViewModel.settings.plugins.ws281x_led_status.custom.event(),
             );
         };
 
         self.onSettingsBeforeSave = function () {
             self.settingsViewModel.settings.plugins.ws281x_led_status.custom.atcommand(
-                self.custom_atcommand()
+                self.custom_atcommand(),
             );
             self.settingsViewModel.settings.plugins.ws281x_led_status.custom.gcode(
-                self.custom_gcode()
+                self.custom_gcode(),
             );
             self.settingsViewModel.settings.plugins.ws281x_led_status.custom.event(
-                self.custom_event()
+                self.custom_event(),
             );
         };
 

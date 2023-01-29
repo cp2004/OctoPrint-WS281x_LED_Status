@@ -17,15 +17,15 @@ With lots of options effects and integrations to choose from, you can customise 
 
 Most prominent features include:
 
-- Printer status effects
-- Tracking heating, printing and cooling progress
-- Intercepting M150 commands & controlling with @ commands
-- Easy controls for turning lights on and off from the navbar
-- Theme-friendly torch button to temporarily light up your printer
-- Timers to turn the LEDs off at certain times of day or after a print is done.
-- Custom Triggers - add your own events, @ commands or gcode matching to trigger effects
-- Powerful integration with OctoApp for Android
-- ...and more!
+-   Printer status effects
+-   Tracking heating, printing and cooling progress
+-   Intercepting M150 commands & controlling with @ commands
+-   Easy controls for turning lights on and off from the navbar
+-   Theme-friendly torch button to temporarily light up your printer
+-   Timers to turn the LEDs off at certain times of day or after a print is done.
+-   Custom Triggers - add your own events, @ commands or gcode matching to trigger effects
+-   Powerful integration with OctoApp for Android
+-   ...and more!
 
 You can take a look at the [documentation](https://cp2004.gitbook.io/ws281x-led-status/) for more information about all that the plugin has to offer.
 
@@ -35,9 +35,9 @@ You can take a look at the [documentation](https://cp2004.gitbook.io/ws281x-led-
 
 Setting up the plugin couldn't be easier! There are 3 main steps, with configuration made easy with the setup wizard.
 
-- Wiring your LEDs
-- Configuring SPI
-- Configuring plugin settings
+-   Wiring your LEDs
+-   Configuring SPI
+-   Configuring plugin settings
 
 Follow the detailed [setup guide](https://cp2004.gitbook.io/ws281x-led-status/guides/setup-guide-1) in the documentation to get up and running.
 
@@ -45,9 +45,9 @@ Follow the detailed [setup guide](https://cp2004.gitbook.io/ws281x-led-status/gu
 
 Please read the [Get Help Guide](https://cp2004.gitbook.io/ws281x-led-status/guides/get-help-guide) as well as the [rest of the documentation](https://cp2004.gitbook.io/ws281x-led-status/), to see if your question has been answered there. Still got questions? Get in touch:
 
-- On the [OctoPrint Discord](https://discord.octoprint.org)
-- On the [Community Forums](https://community.octoprint.org)
-- Open an issue with the [question template](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=type%3A+question&template=question.md&title=)
+-   On the [OctoPrint Discord](https://discord.octoprint.org)
+-   On the [Community Forums](https://community.octoprint.org)
+-   Open an issue with the [question template](https://github.com/cp2004/OctoPrint-WS281x_LED_Status/issues/new?assignees=&labels=type%3A+question&template=question.md&title=)
 
 ## Reporting problems
 
@@ -61,9 +61,9 @@ in touch if you don't know where to start.
 
 ## Sponsors
 
-- [@KenLucke](https://github.com/KenLucke)
-- [@iFrostizz](https://github.com/iFrostizz)
-- [@CmdrCody51](https://github.com/CmdrCody51)
+-   [@KenLucke](https://github.com/KenLucke)
+-   [@iFrostizz](https://github.com/iFrostizz)
+-   [@CmdrCody51](https://github.com/CmdrCody51)
 
 As well as 5 others supporting me regularly through [GitHub Sponsors](https://github.com/sponsors/cp2004)!
 
