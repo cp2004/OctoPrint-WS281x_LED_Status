@@ -268,13 +268,22 @@ def migrate_two_to_three(settings):
     # See PR #212 for changes
     reverse = settings.get(["strip", "reverse"])
 
-    if reverse and settings.get(["effects", "progress_print", "effect"]) == "Progress Bar":
+    if (
+        reverse
+        and settings.get(["effects", "progress_print", "effect"]) == "Progress Bar"
+    ):
         settings.set(["effects", "progress_print", "effect"], "Progress Bar Reversed")
 
-    if reverse and settings.get(["effects", "progress_heatup", "effect"]) == "Progress Bar":
+    if (
+        reverse
+        and settings.get(["effects", "progress_heatup", "effect"]) == "Progress Bar"
+    ):
         settings.set(["effects", "progress_heatup", "effect"], "Progress Bar Reversed")
 
-    if reverse and settings.get(["effects", "progress_cooling", "effect"]) == "Progress Bar":
+    if (
+        reverse
+        and settings.get(["effects", "progress_cooling", "effect"]) == "Progress Bar"
+    ):
         settings.set(["effects", "progress_cooling", "effect"], "Progress Bar Reversed")
 
     settings.settings.remove(["plugins", "ws281x_led_status", "strip", "reverse"])

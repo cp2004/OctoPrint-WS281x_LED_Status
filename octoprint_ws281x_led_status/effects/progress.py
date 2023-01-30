@@ -8,55 +8,42 @@ from octoprint_ws281x_led_status.util import blend_two_colors, q_poll_sleep
 
 
 def progress_bar(
-    strip,
-    queue,
-    brightness_manager,
-    value,
-    progress_color,
-    base_color,
-    *args,
-    **kwargs
+    strip, queue, brightness_manager, value, progress_color, base_color, *args, **kwargs
 ):
-    progress_bar_impl(strip, queue, brightness_manager, value, progress_color, base_color, False, False)
+    progress_bar_impl(
+        strip,
+        queue,
+        brightness_manager,
+        value,
+        progress_color,
+        base_color,
+        False,
+        False,
+    )
 
 
 def progress_bar_from_both_ends(
-    strip,
-    queue,
-    brightness_manager,
-    value,
-    progress_color,
-    base_color,
-    *args,
-    **kwargs
+    strip, queue, brightness_manager, value, progress_color, base_color, *args, **kwargs
 ):
-    progress_bar_impl(strip, queue, brightness_manager, value, progress_color, base_color, False, True)
+    progress_bar_impl(
+        strip, queue, brightness_manager, value, progress_color, base_color, False, True
+    )
 
 
 def progress_bar_from_center(
-    strip,
-    queue,
-    brightness_manager,
-    value,
-    progress_color,
-    base_color,
-    *args,
-    **kwargs
+    strip, queue, brightness_manager, value, progress_color, base_color, *args, **kwargs
 ):
-    progress_bar_impl(strip, queue, brightness_manager, value, progress_color, base_color, True, True)
+    progress_bar_impl(
+        strip, queue, brightness_manager, value, progress_color, base_color, True, True
+    )
 
 
 def progress_bar_reversed(
-    strip,
-    queue,
-    brightness_manager,
-    value,
-    progress_color,
-    base_color,
-    *args,
-    **kwargs
+    strip, queue, brightness_manager, value, progress_color, base_color, *args, **kwargs
 ):
-    progress_bar_impl(strip, queue, brightness_manager, value, progress_color, base_color, True, False)
+    progress_bar_impl(
+        strip, queue, brightness_manager, value, progress_color, base_color, True, False
+    )
 
 
 def gradient(
@@ -124,7 +111,9 @@ def progress_bar_impl(
         if upper_remainder > 0.0:
             tween_color = blend_two_colors(progress_color, base_color, upper_remainder)
             pixel = (
-                ((max_pixel - int(upper_whole)) - 1) if reverse_progress else (int(upper_whole) + min_pixel)
+                ((max_pixel - int(upper_whole)) - 1)
+                if reverse_progress
+                else (int(upper_whole) + min_pixel)
             )
             strip.setPixelColorRGB(pixel, *tween_color)
             pixels_remaining -= 1
