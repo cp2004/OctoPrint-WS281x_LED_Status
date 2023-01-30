@@ -43,15 +43,13 @@ class WS281xLedStatusPlugin(
         super().__init__()
 
         # Submodules
-        self.api = api.PluginApi(self)  # type: api.PluginApi
-        self.wizard = wizard.PluginWizard(PI_MODEL)  # type: wizard.PluginWizard
+        self.api = api.PluginApi(self)
+        self.wizard = wizard.PluginWizard(PI_MODEL)
 
         self.current_effect_process = None  # type: multiprocessing.Process
-        self.effect_queue = multiprocessing.Queue()  # type: multiprocessing.Queue
+        self.effect_queue = multiprocessing.Queue()
 
-        self.custom_triggers = triggers.Trigger(
-            self.effect_queue
-        )  # type: triggers.Trigger
+        self.custom_triggers = triggers.Trigger(self.effect_queue)
 
         # Effect states
         self.previous_state = ""
@@ -59,36 +57,34 @@ class WS281xLedStatusPlugin(
         self.next_state = ""
 
         # Heating detection flags. True/False, when True & heating tracking is configured, then it does stuff
-        self.heating = False  # type: bool
-        self.cooling = False  # type: bool
+        self.heating: bool = False
+        self.cooling: bool = False
 
-        self.current_progress = 0  # type: int
+        self.current_progress: int = 0
 
-        self.current_heater_heating = None  # type: str
+        self.current_heater_heating = None
         self.previous_target = {
             "tool": 0,
             "bed": 0,
         }  # Store last non-zero target here, for cooling tracking
-        self.tool_to_target = 0  # type: int
+        self.tool_to_target: int = 0
 
-        self.previous_event = (
-            ""
-        )  # type: str # Effect here will be run when progress expires
+        self.previous_event: str = ""
 
         self.lights_on = True  # Lights should be on by default, makes sense.
         self.torch_on = False  # Torch is off by default, because who would want that?
 
         self.torch_timer = RestartableTimer(
-            interval=30,  # Default, overwritten on settings save
+            interval=30,
             function=self.deactivate_torch,
         )
         self.return_timer = RestartableTimer(
-            interval=30,  # Default
+            interval=30,
             function=self.update_effect,
             args=({"type": "standard", "effect": "idle"},),
         )
         self.idle_timer = RestartableTimer(
-            interval=30,  # Default
+            interval=30,
             function=self.idle_timeout,
         )
         self.idle_timed_out = False
@@ -98,10 +94,7 @@ class WS281xLedStatusPlugin(
         if self._settings.get_boolean(["effects", "startup", "enabled"]):
             self.current_state["effect"] = "startup"
 
-        if self._settings.get_boolean(["lights_on"]):
-            self.lights_on = True
-        else:
-            self.lights_on = False
+        self.lights_on = self._settings.get_boolean(["lights_on"])
 
     # Asset plugin
     def get_assets(self):
@@ -219,7 +212,7 @@ class WS281xLedStatusPlugin(
         return self.api.on_api_get(request=request)
 
     # Websocket communication
-    def _send_UI_msg(self, msg_type, payload):
+    def _send_ui_msg(self, msg_type, payload):
         self._plugin_manager.send_plugin_message(
             "ws281x_led_status", {"type": msg_type, "payload": payload}
         )
@@ -323,8 +316,9 @@ class WS281xLedStatusPlugin(
         """
         if self.current_effect_process is not None:
             if self.current_effect_process.is_alive():
-                self.effect_queue.put("KILL")
+                self.effect_queue.put(constants.KILL_MSG)
             self.current_effect_process.join()
+
         self._logger.info("WS281x LED Status runner stopped")
 
     def restart_strip(self):
@@ -343,7 +337,7 @@ class WS281xLedStatusPlugin(
         :param send_ui: (bool) whether to send the results to the UI
         :return: None
         """
-        _UI_MSG_TYPE = "os_config_test"
+        ui_msg_type = "os_config_test"
         self._logger.info(
             "Running OS config test ({} mode)".format("UI" if send_ui else "Log")
         )
@@ -358,13 +352,13 @@ class WS281xLedStatusPlugin(
 
         for test_key, command in tests.items():
             if send_ui:
-                self._send_UI_msg(
-                    _UI_MSG_TYPE, {"test": test_key, "status": "in_progress"}
+                self._send_ui_msg(
+                    ui_msg_type, {"test": test_key, "status": "in_progress"}
                 )
 
             status = self.wizard.validate(command)
             if send_ui:
-                self._send_UI_msg(_UI_MSG_TYPE, {"test": test_key, "status": status})
+                self._send_ui_msg(ui_msg_type, {"test": test_key, "status": status})
 
             statuses[test_key] = status
             if send_ui:
@@ -381,14 +375,14 @@ class WS281xLedStatusPlugin(
                 log_content = log_content + " !! Reason: {}".format(status["reason"])
 
         if send_ui:
-            self._send_UI_msg(_UI_MSG_TYPE, {"test": "complete", "status": "complete"})
+            self._send_ui_msg(ui_msg_type, {"test": "complete", "status": "complete"})
 
         self._logger.info(log_content)
 
     # Lights and torch on/off handling
     def switch_lights(self, state):
         # Notify the UI
-        self._send_UI_msg("lights", {"on": state})
+        self._send_ui_msg("lights", {"on": state})
         # Actually do the action
         self.lights_on = state
         self.effect_queue.put(constants.ON_MSG if state else constants.OFF_MSG)
@@ -415,7 +409,7 @@ class WS281xLedStatusPlugin(
         self.update_effect({"type": "standard", "effect": "torch"})
         self.torch_on = True
 
-        self._send_UI_msg("torch", {"on": True})
+        self._send_ui_msg("torch", {"on": True})
 
     def deactivate_torch(self):
         self._logger.debug("Deactivating torch mode")
@@ -424,7 +418,7 @@ class WS281xLedStatusPlugin(
             # Return whatever state we have suppressed
             self.update_effect(self.next_state)
 
-        self._send_UI_msg("torch", {"on": False})
+        self._send_ui_msg("torch", {"on": False})
 
     def update_effect(self, mode):
         """
@@ -697,26 +691,24 @@ class WS281xLedStatusPlugin(
                 else:
                     self.activate_torch()
             elif params[0:6] == AtCommands.CUSTOM:
-                self.custom_triggers.on_at_command(params[7:])  # Strip off "CUSTOM"
+                self.custom_triggers.on_at_command(params[7:])  # Strip off "CUSTOM "
 
         elif cmd[0:3] == "WS_":
             if cmd == DeprecatedAtCommands.LIGHTS_ON:
                 self.switch_lights(True)
-                self.deprecated_at_command(cmd)
             elif cmd == DeprecatedAtCommands.LIGHTS_OFF:
                 self.switch_lights(False)
-                self.deprecated_at_command(cmd)
             elif cmd in [
                 DeprecatedAtCommands.TORCH,
                 DeprecatedAtCommands.TORCH_ON,
             ]:
                 self.activate_torch()
-                self.deprecated_at_command(cmd)
             elif cmd == DeprecatedAtCommands.TORCH_OFF and self._settings.get_boolean(
                 ["effects", "torch", "toggle"]
             ):
                 self.deactivate_torch()
-                self.deprecated_at_command(cmd)
+
+            self.deprecated_at_command(cmd)
 
     def deprecated_at_command(self, cmd):
         # These styles of commands are deprecated, and raise a warning
@@ -730,7 +722,7 @@ class WS281xLedStatusPlugin(
             " for more info"
         )
 
-        self._send_UI_msg("at_cmd_deprecation", cmd)
+        self._send_ui_msg("at_cmd_deprecation", cmd)
 
     # Software update hook
     def get_update_information(self):
