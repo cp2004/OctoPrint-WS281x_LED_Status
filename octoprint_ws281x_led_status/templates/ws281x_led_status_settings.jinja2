@@ -1,14 +1,5 @@
 <h3>WS281x LED Status</h3>
 <form class="form-horizontal">
-
-    {% if plugin_ws281x_led_status_python2 %}
-    <div class="alert">
-        <strong>Warning:</strong>
-        You are still using Python 2, and the next version of this plugin will drop support for this.
-        Please <a href="https://faq.octoprint.org/python3-update" target="_blank" rel="noopener noreferrer">upgrade to Python 3</a> as soon as possible.
-    </div>
-    {% endif %}
-
     <button class="btn  btn-primary" data-toggle="modal" data-target="#LEDStripEditor"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> LED Strip settings</button>
     <br>
     <div class="tabbable" style="padding-top: 10px">
