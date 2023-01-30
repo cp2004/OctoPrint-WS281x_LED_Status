@@ -3,16 +3,6 @@ import re
 
 from octoprint.events import all_events
 
-"""
-TODOs
-* Runner support for custom messages, refactor to dicts first rather than splitting strings?
-* UI support for customising.
-
-* Custom events
-* Custom @ commands
-* Custom gcode commands
-"""
-
 
 class Trigger:
     def __init__(self, effect_queue):
@@ -28,7 +18,7 @@ class Trigger:
 
     def register_atcommand_handler(self, match, effect, color, delay):
         """
-        command: @WS CUSTOM <command> TODO keep this concise, does it need 'CUSTOM' or is there something shorter?
+        command: @WS CUSTOM <command>
         effect: Name from constants.EFFECTS
         color: Hex colour
         delay: ms between frames

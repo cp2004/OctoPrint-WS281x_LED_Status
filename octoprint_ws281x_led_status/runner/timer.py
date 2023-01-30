@@ -8,8 +8,6 @@ from datetime import datetime
 
 from octoprint.util import RepeatedTimer
 
-# TODO Test this whole module in Python 2...
-
 
 class ActiveTimer:
     def __init__(self, settings, callback):

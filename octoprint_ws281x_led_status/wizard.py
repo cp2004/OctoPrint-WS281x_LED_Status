@@ -24,7 +24,6 @@ class PluginWizard:
 
         if self.pi_model is None:
             self._logger.error("Tried to run wizard command without Pi model, aborting")
-            # TODO return error?
             return
 
         if not self.validate(cmd)["passed"]:

@@ -79,7 +79,7 @@ class WS281xLedStatusPlugin(
         self.torch_on = False  # Torch is off by default, because who would want that?
 
         self.torch_timer = RestartableTimer(
-            interval=30,  # Default, overwritten on settings save TODO!
+            interval=30,  # Default, overwritten on settings save
             function=self.deactivate_torch,
         )
         self.return_timer = RestartableTimer(
@@ -88,7 +88,7 @@ class WS281xLedStatusPlugin(
             args=({"type": "standard", "effect": "idle"},),
         )
         self.idle_timer = RestartableTimer(
-            interval=30,
+            interval=30,  # Default
             function=self.idle_timeout,
         )
         self.idle_timed_out = False
