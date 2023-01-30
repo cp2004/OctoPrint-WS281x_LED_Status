@@ -5,7 +5,7 @@ __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the ter
 # noinspection PyPackageRequirements
 from octoprint.util import dict_merge
 
-VERSION = 2
+VERSION = 3
 
 defaults = {
     "strip": {
