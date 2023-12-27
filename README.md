@@ -62,15 +62,19 @@ in touch if you don't know where to start.
 ## Sponsors
 
 - [@KenLucke](https://github.com/KenLucke)
-- [@iFrostizz](https://github.com/iFrostizz)
 - [@CmdrCody51](https://github.com/CmdrCody51)
 
-As well as 5 others supporting me regularly through [GitHub Sponsors](https://github.com/sponsors/cp2004)!
+As well as 2 others supporting me regularly through [GitHub Sponsors](https://github.com/sponsors/cp2004)!
 
 ## Supporting my efforts
 
-I created this project in my spare time, so if you have found it useful or enjoyed using it then please consider [supporting it's development!](https://github.com/sponsors/cp2004). You can sponsor monthly or one time, for any amount you choose.
+![GitHub Sponsors](https://img.shields.io/github/sponsors/cp2004?style=for-the-badge&label=Sponsor!&color=red&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fcp2004)
 
+I created this project in my spare time, and do my best to support the community with issues and help using it. If you have found this useful or enjoyed using it then please consider [supporting it's development! ❤️](https://github.com/sponsors/cp2004). You can sponsor monthly or one time, for any amount you choose.
+
+## Check out my other plugins
+
+You can see all of my published OctoPrint plugins [on the OctoPrint Plugin Repository!](https://plugins.octoprint.org/by_author/#charlie-powell) Or, if you're feeling nosy and want to see what else I'm working on, check out my [GitHub profile](https://github.com/cp2004).
 ## Thanks
 
 This was my first plugin and is still my favourite, so I have to say thanks for helping me develop it:
