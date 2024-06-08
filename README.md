@@ -1,6 +1,7 @@
 # OctoPrint WS281x LED Status with Python 3.12 compatibility 
 
 Install Command: ~/OctoPrint/venv/bin/pip install https://github.com/abacon118/OctoPrint-WS281x_LED_Status_Python312/archive/refs/tags/0.8.1.zip
+
 Add some RGB LEDs to your 3D printer for a quick status update!
 
 ![GitHub issues](https://img.shields.io/github/issues/cp2004/OctoPrint-WS281x_LED_Status?style=flat-square)
