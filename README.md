@@ -1,4 +1,4 @@
-# OctoPrint WS281x LED Status
+# OctoPrint WS281x LED Status with Python 3.12 compatibility 
 
 Add some RGB LEDs to your 3D printer for a quick status update!
 
