@@ -1,5 +1,25 @@
+{% import "macros/binding.jinja2" as binding %}
+
 <h3>WS281x LED Status</h3>
 <form class="form-horizontal">
+    <!-- Hidden inputs to ensure backend/strip settings are saved when modal is used -->
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.type") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.count") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.brightness") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.pin") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.freq_hz") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.dma") }}">
+    <input type="hidden" data-bind="checked: {{ binding.bind_setting("backend.config.invert") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.channel") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.type") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("backend.config.pixel_order") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("strip.adjustment.R") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("strip.adjustment.G") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("strip.adjustment.B") }}">
+    <input type="hidden" data-bind="checked: {{ binding.bind_setting("strip.white_override") }}">
+    <input type="hidden" data-bind="value: {{ binding.bind_setting("strip.white_brightness") }}">
+    <input type="hidden" data-bind="checked: {{ binding.bind_setting("features.sacrifice_pixel") }}">
+
     <button class="btn  btn-primary" data-toggle="modal" data-target="#LEDStripEditor"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> LED Strip settings</button>
     <br>
     <div class="tabbable" style="padding-top: 10px">

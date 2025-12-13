@@ -31,10 +31,21 @@ I have had good results with a 74ACHT125 level shifter, which is recommended by 
 
 ### Raspberry Pi
 
-All models of Raspberry Pi are supported currently, however for new models I will have to wait for upstream support from the rpi-ws281x library first. This page will be updated if this happens!
+**All models of Raspberry Pi are supported**, including:
+- Raspberry Pi 1, 2, 3, 4
+- Raspberry Pi Zero, Zero 2
+- **Raspberry Pi 5** (new!)
 
-This also means that no other devices than a Raspberry Pi are supported. There are no alternative libraries for WS281x LED control (for Python) that could enable this, so there is nothing that can be done. Sorry!
+The plugin now uses a flexible LED backend system to support all hardware versions:
+- **Pi 1-4, Zero**: Uses the `rpi_ws281x` backend by default
+- **Pi 5**: Uses the `Adafruit CircuitPython NeoPixel (PWM)` backend
 
-The plugin **will not load** if it is not running on a Raspberry Pi, even if it does install.
+You can select your backend in the plugin settings during initial setup. Both backends support all plugin features identically.
+
+{% hint style="info" %}
+For Raspberry Pi 5 users: Select the "Adafruit CircuitPython NeoPixel (PWM)" backend in plugin settings. Requires kernel 6.12+ for PIO (Programmable I/O) support. The setup wizard will guide you through configuring PIO device access (user must be in gpio group and udev rules must be set).
+{% endhint %}
+
+**Note:** Only Raspberry Pi devices are supported. The plugin **will not load** if it is not running on a Raspberry Pi, even if it does install.
 
 ## Got the necessary hardware? Wire it up!

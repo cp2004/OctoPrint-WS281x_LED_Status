@@ -138,6 +138,20 @@ $(function () {
 
         self.settingsViewModel = parameters[0];
 
+        /* Backend selection */
+        self.backendDescriptions = {
+            "rpi_ws281x": "Standard rpi_ws281x library using PWM/PCM interface. Works on Raspberry Pi 1-4, Zero, Zero 2 (NOT Pi 5). Requires user to be in the gpio group.",
+            "adafruit_neopixel_pwm": "Adafruit CircuitPython NeoPixel library using PWM interface. Works on all Raspberry Pi models including Pi 5. Supports any GPIO pin. No special group membership or configuration required."
+        };
+
+        self.backendDescription = ko.computed(function () {
+            if (!self.settingsViewModel.settings || !self.settingsViewModel.settings.plugins) {
+                return "";
+            }
+            var backend = self.settingsViewModel.settings.plugins.ws281x_led_status.backend.type();
+            return self.backendDescriptions[backend] || "";
+        });
+
         /* Power calculation utility */
 
         self.current_input = ko.observable(40);
@@ -146,9 +160,12 @@ $(function () {
         self.current_req = ko.observable("--A");
 
         self.calculate_power = function () {
+            if (!self.settingsViewModel.settings || !self.settingsViewModel.settings.plugins) {
+                return;
+            }
             var current_ma = parseInt(self.current_input(), 10);
             var num_pixels = parseInt(
-                self.settingsViewModel.settings.plugins.ws281x_led_status.strip.count(),
+                self.settingsViewModel.settings.plugins.ws281x_led_status.backend.config.count(),
                 10,
             );
 

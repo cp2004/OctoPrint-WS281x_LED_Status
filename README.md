@@ -11,12 +11,13 @@ Add some RGB LEDs to your 3D printer for a quick status update!
 
 ![rainbow effect](/assets/rainbow.gif)
 
-A highly configurable yet easy to use plugin for attaching WS2811, WS2812 and SK6812 or LEDs to your Raspberry Pi for a printer status update!
+A highly configurable yet easy to use plugin for attaching WS2811, WS2812 and SK6812 LEDs to your Raspberry Pi (including Raspberry Pi 5!) for a printer status update!
 
 With lots of options effects and integrations to choose from, you can customise the plugin to do things _exactly_ as you want them.
 
 Most prominent features include:
 
+-   **Raspberry Pi 5 support** with multiple LED control backends to choose from
 -   Printer status effects
 -   Tracking heating, printing and cooling progress
 -   Intercepting M150 commands & controlling with @ commands
@@ -36,10 +37,34 @@ You can take a look at the [documentation](https://cp2004.gitbook.io/ws281x-led-
 Setting up the plugin couldn't be easier! There are 3 main steps, with configuration made easy with the setup wizard.
 
 -   Wiring your LEDs
--   Configuring SPI
+-   Choosing and configuring an LED control backend (rpi_ws281x for Pi 3/4, Adafruit CircuitPython for Pi 5)
 -   Configuring plugin settings
 
 Follow the detailed [setup guide](https://cp2004.gitbook.io/ws281x-led-status/guides/setup-guide-1) in the documentation to get up and running.
+
+**Note for Raspberry Pi 5 users:** This plugin now supports Pi 5 using the Adafruit CircuitPython NeoPixel (PWM) backend. Requires kernel 6.12+ for PIO support. See the documentation for setup instructions specific to Pi 5.
+
+## Raspberry Pi 5 Support
+
+This plugin now supports **all Raspberry Pi models including Pi 5** through a flexible LED backend system:
+
+- **Pi 1-4, Zero**: Use the `rpi_ws281x` backend (default, fully backward compatible)
+- **Pi 5**: Use the `Adafruit CircuitPython NeoPixel (PWM)` backend
+
+**Key features:**
+- Multiple backend support with easy selection in plugin settings
+- Pi 5 backend supports any GPIO pin (not limited to specific pins)
+- Simplified OS configuration for Pi 5 (no SPI setup needed, but PIO support required)
+- All plugin features work identically with both backends
+- Automatic dependency installation via OctoPrint Plugin Manager
+
+**Quick setup for Pi 5:**
+1. Ensure your Raspberry Pi OS has kernel 6.12+ for PIO support
+2. Install plugin normally through Plugin Manager
+3. In plugin settings, select "Adafruit CircuitPython NeoPixel (PWM)" backend
+4. Follow the setup wizard to configure PIO device access (adds user to gpio group and sets udev rules)
+5. Configure your GPIO pin (default: 18) and pixel order (usually GRB)
+6. Reboot and you're ready!
 
 ## Getting help
 

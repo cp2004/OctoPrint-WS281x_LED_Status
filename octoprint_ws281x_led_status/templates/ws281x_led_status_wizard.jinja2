@@ -16,7 +16,42 @@
     See {{ docs.doc_link("guides/setup-guide-1/wiring-your-leds", "Wiring your LEDs") }} in the docs.
 </p>
 <h3>
-    {{ docs.doc_link("guides/setup-guide-1/spi-setup", "2. SPI Setup") }}
+    2. Choose LED Control Backend
+</h3>
+<div id="backend-recommendation-section">
+    <p>
+        <strong>Detected Hardware:</strong> Raspberry Pi {{ plugin_ws281x_led_status_backend_recommendation.pi_model }}
+    </p>
+    {% if plugin_ws281x_led_status_backend_recommendation.recommended_backend %}
+        <div class="alert alert-info">
+            <strong>Recommended Backend:</strong> {{ plugin_ws281x_led_status_backend_recommendation.recommended_backend }}
+            <p>{{ plugin_ws281x_led_status_backend_recommendation.reason }}</p>
+        </div>
+        {% if plugin_ws281x_led_status_backend_recommendation.alternative %}
+        <p>
+            <small>
+                <em>Alternative backend available: {{ plugin_ws281x_led_status_backend_recommendation.alternative }}</em>
+            </small>
+        </p>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning">
+            <strong>No Compatible Backend Available</strong>
+            <p>{{ plugin_ws281x_led_status_backend_recommendation.reason }}</p>
+        </div>
+    {% endif %}
+    <p>
+        The backend selection can be changed later in the plugin settings if needed.
+        <i class="fa fa-arrow-right text-success"></i>
+        {% if plugin_ws281x_led_status_backend_recommendation.pi_model == "5" %}
+            See {{ docs.doc_link("features/adafruit_backend_requirements", "Raspberry Pi 5 Setup Guide") }} for detailed instructions.
+        {% else %}
+            See documentation for backend-specific setup requirements.
+        {% endif %}
+    </p>
+</div>
+<h3>
+    {{ docs.doc_link("guides/setup-guide-1/spi-setup", "3. OS Configuration") }}
 </h3>
 <p>
     The OS configuration test will help you to configure your Raspberry Pi for use with this plugin.
@@ -34,7 +69,7 @@
     </button>
 </p>
 <h3>
-    {{ docs.doc_link("guides/setup-guide-1/initial-configuration", "3. Initial Configuration") }}
+    {{ docs.doc_link("guides/setup-guide-1/initial-configuration", "4. Initial Configuration") }}
 </h3>
 <form class="form-horizontal">
     <div class="control-group">
@@ -58,7 +93,7 @@
     </div>
 </form>
 <h3>
-    4. Reboot your Pi
+    5. Reboot your Pi
 </h3>
 <p>
     Once you have made any necessary OS configuration changes, a reboot of the Pi is required. End the wizard, then hit reboot!

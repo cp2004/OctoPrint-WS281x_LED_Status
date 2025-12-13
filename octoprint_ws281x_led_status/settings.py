@@ -5,21 +5,27 @@ __copyright__ = "Copyright (c) Charlie Powell 2020-2021 - released under the ter
 # noinspection PyPackageRequirements
 from octoprint.util import dict_merge
 
-VERSION = 3
+VERSION = 4
 
 defaults = {
     "strip": {
-        "count": 24,
-        "pin": 10,
-        "freq_hz": 800000,
-        "dma": 10,
-        "invert": False,
-        "channel": 0,
-        "type": "WS2811_STRIP_GRB",
-        "brightness": 50,
         "adjustment": {"R": 100, "G": 100, "B": 100},
         "white_override": False,
         "white_brightness": 50,
+    },
+    "backend": {
+        "type": "rpi_ws281x",
+        "config": {
+            "count": 24,
+            "pin": 10,
+            "freq_hz": 800000,
+            "dma": 10,
+            "invert": False,
+            "brightness": 50,
+            "channel": 0,
+            "type": "WS2811_STRIP_GRB",
+            "pixel_order": "GRB",  # For Adafruit backends
+        },
     },
     "effects": {
         "startup": {
@@ -141,6 +147,10 @@ def migrate_settings(target, current, settings):
     if (current is None or current <= 2) and target == 3:
         # 2 => 3
         migrate_two_to_three(settings)
+
+    if (current is None or current <= 3) and target == 4:
+        # 3 => 4
+        migrate_three_to_four(settings)
 
 
 def migrate_none_to_one(settings):
@@ -287,6 +297,57 @@ def migrate_two_to_three(settings):
         settings.set(["effects", "progress_cooling", "effect"], "Progress Bar Reversed")
 
     settings.settings.remove(["plugins", "ws281x_led_status", "strip", "reverse"])
+
+
+def migrate_three_to_four(settings):
+    # See Pi5 Support - Milestone 2
+    # Restructure settings to support backend selection
+
+    # Get current strip settings
+    count = settings.get(["strip", "count"])
+    brightness = settings.get(["strip", "brightness"])
+    pin = settings.get(["strip", "pin"])
+    freq_hz = settings.get(["strip", "freq_hz"])
+    dma = settings.get(["strip", "dma"])
+    invert = settings.get(["strip", "invert"])
+    channel = settings.get(["strip", "channel"])
+    strip_type = settings.get(["strip", "type"])
+
+    # Create backend configuration
+    backend_config = {
+        "count": count,
+        "brightness": brightness,
+        "pin": pin,
+        "freq_hz": freq_hz,
+        "dma": dma,
+        "invert": invert,
+        "channel": channel,
+        "type": strip_type,
+    }
+
+    # Filter out None values
+    backend_config = filter_none(backend_config)
+
+    # If backend_config is empty (all values were None), use defaults
+    # This prevents creating an empty config: {} which breaks settings loading
+    if not backend_config:
+        backend_config = defaults["backend"]["config"].copy()
+
+    # Set new backend section with rpi_ws281x as default
+    settings.set(["backend"], {
+        "type": "rpi_ws281x",
+        "config": backend_config,
+    })
+
+    # Remove obsolete settings from strip section
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "count"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "brightness"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "pin"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "freq_hz"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "dma"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "invert"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "channel"])
+    settings.settings.remove(["plugins", "ws281x_led_status", "strip", "type"])
 
 
 def filter_none(target):

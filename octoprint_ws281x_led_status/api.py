@@ -20,6 +20,8 @@ WIZ_ENABLE_SPI = "wiz_enable_spi"
 WIZ_INCREASE_BUFFER = "wiz_increase_buffer"
 WIZ_SET_CORE_FREQ = "wiz_set_core_freq"
 WIZ_SET_FREQ_MIN = "wiz_set_core_freq_min"
+WIZ_CHECK_PIO = "wiz_check_pio"
+WIZ_ADD_PIO_UDEV_RULE = "wiz_add_pio_udev_rule"
 
 
 class PluginApi:
@@ -41,6 +43,8 @@ class PluginApi:
             WIZ_INCREASE_BUFFER: ["password"],
             WIZ_SET_CORE_FREQ: ["password"],
             WIZ_SET_FREQ_MIN: ["password"],
+            WIZ_CHECK_PIO: [],
+            WIZ_ADD_PIO_UDEV_RULE: ["password"],
         }
 
     def on_api_command(self, command, data):

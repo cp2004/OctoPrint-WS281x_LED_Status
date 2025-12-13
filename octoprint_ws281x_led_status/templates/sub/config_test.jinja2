@@ -1,7 +1,26 @@
 <div id="WS_OS_CONFIG_TEST">
     <p>
-        This runs a test of all the OS configuration required for this plugin to work.
+        This runs a test of the OS configuration required for this plugin to work with your hardware.
     </p>
+
+    <!-- ko if: backend_recommendation -->
+    <div class="alert alert-info">
+        <strong>Backend-Aware Testing</strong>
+        <p>
+            <strong>Detected:</strong> Raspberry Pi <span data-bind="text: backend_recommendation().pi_model"></span>
+            <br>
+            <!-- ko if: backend_recommendation().recommended_backend -->
+            <strong>Recommended Backend:</strong> <span data-bind="text: backend_recommendation().recommended_backend"></span>
+            <br>
+            <small>Tests shown below are specific to the recommended backend for your hardware.</small>
+            <!-- /ko -->
+            <!-- ko ifnot: backend_recommendation().recommended_backend -->
+            <span class="text-warning">No compatible backend detected. Showing default tests.</span>
+            <!-- /ko -->
+        </p>
+    </div>
+    <!-- /ko -->
+
     <button class="btn btn-primary" id="ws_os_config_run" data-bind="click: runConfigTest, enable: !testInProgress()">
         <i data-bind="css: { 'fas-custom fa-custom-running': !testInProgress(), 'fa fa-spin fa-spinner': testInProgress() }"></i>
         Run Tests
@@ -10,6 +29,22 @@
     <div class="alert alert-info" data-bind="visible: testInProgress">
         <strong><i class="fa fa-spinner fa-spin"></i> Test in progress</strong>
         <br>Running test: <span data-bind="text: currentTest"></span>
+    </div>
+
+    <!-- Show this message when no tests are required (e.g., Pi 5 with PWM backend) -->
+    <div class="alert alert-success" data-bind="visible: !testInProgress() && successfulTests().length === 0 && failedTests().length === 0">
+        <strong><i class="fa fa-check-circle"></i> No OS Configuration Required</strong>
+        <p>
+            The recommended backend for your hardware doesn't require any special OS configuration.
+            Your system is ready to use!
+        </p>
+        <!-- ko if: backend_recommendation && backend_recommendation().recommended_backend -->
+        <p>
+            <small>
+                Backend: <strong data-bind="text: backend_recommendation().recommended_backend"></strong>
+            </small>
+        </p>
+        <!-- /ko -->
     </div>
 
     <div class="alert alert-success" data-bind="visible: successfulTests().length">

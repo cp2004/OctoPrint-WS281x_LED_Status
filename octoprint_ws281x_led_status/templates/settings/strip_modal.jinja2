@@ -2,8 +2,9 @@
 {% import "macros/docs.jinja2" as docs with context %}
 
 {% macro strip_binding(setting) %}{{ binding.bind_setting("strip." + setting) }}{% endmacro %}
+{% macro backend_binding(setting) %}{{ binding.bind_setting("backend.config." + setting) }}{% endmacro %}
 
-{% macro number_input(setting, min="", max="", append=None) %}
+{% macro number_input(setting, min="", max="", append=None, binding_macro=strip_binding) %}
     {% if append %}
         <div class="input-append">
     {% endif %}
@@ -12,7 +13,7 @@
             class="input-block-level"
             min="{{ min }}"
             max="{{ max }}"
-            data-bind="value: {{ strip_binding(setting) }}"
+            data-bind="value: {{ binding_macro(setting) }}"
         >
     {% if append %}
         <span class="add-on">{{ append }}</span>
@@ -20,12 +21,12 @@
     {% endif %}
 {% endmacro %}
 
-{% macro slider_input(setting, min=0, max=100) %}
+{% macro slider_input(setting, min=0, max=100, binding_macro=strip_binding) %}
 <input
     type="range"
     min="{{ min }}"
     max="{{ max }}"
-    data-bind="value: {{ strip_binding(setting) }}"
+    data-bind="value: {{ binding_macro(setting) }}"
     class="input-block-level"
 >
 {% endmacro %}
@@ -46,39 +47,81 @@
     </div>
     <div class="modal-body">
         <form class="form-horizontal">
-            <h5>Strip Settings</h5>
+            <h5>Backend Settings</h5>
             <div class="row-fluid">
+                {{ control_label("Backend Type") }}
+                <div class="span8">
+                    <select class="input-block-level" id="backendType" data-bind="value: {{ binding.bind_setting("backend.type") }}">
+                        {% for backend_name, backend_meta in plugin_ws281x_led_status_backends.items() %}
+                        <option value="{{ backend_name }}">{{ backend_meta.get('display_name', backend_name) }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="help-block" id="backendDescription" data-bind="text: backendDescription"></span>
+                </div>
+            </div>
+            <br>
+            <h5>Strip Settings</h5>
+            <div class="row-fluid" data-bind="visible: {{ binding.bind_setting("backend.type") }}() === 'rpi_ws281x'">
                 {{ control_label("Strip Type") }}
                 <div class="span8">
-                    <select class="input-block-level" id="stripType" data-bind="value: {{ strip_binding("type") }}">
+                    <select class="input-block-level" id="stripType" data-bind="value: {{ backend_binding("type") }}">
                         {% for type in plugin_ws281x_led_status_strip_types %}
                         <option value="{{ type }}">{{ type }}</option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
+            <div class="row-fluid" data-bind="visible: {{ binding.bind_setting("backend.type") }}() === 'adafruit_neopixel_pwm'">
+                {{ control_label("Pixel Order") }}
+                <div class="span8">
+                    <select class="input-block-level" id="pixelOrder" data-bind="value: {{ backend_binding("pixel_order") }}">
+                        <option value="RGB">RGB</option>
+                        <option value="RBG">RBG</option>
+                        <option value="GRB">GRB</option>
+                        <option value="GBR">GBR</option>
+                        <option value="BRG">BRG</option>
+                        <option value="BGR">BGR</option>
+                        <option value="RGBW">RGBW</option>
+                        <option value="RBGW">RBGW</option>
+                        <option value="GRBW">GRBW</option>
+                        <option value="GBRW">GBRW</option>
+                        <option value="BRGW">BRGW</option>
+                        <option value="BGRW">BGRW</option>
+                    </select>
+                    <span class="help-inline">Most NeoPixels use GRB</span>
+                </div>
+            </div>
             <br>
             <div class="row-fluid">
                 {{ control_label("Number of LEDs") }}
                 <div class="span4">
-                    {{ number_input("count", 0) }}
+                    {{ number_input("count", 0, binding_macro=backend_binding) }}
                 </div>
             </div>
             <br>
             <div class="row-fluid">
                 {{ control_label("Max Brightness") }}
                 <div class="span4">
-                    {{ number_input("brightness", 0, 100, "%") }}
+                    {{ number_input("brightness", 0, 100, "%", binding_macro=backend_binding) }}
                 </div>
                 <div class="span4">
-                    {{ slider_input("brightness", 0, 100) }}
+                    {{ slider_input("brightness", 0, 100, binding_macro=backend_binding) }}
                 </div>
             </div>
             <br>
-            <div class="row-fluid">
+            <div class="row-fluid" data-bind="visible: {{ binding.bind_setting("backend.type") }}() === 'rpi_ws281x'">
                 {{ control_label("GPIO Pin") }}
                 <div class="span4">
-                    {{ number_input("pin", 10, 10) }}
+                    {{ number_input("pin", 10, 10, binding_macro=backend_binding) }}
+                </div>
+            </div>
+            <div class="row-fluid" data-bind="visible: {{ binding.bind_setting("backend.type") }}() === 'adafruit_neopixel_pwm'">
+                {{ control_label("GPIO Pin") }}
+                <div class="span4">
+                    {{ number_input("pin", 0, 27, binding_macro=backend_binding) }}
+                </div>
+                <div class="span4">
+                    <span class="help-block">Common: GPIO 10 (Pin 19), 18 (Pin 12), 21 (Pin 40)</span>
                 </div>
             </div>
             <h5>{{ _("Color Correction Settings") }}</h5>
@@ -140,20 +183,22 @@
                     </div>
                 </div>
                 <br>
-                <div class="row-fluid">
-                    {{ control_label("Frequency") }}
-                    <div class="span4">
-                        {{ number_input("freq_hz", append="hz") }}
+                <div data-bind="visible: {{ binding.bind_setting("backend.type") }}() === 'rpi_ws281x'">
+                    <div class="row-fluid">
+                        {{ control_label("Frequency") }}
+                        <div class="span4">
+                            {{ number_input("freq_hz", append="hz", binding_macro=backend_binding) }}
+                        </div>
                     </div>
-                </div>
-                <br>
-                <div class="row-fluid">
-                    {{ control_label("Invert Pin output") }}
-                    <div class="span4">
-                        <input type="checkbox" data-bind="checked: {{ strip_binding("invert") }}">
+                    <br>
+                    <div class="row-fluid">
+                        {{ control_label("Invert Pin output") }}
+                        <div class="span4">
+                            <input type="checkbox" data-bind="checked: {{ backend_binding("invert") }}">
+                        </div>
                     </div>
+                    <br>
                 </div>
-                <br>
             </div>
         </form>
     </div>

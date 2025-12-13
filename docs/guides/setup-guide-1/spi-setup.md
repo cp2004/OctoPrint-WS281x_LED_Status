@@ -6,7 +6,16 @@ description: >-
 
 # SPI Setup
 
-The plugin uses the Raspberry Pi's SPI interface to push data to the LED strip, rather than PWM since it doesn't need to be run as root to use SPI.
+{% hint style="warning" %}
+**Raspberry Pi 5 users:** If you're using the Adafruit CircuitPython NeoPixel (PWM) backend, **you can skip this SPI setup page!** The PWM backend does not require SPI configuration. However, it does require PIO (Programmable I/O) support:
+- Kernel 6.12+ required for `/dev/pio0` device
+- User must be in the `gpio` group for PIO access
+- udev rule required: `SUBSYSTEM=="*-pio", GROUP="gpio", MODE="0660"`
+
+The setup wizard will guide you through these PIO configuration steps.
+{% endhint %}
+
+The plugin's `rpi_ws281x` backend (for Pi 1-4) uses the Raspberry Pi's SPI interface to push data to the LED strip, rather than PWM since it doesn't need to be run as root to use SPI.
 
 As a result of this, there are a couple of OS level configuration items that need to be handled. Luckily for you, the plugin makes this very easy for you to do by providing a UI to run the commands.
 

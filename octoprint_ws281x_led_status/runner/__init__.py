@@ -9,9 +9,10 @@ from queue import Queue
 
 # noinspection PyPackageRequirements
 from octoprint.logging.handlers import CleaningTimedRotatingFileHandler
-from rpi_ws281x import PixelStrip
 
 from octoprint_ws281x_led_status import constants
+from octoprint_ws281x_led_status.backend import LEDBackend
+from octoprint_ws281x_led_status.backend.factory import create_backend
 from octoprint_ws281x_led_status.effects import error_handled_effect
 from octoprint_ws281x_led_status.runner import segments
 from octoprint_ws281x_led_status.runner import timer as active_times
@@ -33,6 +34,7 @@ class EffectRunner:
         debug,
         queue,
         strip_settings,
+        backend_settings,
         effect_settings,
         features_settings,
         previous_state,
@@ -52,12 +54,13 @@ class EffectRunner:
 
             # Save settings to class
             self.strip_settings = strip_settings
+            self.backend_settings = backend_settings
             self.effect_settings = effect_settings
             self.features_settings = features_settings
             self.active_times_settings = features_settings["active_times"]
             self.transition_settings = features_settings["transitions"]
             self.max_brightness = int(
-                round((float(strip_settings["brightness"]) / 100) * 255)
+                round((float(backend_settings["config"]["brightness"]) / 100) * 255)
             )
             self.color_correction = {
                 "red": self.strip_settings["adjustment"]["R"],
@@ -72,19 +75,19 @@ class EffectRunner:
             self.segment_settings = []
 
             # Sacrificial pixel offsets by one
-            default_segment = {"start": 0, "end": int(self.strip_settings["count"])}
+            default_segment = {"start": 0, "end": int(self.backend_settings["config"]["count"])}
             if self.features_settings["sacrifice_pixel"]:
                 default_segment["start"] = 1
 
             self.segment_settings.append(default_segment)
 
-            if int(self.strip_settings["count"]) < 6:
+            if int(self.backend_settings["config"]["count"]) < 6:
                 self._logger.info("Applying < 6 LED flickering bug workaround")
                 # rpi_ws281x will think we want 6 LEDs, but we will only use those configured
                 # this works around issues where LEDs would show the wrong colour, flicker and more
                 # when used with less than 6 LEDs.
                 # See #132 for details
-                self.strip_settings["count"] = 6
+                self.backend_settings["config"]["count"] = 6
 
             # State holders
             self.lights_on = saved_lights_on
@@ -95,7 +98,7 @@ class EffectRunner:
 
             self.queue = queue  # type: multiprocessing.Queue
             try:
-                self.strip = self.start_strip()  # type: PixelStrip
+                self.strip = self.start_strip()  # type: LEDBackend
             except (StripFailedError, segments.InvalidSegmentError):
                 self._logger.error("Exiting the effect process")
                 return
@@ -170,33 +173,41 @@ class EffectRunner:
         self._logger.info("Effect runner shutdown. Bye!")
 
     def parse_q_msg(self, msg):
+        self._logger.debug(f"[TRIGGER] Message received - Type: {msg['type']}, Details: {msg}")
+
         if msg["type"] == "lights":
+            self._logger.info(f"[TRIGGER] Light control: {msg['action']}")
             if msg["action"] == "on":
                 self.switch_lights(True)
             if msg["action"] == "off":
                 self.switch_lights(False)
 
         elif msg["type"] == "progress":
+            self._logger.info(f"[TRIGGER] Progress effect: {msg['effect']} at {msg['value']}%")
             self.progress_msg(msg["effect"], msg["value"])
             self.previous_state = msg
 
         elif msg["type"] == "M150":
+            self._logger.info(f"[TRIGGER] M150 command: {msg['command']}")
             self.parse_m150(msg["command"])
 
         elif msg["type"] == "standard":
+            self._logger.info(f"[TRIGGER] Standard effect: {msg['effect']}")
             self.standard_effect(msg["effect"])
             self.previous_state = msg
 
         elif msg["type"] == "custom":
+            self._logger.info(f"[TRIGGER] Custom effect: {msg['effect']}, color: {msg['color']}, delay: {msg['delay']}")
             self.custom_effect(msg["effect"], msg["color"], msg["delay"])
 
     def switch_lights(self, state):
         # state: target state for lights
         # Only run when current state must change, since it will interrupt the currently running effect
         if state == self.lights_on:
+            self._logger.debug(f"[STATE] Light switch requested but already in target state: {state}")
             return
 
-        self._logger.info("Switching lights {}".format("on" if state else "off"))
+        self._logger.info(f"[STATE] Switching lights {'on' if state else 'off'} (was: {'on' if self.lights_on else 'off'})")
 
         if state:
             self.turn_lights_on()
@@ -206,14 +217,16 @@ class EffectRunner:
     def turn_lights_on(self):
         if not self.active_times_timer.active:
             # Active times are not now, don't do anything
-            self._logger.debug("LED switch on blocked by active times")
+            self._logger.info("[STATE] LED switch on blocked by active times, restoring previous state")
             self.parse_q_msg(self.previous_state)
             return
 
         if self.turn_off_timer and self.turn_off_timer.is_alive():
+            self._logger.debug("[STATE] Cancelling turn-off timer")
             self.turn_off_timer.cancel()
 
         self.lights_on = True
+        self._logger.info(f"[STATE] Lights ON, fade={'enabled' if self.transition_settings['fade']['enabled'] else 'disabled'}")
 
         if self.transition_settings["fade"]["enabled"]:
             start_daemon_thread(
@@ -222,25 +235,31 @@ class EffectRunner:
         self.parse_q_msg(self.previous_state)
 
     def turn_lights_off(self):
-        if self.transition_settings["fade"]["enabled"]:
+        fade_enabled = self.transition_settings["fade"]["enabled"]
+        self._logger.info(f"[STATE] Turning lights OFF, fade={'enabled' if fade_enabled else 'disabled'}")
+
+        if fade_enabled:
+            fade_time = float(self.transition_settings["fade"]["time"]) / 1000
+            self._logger.debug(f"[STATE] Starting fade out over {fade_time}s")
             # Start fading brightness out
             start_daemon_thread(
                 target=self.brightness_manager.do_fade_out, name="Fade out thread"
             )
             # Set timer to turn LEDs off after fade
             self.turn_off_timer = start_daemon_timer(
-                interval=float(self.transition_settings["fade"]["time"]) / 1000,
+                interval=fade_time,
                 target=self.lights_off,
             )
         else:
             self.lights_off()
 
     def lights_off(self):
+        self._logger.info("[STATE] Lights OFF - blanking LEDs")
         self.standard_effect("blank")
         self.lights_on = False
 
     def progress_msg(self, progress_effect, value):
-        self._logger.debug(f"Changing effect to {progress_effect}, {value}%")
+        # Detailed logging happens in progress_effect method
         self.progress_effect(progress_effect, min(max(int(value), 0), 100))
 
     def parse_m150(self, msg):
@@ -314,65 +333,96 @@ class EffectRunner:
 
     def progress_effect(self, mode, value):
         effect_settings = self.effect_settings[mode]
+        progress_color = apply_color_correction(
+            self.color_correction, *hex_to_rgb(effect_settings["color"])
+        )
+        base_color = apply_color_correction(
+            self.color_correction, *hex_to_rgb(effect_settings["base"])
+        )
+
         if self.lights_on:
+            self._logger.info(
+                f"[EFFECT] Progress {mode}: value={value}%, effect={effect_settings['effect']}, "
+                f"progress_color=RGB{progress_color}, base_color=RGB{base_color}, lights_on=True"
+            )
             self.run_effect(
                 target=constants.PROGRESS_EFFECTS[effect_settings["effect"]],
                 kwargs={
                     "queue": self.effect_queue,
                     "brightness_manager": self.brightness_manager,
                     "value": int(value),
-                    "progress_color": apply_color_correction(
-                        self.color_correction, *hex_to_rgb(effect_settings["color"])
-                    ),
-                    "base_color": apply_color_correction(
-                        self.color_correction, *hex_to_rgb(effect_settings["base"])
-                    ),
+                    "progress_color": progress_color,
+                    "base_color": base_color,
                 },
                 name=mode,
             )
         else:
+            self._logger.info(
+                f"[EFFECT] Progress {mode} blocked: lights_on=False, blanking LEDs instead"
+            )
             self.blank_leds(whole_strip=False)
 
     def standard_effect(self, mode):
-        # Log if the effect is changing
-        self._logger.debug(f"Changing effect to {mode}")
+        # Handle "blank" as a special case - it's not in effect_settings
+        if mode == "blank":
+            self._logger.info(
+                f"[EFFECT] Blank mode: blanking LEDs, lights_on={self.lights_on}"
+            )
+            self.blank_leds(whole_strip=False)
+            return
 
-        if (self.lights_on and not mode == "blank") or (
-            mode == "torch" and self.effect_settings["torch"]["override_timer"]
-        ):
-            effect_settings = self.effect_settings[mode]
+        effect_settings = self.effect_settings[mode]
+        torch_override = mode == "torch" and effect_settings.get("override_timer", False)
+        will_run = self.lights_on or torch_override
+
+        if will_run:
+            color = apply_color_correction(
+                self.color_correction, *hex_to_rgb(effect_settings["color"])
+            )
+            self._logger.info(
+                f"[EFFECT] Standard {mode}: effect={effect_settings['effect']}, "
+                f"color=RGB{color}, delay={effect_settings['delay']}ms, "
+                f"lights_on={self.lights_on}, torch_override={torch_override}"
+            )
             self.run_effect(
                 target=constants.EFFECTS[effect_settings["effect"]],
                 kwargs={
                     "queue": self.effect_queue,
-                    "color": apply_color_correction(
-                        self.color_correction, *hex_to_rgb(effect_settings["color"])
-                    ),
+                    "color": color,
                     "delay": effect_settings["delay"],
                     "brightness_manager": self.brightness_manager,
                 },
                 name=mode,
             )
         else:
+            self._logger.info(
+                f"[EFFECT] Standard {mode} blocked: lights_on=False, blanking LEDs instead"
+            )
             self.blank_leds(whole_strip=False)
 
     def custom_effect(self, effect, color, delay):
-        self._logger.debug(f"Changing effect to {effect}")
-
         if self.lights_on:
+            corrected_color = apply_color_correction(
+                self.color_correction, *hex_to_rgb(color)
+            )
+            self._logger.info(
+                f"[EFFECT] Custom {effect}: color=RGB{corrected_color}, "
+                f"delay={delay}ms, lights_on=True"
+            )
             self.run_effect(
                 target=constants.EFFECTS[effect],
                 kwargs={
                     "queue": self.effect_queue,
-                    "color": apply_color_correction(
-                        self.color_correction, *hex_to_rgb(color)
-                    ),
+                    "color": corrected_color,
                     "delay": delay,
                     "brightness_manager": self.brightness_manager,
                 },
                 name=effect,
             )
         else:
+            self._logger.info(
+                f"[EFFECT] Custom {effect} blocked: lights_on=False, blanking LEDs instead"
+            )
             self.blank_leds(whole_strip=False)
 
     def run_effect(self, target, kwargs=None, name="WS281x Effect"):
@@ -384,6 +434,7 @@ class EffectRunner:
 
         self.stop_effect()
 
+        self._logger.debug(f"[EFFECT] Starting effect thread: {name}")
         # Targets error handler, which passes off to the effect with effect_args
         self.effect_thread = start_daemon_thread(
             target=error_handled_effect,
@@ -393,6 +444,7 @@ class EffectRunner:
 
     def stop_effect(self):
         if self.effect_thread and self.effect_thread.is_alive():
+            self._logger.debug(f"[EFFECT] Stopping current effect thread: {self.effect_thread.name}")
             self.effect_queue.put(constants.KILL_MSG)
             self.effect_thread.join()
             clear_queue(self.effect_queue)
@@ -422,30 +474,42 @@ class EffectRunner:
 
     def start_strip(self):
         """
-        Start PixelStrip and SegmentManager object
-        :returns strip: (rpi_ws281x.PixelStrip) The initialised strip object
+        Start LED backend and SegmentManager object
+
+        :returns strip: (LEDBackend) The initialised backend object
         """
+        # Get backend type from settings
+        backend_name = self.backend_settings.get("type", "rpi_ws281x")
+        backend_config = self.backend_settings.get("config", {})
+
+        self._logger.info(f"Starting LED strip with backend: '{backend_name}'")
+        self._logger.debug(
+            f"Backend config: count={backend_config.get('count')}, "
+            f"brightness={backend_config.get('brightness', 100)}%"
+        )
+
         try:
-            strip = PixelStrip(
-                num=int(self.strip_settings["count"]),
-                pin=int(self.strip_settings["pin"]),
-                freq_hz=int(self.strip_settings["freq_hz"]),
-                dma=int(self.strip_settings["dma"]),
-                invert=bool(self.strip_settings["invert"]),
-                brightness=int(self.strip_settings["brightness"]),
-                channel=int(self.strip_settings["channel"]),
-                strip_type=constants.STRIP_TYPES[self.strip_settings["type"]],
-            )
+            # Create backend using factory
+            strip = create_backend(backend_name, backend_config)
             strip.begin()
-        except Exception as e:  # Probably wrong settings...
-            self._logger.error(repr(e))
-            self._logger.error("Strip failed to startup")
+
+            self._logger.info(
+                f"Successfully initialized '{backend_name}' backend "
+                f"with {strip.num_pixels()} LEDs at {strip.get_brightness()} brightness"
+            )
+        except Exception as e:  # Probably wrong settings or backend unavailable
+            self._logger.error(f"Failed to initialize LED backend '{backend_name}': {repr(e)}")
+            self._logger.error(
+                f"Common causes: wrong GPIO pin, missing dependencies, "
+                f"SPI not enabled, or insufficient permissions"
+            )
             raise StripFailedError("Error initializing strip") from e
 
         # Create segments & segment manager
         try:
             self.segment_manager = segments.SegmentManager(strip, self.segment_settings)
             self.segment_manager.create_segments()
+            self._logger.debug(f"Created {len(self.segment_settings)} segment(s)")
         except segments.InvalidSegmentError:
             self._logger.error("Segment configuration error. Please report this issue!")
             raise

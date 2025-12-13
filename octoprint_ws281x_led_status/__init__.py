@@ -8,12 +8,20 @@ import os
 import re
 import time
 
+# Create a fork context for all multiprocessing objects
+# This ensures consistent context across Queue and Process for Python 3.13+ compatibility
+mp_context = multiprocessing.get_context('fork')
+
 # noinspection PyPackageRequirements
 import octoprint.plugin
 from octoprint.events import Events, all_events
 from octoprint.util.version import is_octoprint_compatible
 
 from octoprint_ws281x_led_status import api, constants, settings, triggers, util, wizard
+from octoprint_ws281x_led_status.backend.factory import (
+    get_available_backends,
+    get_backend_diagnostics,
+)
 from octoprint_ws281x_led_status.constants import AtCommands, DeprecatedAtCommands
 from octoprint_ws281x_led_status.runner import EffectRunner
 from octoprint_ws281x_led_status.util import RestartableTimer
@@ -47,7 +55,7 @@ class WS281xLedStatusPlugin(
         self.wizard = wizard.PluginWizard(PI_MODEL)
 
         self.current_effect_process = None  # type: multiprocessing.Process
-        self.effect_queue = multiprocessing.Queue()
+        self.effect_queue = mp_context.Queue()
 
         self.custom_triggers = triggers.Trigger(self.effect_queue)
 
@@ -110,6 +118,9 @@ class WS281xLedStatusPlugin(
 
     # Startup plugin
     def on_startup(self, host, port):
+        # Log backend diagnostics on startup
+        self._log_backend_diagnostics()
+
         self.custom_triggers.process_settings(
             self._settings.get(["custom"], merged=True)
         )
@@ -166,6 +177,8 @@ class WS281xLedStatusPlugin(
             "progress_names": constants.PROGRESS_EFFECTS.keys(),
             "pi_model": PI_MODEL,
             "strip_types": constants.STRIP_TYPES,
+            "backends": get_available_backends(),
+            "backend_recommendation": self.wizard.get_backend_recommendation(),
             "timezone": util.get_timezone(),
             "version": self._plugin_version,
             "is_docker": os.path.exists(os.path.join("/bin", "s6-svscanctl"))
@@ -210,11 +223,59 @@ class WS281xLedStatusPlugin(
     def on_api_get(self, request):
         return self.api.on_api_get(request=request)
 
+    def is_api_protected(self):
+        # Require authentication for all API commands
+        return True
+
     # Websocket communication
     def _send_ui_msg(self, msg_type, payload):
         self._plugin_manager.send_plugin_message(
             "ws281x_led_status", {"type": msg_type, "payload": payload}
         )
+
+    def _log_backend_diagnostics(self):
+        """Log available backends and their status on startup for diagnostic purposes"""
+        self._logger.info("=== LED Backend Diagnostics ===")
+
+        diagnostics = get_backend_diagnostics()
+
+        if not diagnostics:
+            self._logger.warning("No LED backends registered!")
+            return
+
+        for backend_name, info in diagnostics.items():
+            status = "✓ Available" if info["available"] else "✗ Unavailable"
+            self._logger.info(
+                f"  {backend_name} ({info['display_name']}): {status}"
+            )
+
+            if not info["available"]:
+                self._logger.info(f"    Reason: {info['availability_reason']}")
+
+            self._logger.debug(f"    Class: {info['class']}")
+            self._logger.debug(f"    Description: {info['description']}")
+
+        # Log currently configured backend
+        configured_backend = self._settings.get(["backend", "type"], merged=True)
+        self._logger.info(f"Configured backend: {configured_backend}")
+
+        # Warn if configured backend is not available
+        if configured_backend in diagnostics:
+            if not diagnostics[configured_backend]["available"]:
+                self._logger.warning(
+                    f"WARNING: Configured backend '{configured_backend}' is not available! "
+                    f"LED strip will fail to initialize."
+                )
+                self._logger.warning(
+                    f"  Reason: {diagnostics[configured_backend]['availability_reason']}"
+                )
+        else:
+            self._logger.error(
+                f"ERROR: Configured backend '{configured_backend}' is not registered!"
+            )
+
+        self._logger.info("=== End Backend Diagnostics ===")
+
 
     # Event Handler plugin
     def on_event(self, event, payload):
@@ -285,13 +346,14 @@ class WS281xLedStatusPlugin(
         if self.current_effect_process and not self.current_effect_process.is_alive():
             self.stop_effect_process()
         # Start effect runner here
-        self.current_effect_process = multiprocessing.Process(
+        self.current_effect_process = mp_context.Process(
             target=EffectRunner,
             name="WS281x LED Status Effect Process",
             kwargs={
                 "debug": self._settings.get_boolean(["features", "debug_logging"]),
                 "queue": self.effect_queue,
                 "strip_settings": self._settings.get(["strip"], merged=True),
+                "backend_settings": self._settings.get(["backend"], merged=True),
                 "effect_settings": self._settings.get(["effects"], merged=True),
                 "features_settings": self._settings.get(["features"], merged=True),
                 "previous_state": self.current_state,
@@ -316,7 +378,9 @@ class WS281xLedStatusPlugin(
         if self.current_effect_process is not None:
             if self.current_effect_process.is_alive():
                 self.effect_queue.put(constants.KILL_MSG)
-            self.current_effect_process.join()
+            # Only join if the process was actually started
+            if self.current_effect_process._popen is not None:
+                self.current_effect_process.join()
 
         self._logger.info("WS281x LED Status runner stopped")
 
@@ -551,12 +615,21 @@ class WS281xLedStatusPlugin(
         else:
             if self.heating:
                 # Currently heating, now stopping - go back to last event
+                self._logger.info(
+                    f"[STATE] Heating stopped by gcode: {gcode or cmd}"
+                )
                 self.heating = False
                 if self._printer.is_printing():
                     # If printing, go back to print progress immediately
+                    self._logger.info(
+                        f"[STATE] Transitioning from heating to print progress (current: {self.current_progress}%)"
+                    )
                     self.on_print_progress(progress=self.current_progress)
                 else:
                     # Otherwise go back to the previous effect
+                    self._logger.info(
+                        f"[STATE] Heating stopped, returning to previous effect: {self.previous_event or 'none'}"
+                    )
                     self.process_previous_event()
 
         self.custom_triggers.on_gcode_command(gcode, cmd)
@@ -609,8 +682,23 @@ class WS281xLedStatusPlugin(
 
             # Stop if current is above target
             if current_temp > target:
+                self._logger.info(
+                    f"[STATE] Heating complete: {heater} reached {current_temp}°C (target: {target}°C)"
+                )
                 self.heating = False
-                return abort()
+                if self._printer.is_printing():
+                    # If printing, go back to print progress immediately
+                    self._logger.info(
+                        f"[STATE] Transitioning from heating to print progress (current: {self.current_progress}%)"
+                    )
+                    self.on_print_progress(progress=self.current_progress)
+                else:
+                    # Otherwise go back to the previous effect
+                    self._logger.info(
+                        f"[STATE] Heating complete, returning to previous effect: {self.previous_event or 'none'}"
+                    )
+                    self.process_previous_event()
+                return parsed_temps
 
             self.update_effect(
                 {
@@ -852,3 +940,6 @@ def __plugin_load__():
         "octoprint.comm.protocol.temperatures.received": __plugin_implementation__.temperatures_received,
         "octoprint.comm.protocol.atcommand.sending": __plugin_implementation__.process_at_command,
     }
+
+from . import _version
+__version__ = _version.get_versions()['version']
