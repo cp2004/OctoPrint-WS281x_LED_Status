@@ -6,6 +6,7 @@ import getpass
 import grp
 import logging
 import os
+import platform
 
 from octoprint_ws281x_led_status import api
 from octoprint_ws281x_led_status.util import run_system_command
@@ -14,7 +15,10 @@ from octoprint_ws281x_led_status.util import run_system_command
 class PluginWizard:
     def __init__(self, pi_model):
         self._logger = logging.getLogger("octoprint.plugins.ws281x_led_status.wizard")
-
+        if "12" in platform.release():
+            self.boot_path = "/boot/firmware"
+        else:
+            self.boot_path = "/boot"
         self.pi_model = pi_model
 
     def on_api_command(self, cmd, data):
@@ -71,20 +75,18 @@ class PluginWizard:
             result = {"check": api.WIZ_ADDUSER, "passed": True, "reason": ""}
         return result
 
-    @staticmethod
-    def is_spi_enabled():
+    def is_spi_enabled(self):
         result = {"check": api.WIZ_ENABLE_SPI, "passed": False, "reason": "failed"}
-        with open("/boot/config.txt") as file:
+        with open(f"{self.boot_path}/config.txt") as file:
             for line in file:
                 if line.startswith("dtparam=spi=on"):
                     result = {"check": api.WIZ_ENABLE_SPI, "passed": True, "reason": ""}
         return result
 
-    @staticmethod
-    def is_spi_buffer_increased():
+    def is_spi_buffer_increased(self):
         result = {"check": api.WIZ_INCREASE_BUFFER, "passed": False, "reason": "failed"}
         # Check `/boot/cmdline.txt` first
-        with open("/boot/cmdline.txt") as file:
+        with open(f"{self.boot_path}/cmdline.txt") as file:
             for line in file:
                 if "spidev.bufsiz=32768" in line:
                     return {
@@ -118,7 +120,7 @@ class PluginWizard:
             "reason": "not_required" if self.pi_model == "4" else "failed",
         }
 
-        with open("/boot/config.txt") as file:
+        with open(f"{self.boot_path}/config.txt") as file:
             for line in file:
                 if line.startswith("core_freq=250"):
                     if self.pi_model == "4":
@@ -140,7 +142,7 @@ class PluginWizard:
 
         if self.pi_model == "4":
             # Pi 4 has a variable clock speed, which messes up SPI timing
-            with open("/boot/config.txt") as file:
+            with open(f"{self.boot_path}/config.txt") as file:
                 for line in file:
                     if line.startswith("core_freq_min=500"):
                         result = {
@@ -165,14 +167,14 @@ class PluginWizard:
                 "-S",
                 "bash",
                 "-c",
-                "echo 'dtparam=spi=on' >> /boot/config.txt",
+                f"echo 'dtparam=spi=on' >> {self.boot_path}/config.txt",
             ],
             api.WIZ_SET_CORE_FREQ: [
                 "sudo",
                 "-S",
                 "bash",
                 "-c",
-                "echo 'core_freq=250' >> /boot/config.txt"
+                f"echo 'core_freq=250' >> {self.boot_path}/config.txt"
                 if self.pi_model != "4"
                 else "",
             ],
@@ -181,7 +183,7 @@ class PluginWizard:
                 "-S",
                 "bash",
                 "-c",
-                "echo 'core_freq_min=500' >> /boot/config.txt"
+                f"echo 'core_freq_min=500' >> {self.boot_path}/config.txt"
                 if self.pi_model == "4"
                 else "",
             ],
@@ -191,7 +193,7 @@ class PluginWizard:
                 "sed",
                 "-i",
                 "$ s/$/ spidev.bufsiz=32768/",
-                "/boot/cmdline.txt",
+                f"{self.boot_path}/cmdline.txt",
             ],
         }
         sys_command = command_to_system[cmd]
